@@ -1,0 +1,1267 @@
+{
+  "master": {
+    "companies": [
+      {
+        "id": "company1",
+        "name": "CoreTech Industries",
+        "slug": "company1",
+        "db_name": "mock_db",
+        "db_host": "localhost",
+        "db_user": "mock",
+        "encrypted_password": "mock",
+        "plan": "enterprise",
+        "status": "active"
+      },
+      {
+        "id": "company2",
+        "name": "Stark Enterprises",
+        "slug": "company2",
+        "db_name": "mock_db",
+        "db_host": "localhost",
+        "db_user": "mock",
+        "encrypted_password": "mock",
+        "plan": "enterprise",
+        "status": "active"
+      }
+    ]
+  },
+  "tenants": {
+    "master": {
+      "roles": [
+        {
+          "id": "1",
+          "name": "Super Admin"
+        },
+        {
+          "id": "2",
+          "name": "Admin"
+        }
+      ],
+      "branches": [
+        {
+          "id": "1",
+          "name": "Main Headquarters"
+        }
+      ],
+      "users": [
+        {
+          "id": "1",
+          "email": "admin@company.com",
+          "password_hash": "$2a$10$6EVh1neNSUAaCnmht0soZ.YZiHlyLCb28CNA1A3T7e0fhner0dUSq",
+          "first_name": "Super",
+          "last_name": "Admin",
+          "role_id": "1",
+          "branch_id": "1",
+          "is_active": true,
+          "updated_at": "2026-04-17T09:36:16.385Z"
+        }
+      ],
+      "permissions": [
+        {
+          "id": "1",
+          "name": "view_dashboard"
+        },
+        {
+          "id": "2",
+          "name": "manage_users"
+        },
+        {
+          "id": "3",
+          "name": "manage_roles"
+        },
+        {
+          "id": "4",
+          "name": "view_inventory"
+        },
+        {
+          "id": "5",
+          "name": "manage_inventory"
+        },
+        {
+          "id": "6",
+          "name": "view_sales"
+        },
+        {
+          "id": "7",
+          "name": "manage_sales"
+        },
+        {
+          "id": "8",
+          "name": "view_purchases"
+        },
+        {
+          "id": "9",
+          "name": "manage_purchases"
+        },
+        {
+          "id": "10",
+          "name": "view_media"
+        },
+        {
+          "id": "11",
+          "name": "upload_files"
+        },
+        {
+          "id": "12",
+          "name": "view_reports"
+        },
+        {
+          "id": "13",
+          "name": "view_accounting"
+        },
+        {
+          "id": "14",
+          "name": "manage_accounting"
+        },
+        {
+          "id": "15",
+          "name": "view_hr"
+        },
+        {
+          "id": "16",
+          "name": "manage_hr"
+        }
+      ],
+      "role_permissions": [
+        {
+          "role_id": "1",
+          "permission_id": "1"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "2"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "3"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "4"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "5"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "6"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "7"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "8"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "9"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "10"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "11"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "12"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "13"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "14"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "15"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "16"
+        }
+      ],
+      "employees": [],
+      "attendance": [],
+      "payroll": [],
+      "products": [
+        {
+          "id": "1",
+          "sku": "LAP-001",
+          "name": "laptop",
+          "description": null,
+          "category_id": null,
+          "supplier_id": null,
+          "base_price": 3321,
+          "cost_price": 2112,
+          "tax_rate": 0,
+          "brand": "asa",
+          "barcode": null,
+          "is_active": true,
+          "image_url": null,
+          "unit_of_measure": "pcs",
+          "min_stock_level": 5,
+          "created_at": "2026-04-02T18:27:26.353Z"
+        },
+        {
+          "id": "p1",
+          "name": "Company1 Product",
+          "created_at": "2026-04-03T04:30:34.521Z",
+          "is_active": true
+        }
+      ],
+      "product_categories": [],
+      "suppliers": [],
+      "sales_orders": [],
+      "customers": [],
+      "inventory": [
+        {
+          "id": "1",
+          "product_id": "1",
+          "branch_id": "1",
+          "quantity": 9,
+          "created_at": "2026-04-02T18:27:26.356Z"
+        }
+      ],
+      "stock_movements": [],
+      "audit_logs": [],
+      "invoices": [],
+      "accounts": [
+        {
+          "id": "1",
+          "name": "Main Cash Account",
+          "code": "1000",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "2",
+          "name": "Inventory Asset",
+          "code": "1200",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "3",
+          "name": "Sales Revenue",
+          "code": "4000",
+          "type": "Revenue",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "4",
+          "name": "Cost of Goods Sold",
+          "code": "5000",
+          "type": "Expense",
+          "balance": 0,
+          "is_active": true
+        }
+      ],
+      "sales_order_items": [],
+      "invoice_items": [],
+      "transactions": [],
+      "journal_entries": [],
+      "journal_entry_lines": [],
+      "purchase_orders": [],
+      "purchase_order_items": []
+    },
+    "company1": {
+      "roles": [
+        {
+          "id": "1",
+          "name": "Super Admin"
+        },
+        {
+          "id": "2",
+          "name": "Admin"
+        }
+      ],
+      "branches": [
+        {
+          "id": "1",
+          "name": "Main Headquarters"
+        }
+      ],
+      "users": [
+        {
+          "id": "1",
+          "email": "admin@company.com",
+          "password_hash": "$2a$10$6EVh1neNSUAaCnmht0soZ.YZiHlyLCb28CNA1A3T7e0fhner0dUSq",
+          "first_name": "Super",
+          "last_name": "Admin",
+          "role_id": "1",
+          "branch_id": "1",
+          "is_active": true,
+          "updated_at": "2026-04-02T18:33:53.431Z"
+        }
+      ],
+      "permissions": [
+        {
+          "id": "1",
+          "name": "view_dashboard"
+        },
+        {
+          "id": "2",
+          "name": "manage_users"
+        },
+        {
+          "id": "3",
+          "name": "manage_roles"
+        },
+        {
+          "id": "4",
+          "name": "view_inventory"
+        },
+        {
+          "id": "5",
+          "name": "manage_inventory"
+        },
+        {
+          "id": "6",
+          "name": "view_sales"
+        },
+        {
+          "id": "7",
+          "name": "manage_sales"
+        },
+        {
+          "id": "8",
+          "name": "view_purchases"
+        },
+        {
+          "id": "9",
+          "name": "manage_purchases"
+        },
+        {
+          "id": "10",
+          "name": "view_media"
+        },
+        {
+          "id": "11",
+          "name": "upload_files"
+        },
+        {
+          "id": "12",
+          "name": "view_reports"
+        },
+        {
+          "id": "13",
+          "name": "view_accounting"
+        },
+        {
+          "id": "14",
+          "name": "manage_accounting"
+        },
+        {
+          "id": "15",
+          "name": "view_hr"
+        },
+        {
+          "id": "16",
+          "name": "manage_hr"
+        }
+      ],
+      "role_permissions": [
+        {
+          "role_id": "1",
+          "permission_id": "1"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "2"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "3"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "4"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "5"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "6"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "7"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "8"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "9"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "10"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "11"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "12"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "13"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "14"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "15"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "16"
+        }
+      ],
+      "employees": [],
+      "attendance": [],
+      "payroll": [],
+      "products": [
+        {
+          "id": "1",
+          "sku": "LAP-001",
+          "name": "laptop",
+          "description": null,
+          "category_id": null,
+          "supplier_id": null,
+          "base_price": 3321,
+          "cost_price": 2112,
+          "tax_rate": 0,
+          "brand": "asa",
+          "barcode": null,
+          "is_active": true,
+          "image_url": null,
+          "unit_of_measure": "pcs",
+          "min_stock_level": 5,
+          "created_at": "2026-04-02T18:27:26.353Z"
+        },
+        {
+          "id": "p1",
+          "name": "Company1 Product",
+          "created_at": "2026-04-03T04:30:34.521Z",
+          "is_active": true
+        }
+      ],
+      "product_categories": [],
+      "suppliers": [],
+      "sales_orders": [],
+      "customers": [],
+      "inventory": [
+        {
+          "id": "1",
+          "product_id": "1",
+          "branch_id": "1",
+          "quantity": 9,
+          "created_at": "2026-04-02T18:27:26.356Z"
+        }
+      ],
+      "stock_movements": [],
+      "audit_logs": [],
+      "invoices": [],
+      "accounts": [
+        {
+          "id": "1",
+          "name": "Main Cash Account",
+          "code": "1000",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "2",
+          "name": "Inventory Asset",
+          "code": "1200",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "3",
+          "name": "Sales Revenue",
+          "code": "4000",
+          "type": "Revenue",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "4",
+          "name": "Cost of Goods Sold",
+          "code": "5000",
+          "type": "Expense",
+          "balance": 0,
+          "is_active": true
+        }
+      ],
+      "sales_order_items": [],
+      "invoice_items": [],
+      "transactions": [],
+      "journal_entries": [],
+      "journal_entry_lines": [],
+      "purchase_orders": [],
+      "purchase_order_items": []
+    },
+    "company2": {
+      "roles": [
+        {
+          "id": "1",
+          "name": "Super Admin"
+        },
+        {
+          "id": "2",
+          "name": "Admin"
+        }
+      ],
+      "branches": [
+        {
+          "id": "1",
+          "name": "Main Headquarters"
+        }
+      ],
+      "users": [
+        {
+          "id": "1",
+          "email": "admin@company.com",
+          "password_hash": "$2a$10$C6JwkbJKNHt.3ePrTqvOnuNyGOK.VAyP8PURIbfzUiwINjCtbYkQ.",
+          "first_name": "Super",
+          "last_name": "Admin",
+          "role_id": "1",
+          "branch_id": "1",
+          "is_active": true
+        }
+      ],
+      "permissions": [
+        {
+          "id": "1",
+          "name": "view_dashboard"
+        },
+        {
+          "id": "2",
+          "name": "manage_users"
+        },
+        {
+          "id": "3",
+          "name": "manage_roles"
+        },
+        {
+          "id": "4",
+          "name": "view_inventory"
+        },
+        {
+          "id": "5",
+          "name": "manage_inventory"
+        },
+        {
+          "id": "6",
+          "name": "view_sales"
+        },
+        {
+          "id": "7",
+          "name": "manage_sales"
+        },
+        {
+          "id": "8",
+          "name": "view_purchases"
+        },
+        {
+          "id": "9",
+          "name": "manage_purchases"
+        },
+        {
+          "id": "10",
+          "name": "view_media"
+        },
+        {
+          "id": "11",
+          "name": "upload_files"
+        },
+        {
+          "id": "12",
+          "name": "view_reports"
+        },
+        {
+          "id": "13",
+          "name": "view_accounting"
+        },
+        {
+          "id": "14",
+          "name": "manage_accounting"
+        },
+        {
+          "id": "15",
+          "name": "view_hr"
+        },
+        {
+          "id": "16",
+          "name": "manage_hr"
+        }
+      ],
+      "role_permissions": [
+        {
+          "role_id": "1",
+          "permission_id": "1"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "2"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "3"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "4"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "5"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "6"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "7"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "8"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "9"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "10"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "11"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "12"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "13"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "14"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "15"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "16"
+        }
+      ],
+      "employees": [],
+      "attendance": [],
+      "payroll": [],
+      "products": [],
+      "product_categories": [],
+      "suppliers": [],
+      "sales_orders": [],
+      "customers": [],
+      "inventory": [],
+      "stock_movements": [],
+      "audit_logs": [],
+      "invoices": [],
+      "accounts": [
+        {
+          "id": "1",
+          "name": "Main Cash Account",
+          "code": "1000",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "2",
+          "name": "Inventory Asset",
+          "code": "1200",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "3",
+          "name": "Sales Revenue",
+          "code": "4000",
+          "type": "Revenue",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "4",
+          "name": "Cost of Goods Sold",
+          "code": "5000",
+          "type": "Expense",
+          "balance": 0,
+          "is_active": true
+        }
+      ],
+      "sales_order_items": [],
+      "invoice_items": [],
+      "transactions": [],
+      "journal_entries": [],
+      "journal_entry_lines": [],
+      "purchase_orders": [],
+      "purchase_order_items": []
+    },
+    "mock-tenant-id": {
+      "roles": [
+        {
+          "id": "1",
+          "name": "Super Admin"
+        },
+        {
+          "id": "2",
+          "name": "Admin"
+        }
+      ],
+      "branches": [
+        {
+          "id": "1",
+          "name": "Main Headquarters"
+        }
+      ],
+      "users": [
+        {
+          "id": "1",
+          "email": "admin@company.com",
+          "password_hash": "$2a$10$GfY5DqwxnoPVO5a1cBybmOB.2zINLKiWR9hZCUGUcCcaJFrizljfW",
+          "first_name": "Super",
+          "last_name": "Admin",
+          "role_id": "1",
+          "branch_id": "1",
+          "is_active": true,
+          "updated_at": "2026-04-17T06:46:16.266Z"
+        }
+      ],
+      "permissions": [
+        {
+          "id": "1",
+          "name": "view_dashboard"
+        },
+        {
+          "id": "2",
+          "name": "manage_users"
+        },
+        {
+          "id": "3",
+          "name": "manage_roles"
+        },
+        {
+          "id": "4",
+          "name": "view_inventory"
+        },
+        {
+          "id": "5",
+          "name": "manage_inventory"
+        },
+        {
+          "id": "6",
+          "name": "view_sales"
+        },
+        {
+          "id": "7",
+          "name": "manage_sales"
+        },
+        {
+          "id": "8",
+          "name": "view_purchases"
+        },
+        {
+          "id": "9",
+          "name": "manage_purchases"
+        },
+        {
+          "id": "10",
+          "name": "view_media"
+        },
+        {
+          "id": "11",
+          "name": "upload_files"
+        },
+        {
+          "id": "12",
+          "name": "view_reports"
+        },
+        {
+          "id": "13",
+          "name": "view_accounting"
+        },
+        {
+          "id": "14",
+          "name": "manage_accounting"
+        },
+        {
+          "id": "15",
+          "name": "view_hr"
+        },
+        {
+          "id": "16",
+          "name": "manage_hr"
+        }
+      ],
+      "role_permissions": [
+        {
+          "role_id": "1",
+          "permission_id": "1"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "2"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "3"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "4"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "5"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "6"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "7"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "8"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "9"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "10"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "11"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "12"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "13"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "14"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "15"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "16"
+        }
+      ],
+      "employees": [],
+      "attendance": [],
+      "payroll": [],
+      "products": [
+        {
+          "id": "1",
+          "sku": "LAP-2227-662",
+          "name": "laptop",
+          "description": null,
+          "category_id": "1",
+          "supplier_id": null,
+          "base_price": 3332.99,
+          "cost_price": 1223,
+          "tax_rate": 0,
+          "brand": "asus",
+          "barcode": null,
+          "is_active": true,
+          "image_url": null,
+          "unit_of_measure": "pcs",
+          "min_stock_level": 5,
+          "created_at": "2026-04-03T04:34:52.228Z"
+        },
+        {
+          "id": "2",
+          "sku": "Wireless Mouse",
+          "name": "Test Mouse",
+          "description": null,
+          "category_id": null,
+          "supplier_id": null,
+          "base_price": 25,
+          "cost_price": 0,
+          "tax_rate": 0,
+          "brand": null,
+          "barcode": null,
+          "is_active": true,
+          "image_url": null,
+          "unit_of_measure": "pcs",
+          "min_stock_level": 5,
+          "created_at": "2026-04-03T04:41:31.831Z"
+        }
+      ],
+      "product_categories": [
+        {
+          "id": "1",
+          "name": "Electronics",
+          "description": "",
+          "parent_id": null,
+          "is_active": true,
+          "created_at": "2026-04-03T04:34:23.883Z"
+        }
+      ],
+      "suppliers": [],
+      "sales_orders": [],
+      "customers": [
+        {
+          "id": "1",
+          "name": "John Doe",
+          "email": "john@example.com",
+          "phone": null,
+          "address": null,
+          "tax_id": null,
+          "branch_id": null,
+          "is_active": true,
+          "created_at": "2026-04-03T04:43:30.100Z"
+        }
+      ],
+      "inventory": [
+        {
+          "id": "1",
+          "product_id": "1",
+          "branch_id": "1",
+          "quantity": 10,
+          "created_at": "2026-04-03T04:34:52.233Z"
+        },
+        {
+          "id": "2",
+          "product_id": "2",
+          "branch_id": "1",
+          "quantity": 50,
+          "created_at": "2026-04-03T04:41:31.842Z"
+        }
+      ],
+      "stock_movements": [],
+      "audit_logs": [
+        {
+          "id": "1",
+          "user_id": "1",
+          "action": "UPDATE_SETTINGS",
+          "resource": "SYSTEM_SETTINGS",
+          "resource_id": null,
+          "details": {
+            "company_name": "Kinetic Vault ERP",
+            "company_email": "admin@kineticvault.com",
+            "company_phone": "+1 (555) 123-4567",
+            "address": "123 Tech Avenue, SP",
+            "currency": "PKR",
+            "timezone": "UTC",
+            "logo_url": null
+          },
+          "ip_address": null,
+          "created_at": "2026-04-17T09:36:48.220Z"
+        }
+      ],
+      "invoices": [],
+      "accounts": [
+        {
+          "id": "1",
+          "name": "Main Cash Account",
+          "code": "1000",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "2",
+          "name": "Inventory Asset",
+          "code": "1200",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "3",
+          "name": "Sales Revenue",
+          "code": "4000",
+          "type": "Revenue",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "4",
+          "name": "Cost of Goods Sold",
+          "code": "5000",
+          "type": "Expense",
+          "balance": 0,
+          "is_active": true
+        }
+      ],
+      "sales_order_items": [],
+      "invoice_items": [],
+      "transactions": [],
+      "journal_entries": [],
+      "journal_entry_lines": [],
+      "purchase_orders": [],
+      "purchase_order_items": []
+    },
+    "9b50e774-54d5-40f0-9aa3-ca8ccf166dea": {
+      "roles": [
+        {
+          "id": "1",
+          "name": "Super Admin"
+        },
+        {
+          "id": "2",
+          "name": "Admin"
+        }
+      ],
+      "branches": [
+        {
+          "id": "1",
+          "name": "Main Headquarters"
+        }
+      ],
+      "users": [
+        {
+          "id": "1",
+          "email": "admin@company.com",
+          "password_hash": "$2a$10$/qzYLxmbn.Ku8K4VeED4lOA3rUMd6reYVJqZi7w/O2jzD0bTQZOg.",
+          "first_name": "Super",
+          "last_name": "Admin",
+          "role_id": "1",
+          "branch_id": "1",
+          "is_active": true,
+          "updated_at": "2026-04-11T15:06:44.901Z"
+        }
+      ],
+      "permissions": [
+        {
+          "id": "1",
+          "name": "view_dashboard"
+        },
+        {
+          "id": "2",
+          "name": "manage_users"
+        },
+        {
+          "id": "3",
+          "name": "manage_roles"
+        },
+        {
+          "id": "4",
+          "name": "view_inventory"
+        },
+        {
+          "id": "5",
+          "name": "manage_inventory"
+        },
+        {
+          "id": "6",
+          "name": "view_sales"
+        },
+        {
+          "id": "7",
+          "name": "manage_sales"
+        },
+        {
+          "id": "8",
+          "name": "view_purchases"
+        },
+        {
+          "id": "9",
+          "name": "manage_purchases"
+        },
+        {
+          "id": "10",
+          "name": "view_media"
+        },
+        {
+          "id": "11",
+          "name": "upload_files"
+        },
+        {
+          "id": "12",
+          "name": "view_reports"
+        },
+        {
+          "id": "13",
+          "name": "view_accounting"
+        },
+        {
+          "id": "14",
+          "name": "manage_accounting"
+        },
+        {
+          "id": "15",
+          "name": "view_hr"
+        },
+        {
+          "id": "16",
+          "name": "manage_hr"
+        }
+      ],
+      "role_permissions": [
+        {
+          "role_id": "1",
+          "permission_id": "1"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "2"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "3"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "4"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "5"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "6"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "7"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "8"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "9"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "10"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "11"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "12"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "13"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "14"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "15"
+        },
+        {
+          "role_id": "1",
+          "permission_id": "16"
+        }
+      ],
+      "employees": [],
+      "attendance": [],
+      "payroll": [],
+      "products": [],
+      "product_categories": [],
+      "suppliers": [],
+      "sales_orders": [],
+      "customers": [],
+      "inventory": [],
+      "stock_movements": [],
+      "audit_logs": [],
+      "invoices": [],
+      "accounts": [
+        {
+          "id": "1",
+          "name": "Main Cash Account",
+          "code": "1000",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "2",
+          "name": "Inventory Asset",
+          "code": "1200",
+          "type": "Asset",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "3",
+          "name": "Sales Revenue",
+          "code": "4000",
+          "type": "Revenue",
+          "balance": 0,
+          "is_active": true
+        },
+        {
+          "id": "4",
+          "name": "Cost of Goods Sold",
+          "code": "5000",
+          "type": "Expense",
+          "balance": 0,
+          "is_active": true
+        }
+      ],
+      "sales_order_items": [],
+      "invoice_items": [],
+      "transactions": [],
+      "journal_entries": [],
+      "journal_entry_lines": [],
+      "purchase_orders": [],
+      "purchase_order_items": []
+    }
+  }
+}

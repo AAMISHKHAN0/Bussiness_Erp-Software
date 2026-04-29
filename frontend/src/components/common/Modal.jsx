@@ -6,14 +6,18 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) => {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+                        className="absolute inset-0 bg-slate-900/40 z-[5]"
+                        style={{
+                            backdropFilter: 'blur(8px)',
+                            WebkitBackdropFilter: 'blur(8px)',
+                        }}
                     />
 
                     {/* Modal Content */}
@@ -22,10 +26,14 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
-                        className={`relative w-full ${maxWidth} bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]`}
+                        className={`relative z-10 w-full ${maxWidth} bg-white/95 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] m-auto border border-white/20`}
+                        style={{
+                            backdropFilter: 'blur(16px)',
+                            WebkitBackdropFilter: 'blur(16px)',
+                        }}
                     >
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                        {/* Header - Fixed */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-transparent flex-shrink-0">
                             <h2 className="text-xl font-bold text-gray-900">{title}</h2>
                             <button
                                 onClick={onClose}
@@ -36,7 +44,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) => {
                         </div>
 
                         {/* Body (Scrollable) */}
-                        <div className="p-6 overflow-y-auto custom-scrollbar">
+                        <div className="p-6 overflow-y-auto custom-scrollbar flex-1 min-h-0 bg-white/50">
                             {children}
                         </div>
                     </motion.div>

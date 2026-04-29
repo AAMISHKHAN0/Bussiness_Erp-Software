@@ -1,0 +1,61 @@
+{
+  "name": "software",
+  "version": "1.0.0",
+  "description": "A modern, scalable, and enterprise-grade **Enterprise Resource Planning (ERP)** software suite designed to streamline business operations across various departments including Inventory, Sales, Purchasing, HR, and Accounting.",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start": "concurrently \"npm start --prefix backend\" \"npm run dev --prefix frontend\"",
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "electron:dev": "concurrently \"npm run dev:frontend\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "npm run build --prefix frontend && electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AAMISHKHAN0/Bussiness-Erp-Software.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AAMISHKHAN0/Bussiness-Erp-Software/issues"
+  },
+  "homepage": "https://github.com/AAMISHKHAN0/Bussiness-Erp-Software#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "electron": "^30.0.1",
+    "electron-builder": "^24.13.3",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.erp.software",
+    "productName": "ERP System",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "win": {
+      "icon": "frontend/public/favicon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "dist/**/*",
+      "frontend/dist/**/*",
+      "backend/**/*",
+      "electron/**/*"
+    ]
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.3"
+  }
+}

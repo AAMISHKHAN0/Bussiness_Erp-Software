@@ -13,67 +13,81 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('erp_token'));
     const [loading, setLoading] = useState(true);
+    const [backendOnline, setBackendOnline] = useState(true);
+
+    const normalizeUser = (userData) => {
+        if (!userData) return null;
+
+        const firstName = userData.firstName || userData.first_name || '';
+        const lastName = userData.lastName || userData.last_name || '';
+        const name = userData.name || `${firstName} ${lastName}`.trim() || userData.email || 'Admin';
+
+        return {
+            ...userData,
+            firstName,
+            lastName,
+            name,
+            permissions: Array.isArray(userData.permissions) ? userData.permissions : [],
+        };
+    };
 
     useEffect(() => {
         const initAuth = async () => {
-            if (token) {
-                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                try {
-                    const response = await api.get('/auth/me');
-                    if (response.data.success) {
-                        setUser(response.data.data);
-                    }
-                } catch (error) {
-                    console.error('Failed to restore session:', error);
-                    logout();
+            // BUGFIX: Skip auto-load if we are already on the login page to avoid redirect loops
+            if (window.location.pathname === '/login') {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await api.get('/auth/me');
+                if (response.data.success) {
+                    setUser(normalizeUser(response.data.data));
+                }
+            } catch (error) {
+                if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+                    console.warn('Backend server is not running. Please start the backend server.');
+                    setBackendOnline(false);
+                } else if (error.response?.status === 401) {
+                    console.warn('No active session found. Please log in.');
+                } else {
+                    console.warn('Auth check failed:', error.message);
                 }
             }
             setLoading(false);
         };
 
         initAuth();
-    }, [token]);
+    }, []);
 
     const login = async (email, password) => {
         const response = await api.post('/auth/login', { email, password });
-        const { tokens: newTokens, user: userData } = response.data.data;
+        const { user: userData } = response.data.data;
 
-        localStorage.setItem('erp_token', newTokens.accessToken);
-        localStorage.setItem('erp_refresh_token', newTokens.refreshToken);
-
-        api.defaults.headers.common['Authorization'] = `Bearer ${newTokens.accessToken}`;
-
-        setToken(newTokens.accessToken);
-        setUser(userData);
-        return userData;
+        const normalizedUser = normalizeUser(userData);
+        setUser(normalizedUser);
+        return normalizedUser;
     };
 
     const logout = async () => {
         try {
-            const refreshToken = localStorage.getItem('erp_refresh_token');
-            if (refreshToken) {
-                await api.post('/auth/logout', { refreshToken });
-            }
+            await api.post('/auth/logout');
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            localStorage.removeItem('erp_token');
-            localStorage.removeItem('erp_refresh_token');
-            delete api.defaults.headers.common['Authorization'];
-            setToken(null);
             setUser(null);
+            window.location.href = '/login';
         }
     };
 
     const value = {
         user,
-        token,
         loading,
-        isAuthenticated: !!token,
+        isAuthenticated: !!user,
         login,
         logout,
+        backendOnline,
     };
 
     return (

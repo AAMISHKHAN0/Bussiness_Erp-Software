@@ -11,9 +11,10 @@ const AccountForm = ({ onSuccess, onCancel }) => {
     });
 
     const mutation = useMutation({
-        mutationFn: (newAccount) => api.post('/accounts/accounts', newAccount),
+        mutationFn: (newAccount) => api.post('/accounting/accounts', newAccount),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['accounts'] });
+            queryClient.invalidateQueries({ queryKey: ['accounting-data'] });
             onSuccess();
         }
     });

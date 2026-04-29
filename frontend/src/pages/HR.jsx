@@ -24,7 +24,6 @@ const HR = () => {
             const response = await api.get(endpoint);
             return response.data.data || [];
         },
-        refetchInterval: 30000,
     });
 
     const deleteMutation = useMutation({
@@ -84,24 +83,35 @@ const HR = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {items.map((emp) => (
-                                        <tr key={emp.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">{emp.first_name} {emp.last_name}</div>
-                                                <div className="text-xs text-gray-500">{emp.email}</div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">{emp.designation}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">{emp.department}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">{emp.join_date}</td>
-                                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">${emp.salary}</td>
-                                            <td className="px-6 py-4 text-right">
-                                                <ActionButtons
-                                                    onEdit={() => { setEditingEmployee(emp); setIsEmployeeModalOpen(true); }}
-                                                    onDelete={() => deleteMutation.mutate(emp.id)}
-                                                />
+                                    {items.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                                                <div className="flex flex-col items-center justify-center space-y-3">
+                                                    <Users size={32} className="text-gray-300" />
+                                                    <p className="text-sm">No employees found. Click "Add Employee" to get started.</p>
+                                                </div>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ) : (
+                                        items.map((emp) => (
+                                            <tr key={emp.id} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-medium text-gray-900">{emp.first_name} {emp.last_name}</div>
+                                                    <div className="text-xs text-gray-500">{emp.email}</div>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{emp.designation}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{emp.department}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{emp.join_date}</td>
+                                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">${emp.salary}</td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <ActionButtons
+                                                        onEdit={() => { setEditingEmployee(emp); setIsEmployeeModalOpen(true); }}
+                                                        onDelete={() => deleteMutation.mutate(emp.id)}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         )}
@@ -116,18 +126,29 @@ const HR = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {items.map((att) => (
-                                        <tr key={att.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 text-sm text-gray-900">{att.date}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-600 font-mono">#{att.employee_id}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${att.status === 'Present' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                    {att.status === 'Present' ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                                                    {att.status}
-                                                </span>
+                                    {items.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="3" className="px-6 py-12 text-center text-gray-500">
+                                                <div className="flex flex-col items-center justify-center space-y-3">
+                                                    <Calendar size={32} className="text-gray-300" />
+                                                    <p className="text-sm">No attendance records found.</p>
+                                                </div>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ) : (
+                                        items.map((att) => (
+                                            <tr key={att.id} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-6 py-4 text-sm text-gray-900">{att.date}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600 font-mono">#{att.employee_id}</td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${att.status === 'Present' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                        {att.status === 'Present' ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                                                        {att.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         )}
@@ -143,18 +164,29 @@ const HR = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {items.map((pay) => (
-                                        <tr key={pay.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 text-sm text-gray-900 font-medium">{pay.month}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">#{pay.employee_id}</td>
-                                            <td className="px-6 py-4 text-sm font-bold text-gray-900">${pay.net_salary}</td>
-                                            <td className="px-6 py-4">
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                                    <CheckCircle size={14} /> {pay.status}
-                                                </span>
+                                    {items.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                                                <div className="flex flex-col items-center justify-center space-y-3">
+                                                    <CreditCard size={32} className="text-gray-300" />
+                                                    <p className="text-sm">No payroll records found.</p>
+                                                </div>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ) : (
+                                        items.map((pay) => (
+                                            <tr key={pay.id} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-6 py-4 text-sm text-gray-900 font-medium">{pay.month}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">#{pay.employee_id}</td>
+                                                <td className="px-6 py-4 text-sm font-bold text-gray-900">${pay.net_salary}</td>
+                                                <td className="px-6 py-4">
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                                        <CheckCircle size={14} /> {pay.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         )}

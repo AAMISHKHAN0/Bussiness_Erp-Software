@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+dist_electron/
+*/dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+query_log.txt
+
+# Test and debug files
+bugs.txt
+bugs*.txt
+test_*.js
+test_*.ts
+verify_*.js
+fix_*.js
+reproduce_*.js
+scratchpad.md
+local_provision.js
+db_test_categories.js
+
+# Test logs
+test_*_log.txt
+
+# Runtime data
+uploads/*
+!uploads/.gitkeep
+
+# Database
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.bak
+*.orig

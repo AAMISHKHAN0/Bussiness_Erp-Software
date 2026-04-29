@@ -24,7 +24,6 @@ const Accounting = () => {
                 transactions: txRes.data.data || []
             };
         },
-        refetchInterval: 30000,
     });
 
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);

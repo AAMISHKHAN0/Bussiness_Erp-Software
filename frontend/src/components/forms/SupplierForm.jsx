@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import api from '../../services/api';
 
-const SupplierForm = ({ onSuccess, onCancel }) => {
+const SupplierForm = ({ onSuccess, onCancel, initialData = null }) => {
     const queryClient = useQueryClient();
+    const isEditing = !!initialData;
 
     const [formData, setFormData] = useState({
         name: '', company_name: '', contact_person: '', email: '', phone: '',
@@ -12,11 +13,38 @@ const SupplierForm = ({ onSuccess, onCancel }) => {
         payment_terms: '', notes: ''
     });
 
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                name: initialData.name || '',
+                company_name: initialData.company_name || '',
+                contact_person: initialData.contact_person || '',
+                email: initialData.email || '',
+                phone: initialData.phone || '',
+                address: initialData.address || '',
+                city: initialData.city || '',
+                country: initialData.country || '',
+                tax_id: initialData.tax_id || '',
+                payment_terms: initialData.payment_terms || '',
+                notes: initialData.notes || ''
+            });
+        }
+    }, [initialData]);
+
     const mutation = useMutation({
-        mutationFn: (newSupplier) => api.post('/suppliers', newSupplier),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+        mutationFn: (data) => isEditing
+            ? api.put(`/suppliers/${initialData.id}`, data)
+            : api.post('/suppliers', data),
+        onSuccess: (res) => {
+            console.log('[SupplierForm] Supplier saved successfully:', res.data);
+            // Refetch both keys to cover Purchase page and Vendor page
+            queryClient.refetchQueries({ queryKey: ['purchase-data'] });
+            queryClient.refetchQueries({ queryKey: ['suppliers'] });
+            queryClient.refetchQueries({ queryKey: ['products'] });
             onSuccess();
+        },
+        onError: (err) => {
+            console.error('[SupplierForm] Failed to save supplier:', err.response?.data || err.message);
         }
     });
 

@@ -3,48 +3,51 @@ import {
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
+import { useI18n } from '../../context/I18nContext';
 
 const SalesChart = () => {
+    const { locale, t } = useI18n();
+
     const { data: chartData, isLoading } = useQuery({
-        queryKey: ['sales-chart-data'],
+        queryKey: ['dashboard-timeseries', locale],
         queryFn: async () => {
-            try {
-                const res = await api.get('/reports/sales-summary');
-                if (res.data.data.length > 0) return res.data.data;
-                return getDefaultData();
-            } catch (err) {
-                return getDefaultData();
-            }
+            const res = await api.get('/reports/dashboard-timeseries');
+            return (res.data.data || []).map((item) => {
+                const date = new Date(item.month_start);
+                return {
+                    name: new Intl.DateTimeFormat(locale, { month: 'short' }).format(date),
+                    sales: Number(item.revenue) || 0,
+                };
+            });
         },
-        refetchInterval: 60000,
+        refetchInterval: 10000, // 10 seconds for more real-time feel
+        refetchOnWindowFocus: true,
+        staleTime: 5000, // Consider data stale after 5 seconds
+        gcTime: 60000, // Keep in cache for 1 minute
     });
 
-    const getDefaultData = () => [
-        { name: 'Jan', sales: 4000, target: 2400 },
-        { name: 'Feb', sales: 3000, target: 1398 },
-        { name: 'Mar', sales: 9800, target: 9800 },
-        { name: 'Apr', sales: 3908, target: 3908 },
-        { name: 'May', sales: 4800, target: 4800 },
-        { name: 'Jun', sales: 3800, target: 3800 },
-        { name: 'Jul', sales: 4300, target: 4300 },
-    ];
-
-    if (isLoading) return <div className="h-full w-full flex items-center justify-center text-gray-400">Loading Chart...</div>;
+    if (isLoading) return <div className="h-full w-full flex items-center justify-center text-gray-400">{t('common.loading')}</div>;
 
     return (
-        <div className="h-full flex flex-col">
-            <h3 className="text-sm font-bold text-gray-700 mb-4">Sales Trends</h3>
-            <div className="flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} offset={10} />
-                        <Tooltip />
-                        <Area type="monotone" dataKey="sales" stroke="#3b82f6" fill="#eff6ff" strokeWidth={2} />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
+        <div className="flex h-full min-h-0 flex-col">
+            <h3 className="text-sm font-bold text-gray-700 mb-4">{t('dashboard.salesTrends')}</h3>
+            {chartData?.length ? (
+                <div className="min-h-0 flex-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} offset={10} />
+                            <Tooltip />
+                            <Area type="monotone" dataKey="sales" stroke="#3b82f6" fill="#eff6ff" strokeWidth={2} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            ) : (
+                <div className="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-gray-200 text-sm text-gray-400">
+                    {t('common.noData')}
+                </div>
+            )}
         </div>
     );
 };

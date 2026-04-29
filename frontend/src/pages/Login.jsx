@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { logoUrl } from '../utils/assets';
+import AuthShowcase from '../components/common/AuthShowcase';
+
+const showcaseStats = [
+    { label: 'Modules', value: '12+' },
+    { label: 'Reports', value: '50+' },
+    { label: 'Uptime', value: '99.9%' },
+];
 
 const Login = () => {
     const navigate = useNavigate();
@@ -50,8 +58,8 @@ const Login = () => {
 
                 <div className="relative z-10 flex flex-col justify-center px-16">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20">
-                            <Building2 className="w-8 h-8 text-white" />
+                        <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 overflow-hidden">
+                            <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <h1 className="text-3xl font-bold text-white tracking-tight">ERP System</h1>
                     </div>
@@ -87,8 +95,8 @@ const Login = () => {
                 <div className="w-full max-w-md">
                     {/* Mobile logo */}
                     <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-                        <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
-                            <Building2 className="w-6 h-6 text-white" />
+                        <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center overflow-hidden">
+                            <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <h1 className="text-2xl font-bold text-gray-900">ERP System</h1>
                     </div>

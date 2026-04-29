@@ -21,6 +21,7 @@ const CreateSalesOrder = () => {
 
     // Form State
     const [customerId, setCustomerId] = useState('');
+    const [status, setStatus] = useState('Pending');
     const [notes, setNotes] = useState('');
     const [items, setItems] = useState([
         { id: Date.now(), product_id: '', quantity: 1, unit_price: 0, tax: 0, discount: 0 }
@@ -98,6 +99,7 @@ const CreateSalesOrder = () => {
         const payload = {
             customer_id: customerId,
             branch_id: '1',
+            status,
             items: items.map(i => ({
                 product_id: i.product_id,
                 quantity: Number(i.quantity),
@@ -137,11 +139,13 @@ const CreateSalesOrder = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
-                            <select className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 bg-gray-50 text-gray-500" disabled>
-                                <option>Pending</option>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
+                            <select value={status} onChange={e => setStatus(e.target.value)} className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white">
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
                             </select>
-                            <span className="text-xs text-gray-400 mt-1 block">Invoices manage payment status.</span>
+                            <span className="text-xs text-gray-400 mt-1 block">Current status of the sales order.</span>
                         </div>
                     </div>
                 </div>

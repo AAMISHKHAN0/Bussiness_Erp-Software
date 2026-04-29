@@ -8,6 +8,7 @@ import {
     ArrowUpRight, Loader2, Search, XCircle
 } from 'lucide-react';
 import api from '../services/api';
+import { exportToCSV } from '../utils/exportUtils';
 
 const COLORS = ['#0ea5e9', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e'];
 
@@ -81,7 +82,14 @@ const Reports = () => {
                             {['Jan', 'Feb', 'Mar', 'Apr'].map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
                     </div>
-                    <button className="btn-primary flex items-center gap-2">
+                    <button 
+                        onClick={() => {
+                            if (salesData.length) exportToCSV(salesData, 'sales_report');
+                            if (inventoryData.length) exportToCSV(inventoryData, 'inventory_report');
+                            if (hrData.length) exportToCSV(hrData, 'hr_report');
+                        }}
+                        className="btn-primary flex items-center gap-2"
+                    >
                         <Download size={18} />
                         Export Data
                     </button>
@@ -90,31 +98,41 @@ const Reports = () => {
 
             {/* KPI Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                    { label: 'Revenue Growth', value: '+14.2%', target: '15%', progress: 92, color: 'text-blue-600', bg: 'bg-blue-50' },
-                    { label: 'Profit Margin', value: '28.5%', target: '25%', progress: 100, color: 'text-green-600', bg: 'bg-green-50' },
-                    { label: 'Operating Cost', value: '$12k/mo', target: '$15k', progress: 80, color: 'text-purple-600', bg: 'bg-purple-50' },
-                    { label: 'Customer Churn', value: '1.2%', target: '<2%', progress: 100, color: 'text-rose-600', bg: 'bg-rose-50' },
-                ].map((kpi, i) => (
-                    <div key={i} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                        <div className="flex items-center justify-between mb-4">
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{kpi.label}</p>
-                            <div className={`${kpi.bg} p-1.5 rounded-md`}>
-                                <ArrowUpRight size={14} className={kpi.color} />
+                {(() => {
+                    const totalRevenue = salesData.reduce((s, d) => s + Number(d.revenue || 0), 0);
+                    const totalPayroll = hrData.reduce((s, d) => s + Number(d.total_salary || 0), 0);
+                    const totalEmployees = hrData.reduce((s, d) => s + Number(d.count || 0), 0);
+                    const grossProfit = totalRevenue - totalPayroll;
+                    const profitMargin = totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : '0.0';
+
+                    const kpis = [
+                        { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, target: 'All Time', progress: totalRevenue > 0 ? 100 : 0, color: 'text-blue-600', bg: 'bg-blue-50' },
+                        { label: 'Profit Margin', value: `${profitMargin}%`, target: `Revenue: $${totalRevenue.toLocaleString()}`, progress: Math.min(Number(profitMargin), 100), color: 'text-green-600', bg: 'bg-green-50' },
+                        { label: 'Monthly Payroll', value: `$${totalPayroll.toLocaleString()}`, target: `${totalEmployees} Staff`, progress: totalPayroll > 0 ? 75 : 0, color: 'text-purple-600', bg: 'bg-purple-50' },
+                        { label: 'Departments', value: `${hrData.length}`, target: `${totalEmployees} Employees`, progress: hrData.length > 0 ? 100 : 0, color: 'text-rose-600', bg: 'bg-rose-50' },
+                    ];
+
+                    return kpis.map((kpi, i) => (
+                        <div key={i} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{kpi.label}</p>
+                                <div className={`${kpi.bg} p-1.5 rounded-md`}>
+                                    <ArrowUpRight size={14} className={kpi.color} />
+                                </div>
+                            </div>
+                            <div className="flex items-baseline gap-2">
+                                <h3 className="text-2xl font-bold text-gray-900">{kpi.value}</h3>
+                                <span className="text-xs text-gray-400">{kpi.target}</span>
+                            </div>
+                            <div className="mt-4 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full rounded-full transition-all duration-1000 ${kpi.color.replace('text', 'bg')}`}
+                                    style={{ width: `${kpi.progress}%` }}
+                                />
                             </div>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <h3 className="text-2xl font-bold text-gray-900">{kpi.value}</h3>
-                            <span className="text-xs text-gray-400">Target: {kpi.target}</span>
-                        </div>
-                        <div className="mt-4 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                                className={`h-full rounded-full transition-all duration-1000 ${kpi.color.replace('text', 'bg')}`}
-                                style={{ width: `${kpi.progress}%` }}
-                            />
-                        </div>
-                    </div>
-                ))}
+                    ));
+                })()}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -204,16 +222,20 @@ const Reports = () => {
                             </p>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg text-center">
-                            <p className="text-xs text-gray-500 uppercase font-bold mb-1">Growth Index</p>
-                            <div className="flex items-center justify-center gap-1 text-green-600 font-bold">
-                                <ArrowUpRight size={16} />
-                                +4.5%
+                            <p className="text-xs text-gray-500 uppercase font-bold mb-1">Contribution</p>
+                            <div className="flex items-center justify-center gap-1 text-primary-600 font-bold">
+                                {(() => {
+                                    const total = salesData.reduce((s, d) => s + Number(d.revenue || 0), 0);
+                                    const val = drillDownData.revenue || drillDownData.total_value || 0;
+                                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0.0';
+                                    return `${pct}%`;
+                                })()}
                             </div>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg text-right">
                             <p className="text-xs text-gray-500 uppercase font-bold mb-1">Status</p>
-                            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">
-                                Optimized
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${(drillDownData.revenue || drillDownData.total_value) > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                {(drillDownData.revenue || drillDownData.total_value) > 0 ? 'Active' : 'No Data'}
                             </span>
                         </div>
                     </div>

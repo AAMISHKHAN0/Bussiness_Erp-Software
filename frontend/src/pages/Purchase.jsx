@@ -27,7 +27,6 @@ const Purchase = () => {
                 grn: []
             };
         },
-        refetchInterval: 30000,
     });
 
     const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
@@ -145,7 +144,10 @@ const Purchase = () => {
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-500">{order.expected_date ? new Date(order.expected_date).toLocaleDateString() : '-'}</td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <ActionButtons onDelete={() => deleteMutation.mutate({ endpoint: '/purchases/orders', id: order.id })} />
+                                                    <ActionButtons
+                                                        onEdit={() => navigate(`/purchases/${order.id}/edit`)}
+                                                        onDelete={() => deleteMutation.mutate({ endpoint: '/purchases/orders', id: order.id })}
+                                                    />
                                                 </td>
                                             </tr>
                                         ))}

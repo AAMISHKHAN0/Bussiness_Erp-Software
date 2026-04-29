@@ -5,6 +5,7 @@ import api from '../../services/api';
 
 const StockForm = ({ onSuccess, onCancel, products = [] }) => {
     const queryClient = useQueryClient();
+    const [successMsg, setSuccessMsg] = useState('');
 
     const [formData, setFormData] = useState({
         product_id: '', branch_id: '1', movement_type: 'IN',
@@ -13,10 +14,11 @@ const StockForm = ({ onSuccess, onCancel, products = [] }) => {
 
     const mutation = useMutation({
         mutationFn: (newMovement) => api.post('/inventory/movement', newMovement),
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['inventory-data'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-            onSuccess();
+            setSuccessMsg(`Stock ${variables.movement_type === 'IN' ? 'added' : variables.movement_type === 'OUT' ? 'removed' : 'adjusted'}: ${variables.quantity} units`);
+            setTimeout(() => onSuccess(), 1200);
         }
     });
 
@@ -65,6 +67,13 @@ const StockForm = ({ onSuccess, onCancel, products = [] }) => {
                     <input type="text" name="notes" value={formData.notes} onChange={handleChange} className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="e.g. Broken in transit, Initial count..." />
                 </div>
             </div>
+
+            {/* Success Message */}
+            {successMsg && (
+                <div className="p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium border border-emerald-100 animate-fadeIn">
+                    ✓ {successMsg}
+                </div>
+            )}
 
             {/* Error Message */}
             {mutation.isError && (

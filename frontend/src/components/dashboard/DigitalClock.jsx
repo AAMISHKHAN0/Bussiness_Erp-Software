@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
+import { useI18n } from '../../context/I18nContext';
 
 const DigitalClock = () => {
     const [time, setTime] = useState(new Date());
+    const { locale } = useI18n();
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -13,7 +15,7 @@ const DigitalClock = () => {
     }, []);
 
     const formatTime = (date) => {
-        return date.toLocaleTimeString('en-PK', {
+        return date.toLocaleTimeString(locale, {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
@@ -22,7 +24,7 @@ const DigitalClock = () => {
     };
 
     const formatDate = (date) => {
-        return date.toLocaleDateString('en-PK', {
+        return date.toLocaleDateString(locale, {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -31,16 +33,16 @@ const DigitalClock = () => {
     };
 
     return (
-        <div className="flex flex-col items-end">
-            <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 group hover:border-primary-200 transition-all duration-300">
+        <div className="flex w-full flex-col items-start sm:w-auto sm:items-end">
+            <div className="group flex w-full items-center gap-3 rounded-2xl border border-gray-100 bg-white px-4 py-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:border-primary-200 sm:w-auto sm:px-5">
                 <div className="p-2 bg-primary-50 text-primary-600 rounded-xl group-hover:bg-primary-100 transition-colors">
                     <Clock size={20} className="animate-pulse" />
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-xl font-black text-gray-900 tracking-tight tabular-nums">
+                    <span className="text-lg font-black tracking-tight text-gray-900 tabular-nums sm:text-xl">
                         {formatTime(time)}
                     </span>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest -mt-0.5">
+                    <span className="-mt-0.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
                         {formatDate(time)}
                     </span>
                 </div>

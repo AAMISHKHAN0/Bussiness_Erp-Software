@@ -29,7 +29,11 @@ const CategoryForm = ({ onSuccess, onCancel, categories = [], initialData = null
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        mutation.mutate(formData);
+        const payload = {
+            ...formData,
+            parent_id: formData.parent_id || null
+        };
+        mutation.mutate(payload);
     };
 
     return (
@@ -67,7 +71,7 @@ const CategoryForm = ({ onSuccess, onCancel, categories = [], initialData = null
                     Cancel
                 </button>
                 <button type="submit" disabled={mutation.isPending} className="flex-1 px-4 py-2 text-white bg-primary-600 hover:bg-primary-700 font-medium rounded-lg transition-colors flex justify-center items-center">
-                    {mutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Category'}
+                    {mutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : isEditing ? 'Update Category' : 'Save Category'}
                 </button>
             </div>
         </form>

@@ -48,6 +48,17 @@ const MediaManager = () => {
         }
     };
 
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this file?')) return;
+
+        try {
+            await api.delete(`/files/${id}`);
+            setFiles(prev => prev.filter(f => f.id !== id));
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to delete file');
+        }
+    };
+
     const formatSize = (bytes) => {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
@@ -160,8 +171,8 @@ const MediaManager = () => {
                                 ) : (
                                     getFileIcon(file.type || file.mimetype)
                                 )}
-                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button className="p-1.5 bg-white/90 backdrop-blur rounded-md shadow-sm text-red-500 hover:bg-red-500 hover:text-white transition-colors">
+                                <div className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleDelete(file.id)} className="p-1.5 bg-white/90 backdrop-blur border border-gray-100 rounded-md shadow-sm text-red-500 hover:bg-red-500 hover:text-white transition-colors">
                                         <Trash2 size={14} />
                                     </button>
                                 </div>
@@ -179,40 +190,42 @@ const MediaManager = () => {
                 </div>
             ) : (
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                    <table className="w-full text-left">
-                        <thead className="bg-gray-50 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
-                            <tr>
-                                <th className="px-6 py-3">File Name</th>
-                                <th className="px-6 py-3">Size</th>
-                                <th className="px-6 py-3">Uploaded</th>
-                                <th className="px-6 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {filteredFiles.map((file, i) => (
-                                <tr key={i} className="hover:bg-gray-50 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            {getFileIcon(file.type || file.mimetype)}
-                                            <span className="text-sm font-medium text-gray-900">{file.name || file.originalName}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-xs text-gray-500">{formatSize(file.size)}</td>
-                                    <td className="px-6 py-4 text-xs text-gray-500">{file.uploadedAt || 'Just now'}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md">
-                                                <Download size={16} />
-                                            </button>
-                                            <button className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md">
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left whitespace-nowrap min-w-[600px]">
+                            <thead className="bg-gray-50 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                                <tr>
+                                    <th className="px-6 py-3">File Name</th>
+                                    <th className="px-6 py-3">Size</th>
+                                    <th className="px-6 py-3">Uploaded</th>
+                                    <th className="px-6 py-3 text-right">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {filteredFiles.map((file, i) => (
+                                    <tr key={i} className="hover:bg-gray-50 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                {getFileIcon(file.type || file.mimetype)}
+                                                <span className="text-sm font-medium text-gray-900">{file.name || file.originalName}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-xs text-gray-500">{formatSize(file.size)}</td>
+                                        <td className="px-6 py-4 text-xs text-gray-500">{file.uploadedAt || 'Just now'}</td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-md">
+                                                    <Download size={16} />
+                                                </button>
+                                                <button onClick={() => handleDelete(file.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>
