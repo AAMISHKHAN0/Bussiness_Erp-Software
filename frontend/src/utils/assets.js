@@ -4,7 +4,11 @@ const getLogoUrl = () => {
     if (savedLogo) {
         return savedLogo;
     }
-    return new URL('../../public/logo.png', import.meta.url).href;
+    try {
+        return new URL('../../public/logo.png', import.meta.url).href;
+    } catch (e) {
+        return '/logo.png';
+    }
 };
 
 export const logoUrl = getLogoUrl();

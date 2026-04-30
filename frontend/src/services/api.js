@@ -45,7 +45,9 @@ api.interceptors.request.use(
         const parts = host.split('.');
         
         // Check if subdomain is present (tenant.domain.com)
-        if (parts.length > 2 && !host.includes('localhost')) {
+        // Skip for localhost and raw IP addresses
+        const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(host);
+        if (parts.length > 2 && !host.includes('localhost') && !isIP) {
              config.headers['x-tenant-id'] = parts[0];
         } else if (host === 'localhost' && parts.length === 2 && parts[1] === 'localhost') {
              // localhost with subdomain pattern (tenant.localhost)

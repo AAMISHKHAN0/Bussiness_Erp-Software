@@ -72,19 +72,12 @@ const Router = typeof window !== 'undefined' && window.location.protocol === 'fi
 
 function App() {
     return (
-        <I18nProvider>
-            <LicenseProvider>
-                <LicenseGate>
-                    <AuthProvider>
-                        <Router future={{
-                            v7_startTransition: true,
-                            v7_relativeSplatPath: true,
-                            v7_fetcherPersist: true,
-                            v7_normalizeFormMethod: true,
-                            v7_partialHydration: true,
-                            v7_skipActionErrorRevalidation: true
-                        }}>
-                            <ErrorBoundary>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <ErrorBoundary>
+                <I18nProvider>
+                    <LicenseProvider>
+                        <LicenseGate>
+                            <AuthProvider>
                                 <Routes>
                                     {/* Public Routes */}
                                     <Route path="/login" element={<LoginResponsive />} />
@@ -115,12 +108,12 @@ function App() {
                                     {/* Catch-all redirect */}
                                     <Route path="*" element={<Navigate to="/dashboard" replace />} />
                                 </Routes>
-                            </ErrorBoundary>
-                        </Router>
-                    </AuthProvider>
-                </LicenseGate>
-            </LicenseProvider>
-        </I18nProvider>
+                            </AuthProvider>
+                        </LicenseGate>
+                    </LicenseProvider>
+                </I18nProvider>
+            </ErrorBoundary>
+        </Router>
     );
 }
 
