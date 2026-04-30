@@ -48,11 +48,10 @@ services:
       LOG_LEVEL: info
       ALLOW_DB_MOCK_FALLBACK: false
       LICENSE_FILE_PATH: /app/license.json
-    expose:
-      - "5000"
+    ports:
+      - "127.0.0.1:5000:5000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     volumes:
       - backend_logs:/app/logs
       - ./uploads:/app/uploads
@@ -77,8 +76,7 @@ services:
         condition: service_started
     networks:
       - erp_network
-    # Override entrypoint to prevent default.conf creation
-    entrypoint: ["/bin/sh", "-c", "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+    command: /bin/sh -c "rm -f /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
 
 volumes:
   postgres_data:
