@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import { env } from './config/env';
 import { logger } from './utils/logger';
 import { connectWithRetry, masterPool } from './config/db';
+import { initializeDatabase } from './config/dbInit';
 import routes from './api/routes';
 import { errorHandler } from './middlewares/errorHandler';
 import { apiLimiter } from './middlewares/rateLimiter';
@@ -179,8 +180,11 @@ const startServer = async () => {
         logger.info('──────────────────────────────────────────────────');
 
         // Background DB connection attempt
-        connectWithRetry().then(connected => {
-            if (!connected) {
+        connectWithRetry().then(async (connected) => {
+            if (connected) {
+                // Auto-create tables and seed data if missing
+                await initializeDatabase();
+            } else {
                 logger.error('❌ Failed to establish persistent DB connection. Check your credentials.');
             }
         });

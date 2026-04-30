@@ -42,7 +42,15 @@ export class AuthController {
                 message: 'Login successful',
                 data: loginResult
             });
-        } catch (error) {
+        } catch (error: any) {
+            // Give clear error if DB is down
+            const msg = (error.message || '').toLowerCase();
+            if (msg.includes('econnrefused') || msg.includes('connection terminated') || msg.includes('relation') || msg.includes('does not exist')) {
+                return res.status(503).json({
+                    success: false,
+                    message: 'Database is initializing. Please wait a few seconds and try again.'
+                });
+            }
             next(error);
         }
     }

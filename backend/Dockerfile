@@ -24,8 +24,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
 
-# Create logs and uploads directories
-RUN mkdir -p logs uploads && chown -R erp:nodejs logs uploads
+# Create logs, uploads, and data directories
+RUN mkdir -p logs uploads data && chown -R erp:nodejs logs uploads data
 
 USER erp
 
