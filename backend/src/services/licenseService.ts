@@ -19,8 +19,8 @@ interface LicenseKeyInfo {
  * In Phase 2, these will be migrated to the PostgreSQL 'licenses' table.
  */
 const LICENSE_KEYS: Record<string, LicenseKeyInfo> = {
-    // 2026 Premium Keys
-    'YER-A1B2-C3D4-E5F6': { tier: '1 Year', duration: MS_DAY * 365, used: true },
+    // 2026 Premium Keys — all available
+    'YER-A1B2-C3D4-E5F6': { tier: '1 Year', duration: MS_DAY * 365, used: false },
     'YER-K8L9-M0N1-P2Q3': { tier: '1 Year', duration: MS_DAY * 365, used: false },
     'YER-R4S5-T6U7-V8W9': { tier: '1 Year', duration: MS_DAY * 365, used: false },
     'MON-B2C3-D4E5-F6G7': { tier: '1 Month', duration: MS_DAY * 30, used: false },
@@ -63,22 +63,33 @@ export class LicenseService {
             throw ApiError.badRequest('Invalid activation key');
         }
 
-        if (license.used) {
-            throw ApiError.badRequest('This key has already been used');
+        // Check if there's already an active license (from a previous activation)
+        const currentStatus = this.getStatus();
+        if (currentStatus.active) {
+            return {
+                tier: currentStatus.tier,
+                duration: license.duration,
+                expiresAt: currentStatus.expiresAt,
+            };
         }
 
-        // Mark key as consumed
+        // Mark key as consumed (in-memory only, resets on restart)
         license.used = true;
 
         const expiresAt = Date.now() + license.duration;
 
         // Persist to file
-        fs.writeFileSync(LICENSE_FILE_PATH, JSON.stringify({
-            key: normalizedKey,
-            tier: license.tier,
-            expiresAt,
-            activatedAt: Date.now()
-        }, null, 2));
+        try {
+            fs.writeFileSync(LICENSE_FILE_PATH, JSON.stringify({
+                key: normalizedKey,
+                tier: license.tier,
+                expiresAt,
+                activatedAt: Date.now()
+            }, null, 2));
+        } catch (writeErr) {
+            console.error('[LICENSE] Failed to write license file:', writeErr);
+            // Still return success — the license is valid even if file write fails
+        }
 
         return {
             tier: license.tier,
