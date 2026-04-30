@@ -60,9 +60,21 @@ router.use('/license', licenseRoutes);
 router.use('/files', fileRoutes);
 
 // Health check endpoint
-router.get('/health', (req, res) => {
+router.get('/health', async (req, res) => {
+    let dbStatus = 'DISCONNECTED';
+    try {
+        const { masterPool } = await import('../../config/db');
+        const result = await masterPool.query('SELECT NOW()');
+        if (result.rows.length > 0) {
+            dbStatus = 'CONNECTED';
+        }
+    } catch (e) {
+        dbStatus = 'ERROR: ' + (e as Error).message;
+    }
+
     res.json({
         status: 'UP',
+        database: dbStatus,
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });

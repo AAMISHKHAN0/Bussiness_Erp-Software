@@ -11,6 +11,9 @@ const algorithm = 'aes-256-cbc';
 const key = crypto.scryptSync(env.crypto.tenantEncryptionKey, 'salt', 32);
 
 export const decrypt = (encrypted: string): string => {
+    if (!encrypted || !encrypted.includes(':')) {
+        return encrypted;
+    }
     try {
         const [ivHex, encryptedHex] = encrypted.split(':');
         const iv = Buffer.from(ivHex, 'hex');
@@ -20,7 +23,7 @@ export const decrypt = (encrypted: string): string => {
         return decrypted;
     } catch (err) {
         logger.error('Failed to decrypt database password', { error: err });
-        throw new Error('Database configuration error');
+        return encrypted; // Fallback to raw string
     }
 };
 
