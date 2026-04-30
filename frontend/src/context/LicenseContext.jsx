@@ -103,9 +103,17 @@ export const LicenseProvider = ({ children }) => {
 
             return { success: true, message: res.data.message, tier: newTier };
         } catch (err) {
+            const msg = err.response?.data?.message || 'Activation failed';
+            
+            // If the key was already used, it might be because the user activated it but refreshed
+            if (msg.includes('already been used')) {
+                // Manually trigger a status check if needed
+                window.location.reload(); 
+            }
+
             return {
                 success: false,
-                message: err.response?.data?.message || 'Activation failed. Please try again.'
+                message: msg
             };
         } finally {
             setActivating(false);

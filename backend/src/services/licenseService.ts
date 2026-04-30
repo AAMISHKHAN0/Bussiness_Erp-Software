@@ -18,16 +18,13 @@ interface LicenseKeyInfo {
  * Pre-generated keys with tiers.
  * In Phase 2, these will be migrated to the PostgreSQL 'licenses' table.
  */
-const LICENSE_KEYS: Record<string, LicenseKeyInfo> = {
-    // Demo/Development Key (from README)
-    'YER-A1B2-C3D4-E5F6': { tier: '1 Year', duration: MS_DAY * 365, used: false },
-    // New 2026 Premium Keys
-    'COMPANY1-ERP-KEY': { tier: '1 Year', duration: MS_DAY * 365, used: false },
-    'COMPANY2-ERP-KEY': { tier: '1 Year', duration: MS_DAY * 365, used: false },
-    // Additional tier keys
-    'DAY-TEST-KEY-001': { tier: 'Day', duration: MS_DAY * 1, used: false },
-    'MONTH-TEST-KEY-001': { tier: 'Month', duration: MS_DAY * 30, used: false },
-    'QUARTER-TEST-KEY-001': { tier: 'Quarter', duration: MS_DAY * 90, used: false },
+    // 2026 Premium Keys
+    'YER-A1B2-C3D4-E5F6': { tier: '1 Year', duration: MS_DAY * 365, used: true },
+    'YER-K8L9-M0N1-P2Q3': { tier: '1 Year', duration: MS_DAY * 365, used: false },
+    'YER-R4S5-T6U7-V8W9': { tier: '1 Year', duration: MS_DAY * 365, used: false },
+    'MON-B2C3-D4E5-F6G7': { tier: '1 Month', duration: MS_DAY * 30, used: false },
+    'MON-H8I9-J0K1-L2M3': { tier: '1 Month', duration: MS_DAY * 30, used: false },
+    'DAY-Z1X2-C3V4-B5N6': { tier: '1 Day', duration: MS_DAY * 1, used: false },
 };
 
 export class LicenseService {
