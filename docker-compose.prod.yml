@@ -8,12 +8,13 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-erp_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_this_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-erp_secure_2026}
       POSTGRES_DB: ${DB_NAME:-erp_production}
     ports:
       - "127.0.0.1:5432:5432"  # Bind to localhost only for security
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - ./backups:/backups
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-erp_user}"]
@@ -37,25 +38,26 @@ services:
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-erp_production}
       DB_USER: ${DB_USER:-erp_user}
-      DB_PASSWORD: ${DB_PASSWORD:-change_this_password}
-      JWT_SECRET: ${JWT_SECRET:-change_this_to_a_strong_secret_min_32_chars}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_this_to_another_strong_secret_min_32_chars}
+      DB_PASSWORD: ${DB_PASSWORD:-erp_secure_2026}
+      JWT_SECRET: ${JWT_SECRET:-kinetic_vault_erp_jwt_secret_2026_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-kinetic_vault_erp_refresh_secret_2026_production}
       JWT_EXPIRY: 15m
       JWT_REFRESH_EXPIRY: 7d
-      CORS_ORIGIN: ${CORS_ORIGIN:-https://your-domain.com}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://187.127.225.30}
       RATE_LIMIT_WINDOW_MS: 900000
       RATE_LIMIT_MAX_REQUESTS: 100
       LOG_LEVEL: info
-      ALLOW_DB_MOCK_FALLBACK: false
+      ALLOW_DB_MOCK_FALLBACK: "false"
       LICENSE_FILE_PATH: /app/license.json
     ports:
       - "127.0.0.1:5000:5000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - backend_logs:/app/logs
       - ./uploads:/app/uploads
-      - ./license.json:/app/license.json
+      - license_data:/app
     networks:
       - erp_network
 
@@ -81,6 +83,7 @@ services:
 volumes:
   postgres_data:
   backend_logs:
+  license_data:
 
 networks:
   erp_network:
