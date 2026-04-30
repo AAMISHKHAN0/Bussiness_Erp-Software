@@ -18,6 +18,7 @@ interface LicenseKeyInfo {
  * Pre-generated keys with tiers.
  * In Phase 2, these will be migrated to the PostgreSQL 'licenses' table.
  */
+const LICENSE_KEYS: Record<string, LicenseKeyInfo> = {
     // 2026 Premium Keys
     'YER-A1B2-C3D4-E5F6': { tier: '1 Year', duration: MS_DAY * 365, used: true },
     'YER-K8L9-M0N1-P2Q3': { tier: '1 Year', duration: MS_DAY * 365, used: false },
