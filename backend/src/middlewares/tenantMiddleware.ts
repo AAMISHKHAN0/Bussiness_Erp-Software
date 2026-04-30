@@ -39,7 +39,12 @@ export const tenantMiddleware = async (req: Request, res: Response, next: NextFu
         }
 
         if (!identifier) {
-            if (env.allowDbMockFallback) {
+            const isIPHost = host && /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(host.split(':')[0]);
+            if (isIPHost) {
+                logger.info(`Detected IP access (${host}). Falling back to 'default' tenant.`);
+                identifier = 'default';
+                isSlug = true;
+            } else if (env.allowDbMockFallback) {
                 logger.info('⚠️ [MockDB] No tenant context found. Using default mock tenant.');
                 identifier = 'mock-default';
                 isSlug = true;

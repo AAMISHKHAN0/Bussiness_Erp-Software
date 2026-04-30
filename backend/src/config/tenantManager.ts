@@ -96,6 +96,9 @@ export const getTenantPool = async (identifier: string, isSlug = false): Promise
         }
 
         logger.info(`Initializing new DB connection pool for tenant: ${tenant.slug}`);
+        const isLocalTenant = tenant.db_host === 'localhost' || tenant.db_host === '127.0.0.1' || tenant.db_host === 'db';
+        const useSSLTenant = !isLocalTenant || tenant.db_host.includes('supabase.co');
+
         const pool = new Pool({
             host: tenant.db_host,
             database: tenant.db_name,
@@ -104,6 +107,7 @@ export const getTenantPool = async (identifier: string, isSlug = false): Promise
             max: 10,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 5000,
+            ssl: useSSLTenant ? { rejectUnauthorized: false } : false,
         });
 
         pool.on('error', (err: Error) => {
