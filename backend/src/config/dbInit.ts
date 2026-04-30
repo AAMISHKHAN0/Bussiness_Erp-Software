@@ -146,7 +146,7 @@ export const initializeDatabase = async (): Promise<boolean> => {
         // Default tenant for IP-based access
         const tenantCheck = await masterPool.query(`SELECT id FROM companies WHERE slug = 'default' LIMIT 1`);
         if (tenantCheck.rows.length === 0) {
-            const { env } = await import('./env');
+            const { env } = await import('./env.js');
             await masterPool.query(`
                 INSERT INTO companies (name, slug, db_name, db_host, db_user, encrypted_password, plan, status)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)

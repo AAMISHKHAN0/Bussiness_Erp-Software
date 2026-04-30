@@ -63,7 +63,7 @@ router.use('/files', fileRoutes);
 router.get('/health', async (req, res) => {
     let dbStatus = 'DISCONNECTED';
     try {
-        const { masterPool } = await import('../../config/db');
+        const { masterPool } = await import('../../config/db.js');
         const result = await masterPool.query('SELECT NOW()');
         if (result.rows.length > 0) {
             dbStatus = 'CONNECTED';
