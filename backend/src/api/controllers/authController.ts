@@ -20,19 +20,20 @@ export class AuthController {
             // Use tenant database if available, otherwise use master query (with mock fallback)
             const db = req.tenantDb || { query: masterQuery } as any;
             const loginResult = await AuthService.login(db, email, password);
-            const isProduction = process.env.NODE_ENV === 'production';
+            // Dynamically check if the connection is HTTPS
+            const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
 
             // Set secure session tokens as HTTP-only cookies
             res.cookie('accessToken', loginResult.tokens.accessToken, {
                 httpOnly: true,
-                secure: isProduction,
+                secure: isSecure,
                 sameSite: 'lax', // Support multi-tenant subdomains
                 maxAge: 15 * 60 * 1000 // 15 mins
             });
 
             res.cookie('refreshToken', loginResult.tokens.refreshToken, {
                 httpOnly: true,
-                secure: isProduction,
+                secure: isSecure,
                 sameSite: 'lax',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
@@ -102,15 +103,25 @@ export class AuthController {
             // Use tenant database if available, otherwise use master query (with mock fallback)
             const db = req.tenantDb || { query: masterQuery } as any;
             const tokens = await AuthService.refreshToken(db, refreshToken);
-            const isProduction = process.env.NODE_ENV === 'production';
+            // Dynamically check if the connection is HTTPS
+            const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
 
             // Set the new access token
             res.cookie('accessToken', tokens.accessToken, {
                 httpOnly: true,
-                secure: isProduction,
+                secure: isSecure,
                 sameSite: 'lax',
-                maxAge: 15 * 60 * 1000
+                maxAge: 15 * 60 * 1000 // 15 mins
             });
+
+            if (tokens.refreshToken) {
+                res.cookie('refreshToken', tokens.refreshToken, {
+                    httpOnly: true,
+                    secure: isSecure,
+                    sameSite: 'lax',
+                    maxAge: 7 * 24 * 60 * 60 * 1000
+                });
+            }
 
             res.json({
                 success: true,
