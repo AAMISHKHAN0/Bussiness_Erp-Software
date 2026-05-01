@@ -47,7 +47,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
         if (savedLogo) {
             setLogoUrl(savedLogo);
         } else {
-            setLogoUrl(new URL('../../public/logo.png', import.meta.url).href);
+            setLogoUrl('/logo.png');
         }
     }, []);
 
