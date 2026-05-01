@@ -181,6 +181,144 @@ export const initializeDatabase = async (): Promise<boolean> => {
             );
         `);
 
+        // Additional Missing Tables
+        await masterPool.query(`
+            CREATE TABLE IF NOT EXISTS suppliers (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name VARCHAR(255) NOT NULL,
+                company_name VARCHAR(255),
+                contact_person VARCHAR(255),
+                email VARCHAR(255),
+                phone VARCHAR(50),
+                address TEXT,
+                city VARCHAR(100),
+                country VARCHAR(100),
+                tax_id VARCHAR(100),
+                payment_terms VARCHAR(100),
+                notes TEXT,
+                branch_id UUID,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS product_categories (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                parent_id UUID,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS sales_order_items (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                sales_order_id UUID REFERENCES sales_orders(id) ON DELETE CASCADE,
+                product_id UUID REFERENCES products(id),
+                quantity INTEGER DEFAULT 1,
+                unit_price DECIMAL(12,2) DEFAULT 0,
+                total DECIMAL(12,2) DEFAULT 0,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS accounts (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                code VARCHAR(100) NOT NULL,
+                name VARCHAR(255) NOT NULL,
+                type VARCHAR(100),
+                category VARCHAR(100),
+                parent_id UUID,
+                description TEXT,
+                balance DECIMAL(12,2) DEFAULT 0,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS journal_entries (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                entry_date DATE NOT NULL,
+                reference_number VARCHAR(255),
+                description TEXT,
+                total_amount DECIMAL(12,2),
+                created_by UUID,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS journal_entry_lines (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                journal_entry_id UUID REFERENCES journal_entries(id) ON DELETE CASCADE,
+                account_id UUID REFERENCES accounts(id),
+                debit_amount DECIMAL(12,2) DEFAULT 0,
+                credit_amount DECIMAL(12,2) DEFAULT 0,
+                description TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS transactions (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                transaction_date DATE NOT NULL,
+                description TEXT,
+                amount DECIMAL(12,2),
+                account_id UUID REFERENCES accounts(id),
+                type VARCHAR(50),
+                reference_type VARCHAR(100),
+                reference_id UUID,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS audit_logs (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID,
+                action VARCHAR(255),
+                entity VARCHAR(255),
+                entity_id UUID,
+                details JSONB,
+                ip_address VARCHAR(100),
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS attendance (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                employee_id UUID REFERENCES employees(id),
+                date DATE NOT NULL,
+                status VARCHAR(50),
+                check_in TIMESTAMP WITH TIME ZONE,
+                check_out TIMESTAMP WITH TIME ZONE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS payroll (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                employee_id UUID REFERENCES employees(id),
+                month VARCHAR(20),
+                year INTEGER,
+                basic_salary DECIMAL(12,2) DEFAULT 0,
+                allowances DECIMAL(12,2) DEFAULT 0,
+                deductions DECIMAL(12,2) DEFAULT 0,
+                net_salary DECIMAL(12,2) DEFAULT 0,
+                status VARCHAR(50) DEFAULT 'Pending',
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // Create Views for Reports
+        await masterPool.query(`
+            CREATE OR REPLACE VIEW sales_trends AS
+            SELECT 
+                DATE_TRUNC('month', order_date) as month,
+                SUM(total_amount) as total_sales
+            FROM sales_orders
+            GROUP BY DATE_TRUNC('month', order_date);
+
+            CREATE OR REPLACE VIEW inventory_summaries AS
+            SELECT 
+                p.category,
+                SUM(i.quantity) as total_quantity,
+                SUM(i.quantity * p.price) as total_value
+            FROM products p
+            LEFT JOIN inventory i ON p.id = i.product_id
+            GROUP BY p.category;
+        `);
+
         // ─── Seed default data if missing ───
         // Default role
         const roleCheck = await masterPool.query(`SELECT id FROM roles WHERE name = 'Super Admin' LIMIT 1`);
