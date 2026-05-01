@@ -88,6 +88,59 @@ export const initializeDatabase = async (): Promise<boolean> => {
             );
         `);
 
+        // Safely add min_stock_level to existing products table
+        await masterPool.query(`
+            ALTER TABLE products ADD COLUMN IF NOT EXISTS min_stock_level INTEGER DEFAULT 10;
+        `);
+
+        await masterPool.query(`
+            CREATE TABLE IF NOT EXISTS inventory (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+                quantity INTEGER DEFAULT 0,
+                location VARCHAR(100),
+                last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        await masterPool.query(`
+            CREATE TABLE IF NOT EXISTS sales_orders (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                order_number VARCHAR(50) UNIQUE NOT NULL,
+                customer_id UUID REFERENCES customers(id),
+                status VARCHAR(50) DEFAULT 'Pending',
+                total_amount DECIMAL(12,2) DEFAULT 0,
+                order_date DATE DEFAULT CURRENT_DATE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        await masterPool.query(`
+            CREATE TABLE IF NOT EXISTS purchase_orders (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                po_number VARCHAR(50) UNIQUE NOT NULL,
+                status VARCHAR(50) DEFAULT 'Pending',
+                total_amount DECIMAL(12,2) DEFAULT 0,
+                order_date DATE DEFAULT CURRENT_DATE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        await masterPool.query(`
+            CREATE TABLE IF NOT EXISTS employees (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                first_name VARCHAR(100) NOT NULL,
+                last_name VARCHAR(100) NOT NULL,
+                email VARCHAR(255) UNIQUE,
+                department VARCHAR(100),
+                position VARCHAR(100),
+                salary DECIMAL(12,2) DEFAULT 0,
+                hire_date DATE,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
         await masterPool.query(`
             CREATE TABLE IF NOT EXISTS invoices (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
