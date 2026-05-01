@@ -347,11 +347,19 @@ export const initializeDatabase = async (): Promise<boolean> => {
                 env.db.name, 
                 'postgres', // In docker network
                 env.db.user, 
-                env.db.password, // Raw password is fine now because decrypt() handles it
+                env.db.password, 
                 'enterprise',
                 'active'
             ]);
             logger.info('  ✅ Created default tenant');
+        } else {
+            // FORCE update host for existing 'default' tenant to fix stale Supabase connections
+            await masterPool.query(`
+                UPDATE companies 
+                SET db_host = 'postgres' 
+                WHERE slug = 'default' AND db_host LIKE '%supabase.co%'
+            `);
+            logger.info('  ✅ Verified/Fixed default tenant host');
         }
 
         // Default admin user
@@ -380,6 +388,7 @@ export const initializeDatabase = async (): Promise<boolean> => {
         return true;
 
     } catch (error: any) {
+        console.error("FULL DB INIT ERROR:", error);
         logger.error('❌ Database initialization failed', { error: error.message });
         return false;
     }
