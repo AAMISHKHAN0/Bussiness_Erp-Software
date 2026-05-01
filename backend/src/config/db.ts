@@ -4,7 +4,7 @@ import { logger } from '../utils/logger';
 import { handleMockQuery } from '../utils/mockDb';
 
 // Pool configuration with production-ready settings
-const isLocal = env.db.host === 'localhost' || env.db.host === '127.0.0.1' || env.db.host === 'db';
+const isLocal = env.db.host === 'localhost' || env.db.host === '127.0.0.1' || env.db.host === 'db' || env.db.host === 'postgres';
 const useSSL = !isLocal || env.db.host.includes('supabase.co');
 
 export const masterPool = new Pool({

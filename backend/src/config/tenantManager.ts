@@ -99,7 +99,7 @@ export const getTenantPool = async (identifier: string, isSlug = false): Promise
         }
 
         logger.info(`Initializing new DB connection pool for tenant: ${tenant.slug}`);
-        const isLocalTenant = tenant.db_host === 'localhost' || tenant.db_host === '127.0.0.1' || tenant.db_host === 'db';
+        const isLocalTenant = tenant.db_host === 'localhost' || tenant.db_host === '127.0.0.1' || tenant.db_host === 'db' || tenant.db_host === 'postgres';
         const useSSLTenant = !isLocalTenant || tenant.db_host.includes('supabase.co');
 
         const pool = new Pool({
