@@ -12,9 +12,11 @@ export const tenantMiddleware = async (req: Request, res: Response, next: NextFu
         let identifier: string | undefined;
         let isSlug = false;
 
-        // 1. Subdomain Extraction
         const host = req.headers.host;
-        if (host) {
+        const isIPHost = host && /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?::[0-9]+)?$/.test(host);
+
+        // 1. Subdomain Extraction (Skip if accessing via IP address)
+        if (host && !isIPHost) {
             const parts = host.split('.');
             if (parts.length > 2 || (parts.length === 2 && parts[1].startsWith('localhost'))) {
                 identifier = parts[0];
@@ -39,7 +41,6 @@ export const tenantMiddleware = async (req: Request, res: Response, next: NextFu
         }
 
         if (!identifier) {
-            const isIPHost = host && /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(host.split(':')[0]);
             if (isIPHost) {
                 logger.info(`Detected IP access (${host}). Falling back to 'default' tenant.`);
                 identifier = 'default';
