@@ -183,14 +183,14 @@
       "unit": "Units",
       "purchase_price": 3450,
       "selling_price": 5890,
-      "quantity": 38,
+      "quantity": 41,
       "min_stock_level": 8,
       "location": "Warehouse Bay A-04",
       "supplier_name": "Ingram Micro Global Distribution",
       "supplier_id": "sup-3",
       "status": "In Stock",
       "is_active": true,
-      "updated_at": "2026-09-09T08:41:31.016Z"
+      "updated_at": "2026-09-09T09:10:43.663Z"
     },
     {
       "id": "p-2",
@@ -348,10 +348,10 @@
       "address": "200 South Wacker Drive, Suite 1800, Chicago, IL 60606",
       "tax_number": "US-IL-992104",
       "credit_limit": 75000,
-      "total_spent": 99072.8,
-      "current_balance": 26922.8,
+      "total_spent": 111745.6,
+      "current_balance": 39595.6,
       "status": "Active",
-      "updated_at": "2026-09-09T08:41:30.386Z"
+      "updated_at": "2026-09-09T09:10:41.617Z"
     },
     {
       "id": "cust-2",
@@ -478,6 +478,36 @@
     }
   ],
   "sales_orders": [
+    {
+      "id": "sal-1788945041612-844",
+      "created_at": "2026-09-09T09:10:41.612Z",
+      "updated_at": "2026-09-09T09:10:41.612Z",
+      "order_number": "SO-2026-6294",
+      "customer_id": "cust-1",
+      "customer_name": "Apex Logistics International",
+      "branch_id": "b-1",
+      "order_date": "2026-09-09",
+      "due_date": "2026-09-23",
+      "status": "Confirmed",
+      "total_amount": 11780,
+      "tax_amount": 992.8,
+      "discount_amount": 100,
+      "net_amount": 12672.8,
+      "payment_status": "Pending",
+      "payment_method": "Net-30 Invoice",
+      "notes": "",
+      "created_by": "Authorized Sales Agent",
+      "items": [
+        {
+          "product_id": "p-1",
+          "name": "HPE ProLiant DL380 Gen11 2U Server",
+          "sku": "HPE-DL380-G11",
+          "quantity": 2,
+          "unit_price": 5890,
+          "total": 11780
+        }
+      ]
+    },
     {
       "id": "sal-1788943290385-710",
       "created_at": "2026-09-09T08:41:30.385Z",
@@ -624,6 +654,32 @@
   ],
   "purchase_orders": [
     {
+      "id": "pur-1788945043550-947",
+      "created_at": "2026-09-09T09:10:43.550Z",
+      "updated_at": "2026-09-09T09:10:43.667Z",
+      "order_number": "PO-2026-3474",
+      "supplier_id": "sup-2",
+      "supplier_name": "Dell Technologies Enterprise Channel",
+      "branch_id": "b-1",
+      "order_date": "2026-09-09",
+      "expected_delivery_date": "2026-09-25",
+      "status": "Received",
+      "total_amount": 17250,
+      "payment_status": "Paid",
+      "notes": "",
+      "created_by": "Procurement Director",
+      "items": [
+        {
+          "product_id": "p-1",
+          "name": "HPE ProLiant DL380 Gen11 2U Server",
+          "quantity": 5,
+          "unit_price": 3450,
+          "total": 17250
+        }
+      ],
+      "received_at": "2026-09-09T09:10:43.667Z"
+    },
+    {
       "id": "pur-1788943290951-558",
       "created_at": "2026-09-09T08:41:30.951Z",
       "updated_at": "2026-09-09T08:41:31.017Z",
@@ -730,9 +786,9 @@
       "name": "Operating Checking Account (Chase)",
       "type": "Asset",
       "category": "Current Assets",
-      "balance": 427500,
+      "balance": 442500,
       "is_active": true,
-      "updated_at": "2026-09-09T08:41:31.638Z"
+      "updated_at": "2026-09-09T09:10:46.107Z"
     },
     {
       "id": "acc-1020",
@@ -821,9 +877,9 @@
       "name": "Commercial Hardware Sales Revenue",
       "type": "Revenue",
       "category": "Operating Revenue",
-      "balance": 501200,
+      "balance": 516200,
       "is_active": true,
-      "updated_at": "2026-09-09T08:41:31.639Z"
+      "updated_at": "2026-09-09T09:10:46.108Z"
     },
     {
       "id": "acc-4020",
@@ -881,6 +937,29 @@
     }
   ],
   "journal_entries": [
+    {
+      "id": "jou-1788945046110-78",
+      "created_at": "2026-09-09T09:10:46.110Z",
+      "updated_at": "2026-09-09T09:10:46.110Z",
+      "entry_number": "JE-2026-9588",
+      "entry_date": "2026-09-09",
+      "reference_number": "REF-CAP-99",
+      "description": "Q3 Enterprise Software & Compute Expansion",
+      "total_amount": 15000,
+      "created_by": "Financial Controller",
+      "lines": [
+        {
+          "account_id": "acc-1010",
+          "debit": 15000,
+          "credit": 0
+        },
+        {
+          "account_id": "acc-4010",
+          "debit": 0,
+          "credit": 15000
+        }
+      ]
+    },
     {
       "id": "jou-1788943291641-555",
       "created_at": "2026-09-09T08:41:31.641Z",
@@ -1066,10 +1145,10 @@
       "employee_id": "emp-101",
       "employee_name": "Alexander Sterling",
       "date": "2026-09-09",
-      "check_in": "13:41",
+      "check_in": "14:10",
       "check_out": "--",
       "status": "Present",
-      "updated_at": "2026-09-09T08:41:32.166Z"
+      "updated_at": "2026-09-09T09:10:47.346Z"
     },
     {
       "id": "att-2",
@@ -1180,6 +1259,56 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1788945047348",
+      "timestamp": "2026-09-09T09:10:47.348Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "ATTENDANCE_CLOCK_IN",
+      "module": "HR",
+      "ip": "127.0.0.1",
+      "details": "Alexander Sterling clocked in at 14:10"
+    },
+    {
+      "id": "log-1788945046112",
+      "timestamp": "2026-09-09T09:10:46.112Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "JOURNAL_ENTRY_POSTED",
+      "module": "Accounting",
+      "ip": "127.0.0.1",
+      "details": "Posted voucher JE-2026-9588 totaling $15000.00"
+    },
+    {
+      "id": "log-1788945043669",
+      "timestamp": "2026-09-09T09:10:43.669Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "GOODS_RECEIPT",
+      "module": "Procurement",
+      "ip": "127.0.0.1",
+      "details": "Received shipment for PO PO-2026-3474. Restocked items."
+    },
+    {
+      "id": "log-1788945043554",
+      "timestamp": "2026-09-09T09:10:43.554Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "PURCHASE_ORDER_CREATED",
+      "module": "Procurement",
+      "ip": "127.0.0.1",
+      "details": "Generated PO PO-2026-3474 to Dell Technologies Enterprise Channel for $17250"
+    },
+    {
+      "id": "log-1788945041622",
+      "timestamp": "2026-09-09T09:10:41.622Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "SALES_ORDER_CREATED",
+      "module": "Sales",
+      "ip": "127.0.0.1",
+      "details": "Created Order SO-2026-6294 for Apex Logistics International totaling $12672.8"
+    },
     {
       "id": "log-1788943292167",
       "timestamp": "2026-09-09T08:41:32.167Z",

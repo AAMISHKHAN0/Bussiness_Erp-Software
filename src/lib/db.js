@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { neon } from '@neondatabase/serverless';
 import { INITIAL_SEED_DATA } from './seedData.js';
 
 // Global reference to preserve database state across Next.js hot-reloads
@@ -10,34 +11,107 @@ class EnterpriseDatabase {
     this.dataDir = path.join(process.cwd(), 'data');
     this.dbFilePath = path.join(this.dataDir, 'erp_database.json');
     this.isLoaded = false;
+    this.neonLoaded = false;
     this.data = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
+    this.sql = null;
+
+    // Detect Cloud Database (Neon / Vercel Postgres)
+    const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+    if (dbUrl) {
+      try {
+        this.sql = neon(dbUrl);
+      } catch (err) {
+        console.warn('[Enterprise DB] Neon client initialization warning:', err.message);
+      }
+    }
+
     this.init();
   }
 
-  init() {
+  async init() {
     if (this.isLoaded) return;
+
+    // 1. Load from local cache or seed if available
     try {
       if (fs.existsSync(this.dbFilePath)) {
         const fileContent = fs.readFileSync(this.dbFilePath, 'utf-8');
         const parsed = JSON.parse(fileContent);
         this.data = { ...this.data, ...parsed };
       } else {
-        this.persist();
+        this.persistLocal();
       }
     } catch (err) {
-      console.warn('[Enterprise DB] Disk persistence notice:', err.message);
+      // In serverless / read-only environments like Vercel Lambda, memory remains authoritative
     }
     this.isLoaded = true;
+
+    // 2. Hydrate from Neon Cloud Postgres if connected
+    if (this.sql) {
+      await this.initNeon();
+    }
   }
 
-  persist() {
+  async initNeon() {
+    if (!this.sql || this.neonLoaded) return;
+    try {
+      // Ensure the collection store table exists
+      await this.sql`
+        CREATE TABLE IF NOT EXISTS erp_collections (
+          collection_name VARCHAR(100) PRIMARY KEY,
+          data JSONB,
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `;
+
+      const rows = await this.sql`SELECT collection_name, data FROM erp_collections`;
+      if (rows && rows.length > 0) {
+        for (const row of rows) {
+          if (row.collection_name && row.data !== undefined) {
+            this.data[row.collection_name] = row.data;
+          }
+        }
+      } else {
+        // Table exists but is empty - seed all initial collections
+        for (const [col, val] of Object.entries(this.data)) {
+          await this.syncToNeon(col, val);
+        }
+      }
+      this.neonLoaded = true;
+    } catch (err) {
+      console.warn('[Enterprise DB] Neon Cloud Postgres synchronization notice:', err.message);
+    }
+  }
+
+  async syncToNeon(collectionName, value) {
+    if (!this.sql || !collectionName) return;
+    try {
+      const jsonString = JSON.stringify(value);
+      await this.sql`
+        INSERT INTO erp_collections (collection_name, data, updated_at)
+        VALUES (${collectionName}, ${jsonString}::jsonb, NOW())
+        ON CONFLICT (collection_name)
+        DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()
+      `;
+    } catch (err) {
+      console.warn(`[Enterprise DB] Cloud sync failed for collection ${collectionName}:`, err.message);
+    }
+  }
+
+  persistLocal() {
     try {
       if (!fs.existsSync(this.dataDir)) {
         fs.mkdirSync(this.dataDir, { recursive: true });
       }
       fs.writeFileSync(this.dbFilePath, JSON.stringify(this.data, null, 2), 'utf-8');
     } catch (err) {
-      // In serverless / read-only environments like Vercel Lambda, memory remains authoritative
+      // Ephemeral disk in serverless runtime
+    }
+  }
+
+  persist(collectionName) {
+    this.persistLocal();
+    if (collectionName && this.data[collectionName]) {
+      this.syncToNeon(collectionName, this.data[collectionName]).catch(() => {});
     }
   }
 
@@ -51,7 +125,7 @@ class EnterpriseDatabase {
 
   updateSettings(updates) {
     this.data.settings = { ...this.data.settings, ...updates };
-    this.persist();
+    this.persist('settings');
     return this.data.settings;
   }
 
@@ -71,7 +145,7 @@ class EnterpriseDatabase {
       ...item,
     };
     this.data[collectionName].unshift(newItem);
-    this.persist();
+    this.persist(collectionName);
     return newItem;
   }
 
@@ -79,13 +153,13 @@ class EnterpriseDatabase {
     const list = this.get(collectionName);
     const index = list.findIndex((item) => String(item.id) === String(id));
     if (index === -1) return null;
-    
+
     this.data[collectionName][index] = {
       ...this.data[collectionName][index],
       ...updates,
       updated_at: new Date().toISOString(),
     };
-    this.persist();
+    this.persist(collectionName);
     return this.data[collectionName][index];
   }
 
@@ -94,7 +168,7 @@ class EnterpriseDatabase {
     const index = list.findIndex((item) => String(item.id) === String(id));
     if (index === -1) return false;
     this.data[collectionName].splice(index, 1);
-    this.persist();
+    this.persist(collectionName);
     return true;
   }
 
@@ -111,13 +185,18 @@ class EnterpriseDatabase {
     };
     if (!this.data.audit_logs) this.data.audit_logs = [];
     this.data.audit_logs.unshift(logItem);
-    this.persist();
+    this.persist('audit_logs');
     return logItem;
   }
 
-  resetToSeed() {
+  async resetToSeed() {
     this.data = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
-    this.persist();
+    this.persistLocal();
+    if (this.sql) {
+      for (const [col, val] of Object.entries(this.data)) {
+        await this.syncToNeon(col, val);
+      }
+    }
     return true;
   }
 }
