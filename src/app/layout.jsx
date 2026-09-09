@@ -3,8 +3,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 
 export const metadata = {
-  title: 'Global Enterprise ERP | Cloud Resource Planning Suite',
-  description: 'Enterprise Resource Planning, Multi-Warehouse Inventory, GAAP Double-Entry Accounting, Procurement, and HR Management',
+  title: 'Nexis ERP | Enterprise Operating Cloud',
+  description: 'The intelligent operating system for modern commerce: Multi-Warehouse Inventory, GAAP Double-Entry Accounting, B2B Procurement, and Real-Time Business Intelligence',
 };
 
 export default function RootLayout({ children }) {

@@ -14,6 +14,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import CommandPalette from '@/components/common/CommandPalette';
 
+import NexisLogo from '@/components/common/NexisLogo';
+
 const NAV_ITEMS = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Inventory & Items', href: '/inventory', icon: Package, badge: 'Stock' },
@@ -109,21 +111,13 @@ export default function AppShell({ children }) {
         } ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         {/* Brand / Logo Header */}
-        <div className="h-16 flex items-center justify-between px-3.5 border-b border-slate-200 bg-white">
+        <div className="h-16 flex items-center justify-between px-3 border-b border-slate-200 bg-white">
           <Link 
             href="/dashboard" 
-            className={`flex items-center gap-3 overflow-hidden ${sidebarCollapsed ? 'justify-center w-full' : ''}`}
-            title="Global Enterprise ERP Suite"
+            className={`flex items-center gap-2.5 overflow-hidden ${sidebarCollapsed ? 'justify-center w-full' : ''}`}
+            title="Nexis ERP Enterprise Operating Cloud"
           >
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-black text-lg text-white shadow-sm flex-shrink-0">
-              G
-            </div>
-            {!sidebarCollapsed && (
-              <div className="leading-tight overflow-hidden">
-                <span className="font-extrabold text-sm tracking-tight text-slate-900 block truncate">Global ERP</span>
-                <span className="text-[11px] font-semibold text-blue-600 tracking-normal block truncate">Enterprise Suite</span>
-              </div>
-            )}
+            <NexisLogo size="md" showText={!sidebarCollapsed} />
           </Link>
 
           {/* Minimize toggle inside sidebar */}
