@@ -237,7 +237,7 @@ export async function POST(request) {
     db.logAudit(
       'SALES_ORDER_CREATED',
       'Sales',
-      `Generated Order ${orderNumber} for ${customer.name} totaling ${settings.currency_symbol || '$'}${netAmount.toLocaleString()}`,
+      `Generated Order ${orderNumber} for ${customer.name} totaling ${settings.currency_symbol || 'Rs. '}${netAmount.toLocaleString()}`,
       user,
       clientIp
     );

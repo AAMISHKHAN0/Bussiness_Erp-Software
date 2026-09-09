@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { name: 'Vendors', href: '/vendors', icon: Building2 },
   { name: 'Accounting', href: '/accounting', icon: Calculator, badge: 'GAAP' },
   { name: 'HR & Payroll', href: '/hr', icon: UserCheck },
-  { name: 'Analytics & Reports', href: '/analytics', icon: BarChart3, badge: 'Reports' },
+  { name: 'Reports & Analytics', href: '/analytics', icon: BarChart3, badge: 'Reports' },
   { name: 'Audit Logs', href: '/audit-logs', icon: ShieldAlert },
   { name: 'System Settings', href: '/admin', icon: Settings },
 ];
@@ -148,23 +148,29 @@ export default function AppShell({ children }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileSidebarOpen(false)}
-                className={`flex items-center rounded-lg text-sm transition-colors group relative ${
-                  sidebarCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3.5 py-2.5'
+                className={`flex items-center rounded-lg text-xs transition-colors group relative h-10 select-none ${
+                  sidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'
                 } ${
                   isActive 
-                    ? 'bg-blue-600 text-white font-semibold shadow-sm' 
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium'
+                    ? 'bg-blue-600 text-white font-bold shadow-xs' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-semibold'
                 }`}
-                title={sidebarCollapsed ? item.name : undefined}
               >
-                <Icon size={19} className={isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-600 transition-colors flex-shrink-0'} />
-                {!sidebarCollapsed && (
-                  <span className="flex-1 whitespace-nowrap truncate">{item.name}</span>
-                )}
-                {!sidebarCollapsed && item.badge && !isActive && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                    {item.badge}
-                  </span>
+                <Icon size={18} className={isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-600 transition-colors flex-shrink-0'} />
+                {!sidebarCollapsed ? (
+                  <>
+                    <span className="flex-1 whitespace-nowrap truncate">{item.name}</span>
+                    {item.badge && !isActive && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                        {item.badge}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  /* Floating tooltip on collapsed state */
+                  <div className="absolute left-full ml-2.5 px-2.5 py-1 bg-slate-900 text-white text-xs font-semibold rounded-md shadow-lg whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                    {item.name}
+                  </div>
                 )}
               </Link>
             );
@@ -292,8 +298,8 @@ export default function AppShell({ children }) {
                       <p className="text-[11px] text-slate-600 mt-0.5">Dispatched to Apex Logistics International.</p>
                     </div>
                     <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
-                      <p className="font-bold text-slate-900">ACH Settlement: $36,661.25</p>
-                      <p className="text-[11px] text-slate-600 mt-0.5">Remittance posted from Morgan & Sterling.</p>
+                      <p className="font-bold text-slate-900">RTGS Settlement: Rs. 7,398,000</p>
+                      <p className="text-[11px] text-slate-600 mt-0.5">Corporate remittance cleared via Habib Bank Ltd.</p>
                     </div>
                   </div>
                 </div>

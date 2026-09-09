@@ -54,7 +54,7 @@ export class AccountingEngine {
 
     if (Math.abs(totalDebit - totalCredit) > 0.01) {
       throw new Error(
-        `GAAP Imbalance: Total Debits ($${totalDebit.toFixed(2)}) must equal Total Credits ($${totalCredit.toFixed(2)}). Difference: $${Math.abs(totalDebit - totalCredit).toFixed(2)}`
+        `GAAP Imbalance: Total Debits (Rs. ${totalDebit.toFixed(2)}) must equal Total Credits (Rs. ${totalCredit.toFixed(2)}). Difference: Rs. ${Math.abs(totalDebit - totalCredit).toFixed(2)}`
       );
     }
 
@@ -94,7 +94,7 @@ export class AccountingEngine {
     db.logAudit(
       'JOURNAL_POSTING',
       'Accounting',
-      `Posted double-entry voucher ${entryNumber} (${referenceType || 'GEN'} ${referenceNumber}) totaling $${totalDebit.toLocaleString()}`,
+      `Posted double-entry voucher ${entryNumber} (${referenceType || 'GEN'} ${referenceNumber}) totaling Rs. ${totalDebit.toLocaleString()}`,
       user
     );
 

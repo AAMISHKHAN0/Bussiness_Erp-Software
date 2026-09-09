@@ -9,6 +9,7 @@ import {
   PackageCheck, Loader2, Trash2, RefreshCw, Download,
   Check, XCircle, AlertTriangle, ShieldCheck
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 
 export default function PurchasesPage() {
   const toast = useToast();
@@ -22,7 +23,7 @@ export default function PurchasesPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState('');
   const [expectedDate, setExpectedDate] = useState('');
-  const [lineItems, setLineItems] = useState([{ product_id: '', quantity: 10, unit_price: 1500 }]);
+  const [lineItems, setLineItems] = useState([{ product_id: '', quantity: 10, unit_price: 320000 }]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -140,7 +141,7 @@ export default function PurchasesPage() {
       const json = await res.json();
       if (json.success) {
         if (json.approval_required) {
-          toast.info(`Purchase Order submitted! Amount exceeds $10,000 threshold and is queued for executive approval.`);
+          toast.info(`Purchase Order submitted! Amount exceeds corporate threshold and is queued for executive authorization.`);
         } else {
           toast.success(`Purchase Order generated successfully`);
         }
@@ -223,26 +224,26 @@ export default function PurchasesPage() {
       </div>
 
       {/* Metrics Banner */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs h-28 flex flex-col justify-between">
           <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Procurement Value</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">${totalProcurement.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">{orders.length} total purchase orders</p>
+          <p className="text-2xl font-extrabold text-slate-900 tabular-nums">{formatCurrency(totalProcurement)}</p>
+          <p className="text-[10px] text-slate-400">{orders.length} total purchase orders</p>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs h-28 flex flex-col justify-between">
           <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Goods Received & Restocked</p>
-          <p className="text-2xl font-extrabold text-emerald-600 mt-1">${receivedVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">Capitalized to Inventory #1200</p>
+          <p className="text-2xl font-extrabold text-emerald-600 tabular-nums">{formatCurrency(receivedVolume)}</p>
+          <p className="text-[10px] text-slate-400">Capitalized to Inventory #1200</p>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs h-28 flex flex-col justify-between">
           <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Inbound Transit / Pending</p>
-          <p className="text-2xl font-extrabold text-amber-600 mt-1">${pendingVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">Expected delivery this month</p>
+          <p className="text-2xl font-extrabold text-amber-600 tabular-nums">{formatCurrency(pendingVolume)}</p>
+          <p className="text-[10px] text-slate-400">Expected delivery this month</p>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs h-28 flex flex-col justify-between">
           <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Supply Partners</p>
-          <p className="text-2xl font-extrabold text-blue-600 mt-1">{suppliers.length}</p>
-          <p className="text-[10px] text-slate-400 mt-1">Direct enterprise distributors</p>
+          <p className="text-2xl font-extrabold text-blue-600 tabular-nums">{suppliers.length}</p>
+          <p className="text-[10px] text-slate-400">Direct enterprise distributors</p>
         </div>
       </div>
 
@@ -294,7 +295,7 @@ export default function PurchasesPage() {
                     <td className="py-3.5 px-4 text-slate-500 font-medium">{po.order_date}</td>
                     <td className="py-3.5 px-4 text-slate-500 font-medium">{po.expected_delivery_date || 'Pending'}</td>
                     <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
-                      ${parseFloat(po.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {formatCurrency(po.total_amount)}
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
@@ -397,7 +398,7 @@ export default function PurchasesPage() {
               <button
                 type="button"
                 onClick={addLine}
-                className="text-blue-600 hover:text-blue-800 font-bold text-xs flex items-center gap-1"
+                className="text-blue-600 hover:text-blue-800 font-bold text-xs flex items-center gap-1 cursor-pointer"
               >
                 <Plus size={14} /> Add Item
               </button>
@@ -420,7 +421,7 @@ export default function PurchasesPage() {
                   >
                     <option value="" disabled>Select SKU to procure...</option>
                     {products.map(p => (
-                      <option key={p.id} value={p.id}>{p.name} (Cost: ${p.purchase_price})</option>
+                      <option key={p.id} value={p.id}>{p.name} (Cost: {formatCurrency(p.purchase_price)})</option>
                     ))}
                   </select>
                 </div>
@@ -441,14 +442,14 @@ export default function PurchasesPage() {
                 </div>
 
                 <div className="w-28 text-right font-mono font-bold text-slate-900">
-                  ${(Number(item.quantity) * Number(item.unit_price)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  {formatCurrency(Number(item.quantity) * Number(item.unit_price))}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => removeLine(idx)}
                   disabled={lineItems.length === 1}
-                  className="p-1 text-slate-400 hover:text-red-600 disabled:opacity-30"
+                  className="p-1 text-slate-400 hover:text-red-600 disabled:opacity-30 cursor-pointer"
                 >
                   <Trash2 size={15} />
                 </button>

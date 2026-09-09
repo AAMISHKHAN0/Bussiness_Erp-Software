@@ -9,6 +9,7 @@ import {
   Search, CheckCircle2, AlertCircle, Scale, 
   TrendingUp, Loader2, RefreshCw, Trash2 
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 
 export default function AccountingPage() {
   const toast = useToast();
@@ -278,7 +279,7 @@ export default function AccountingPage() {
                           </td>
                           <td className="py-3 px-4 text-slate-600 font-medium">{acc.category}</td>
                           <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 text-sm tabular-nums">
-                            ${parseFloat(acc.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            {formatCurrency(acc.balance)}
                           </td>
                         </tr>
                       ))}
@@ -335,10 +336,10 @@ export default function AccountingPage() {
                                   {line.account_name || `Account ID: ${line.account_id}`}
                                 </td>
                                 <td className="py-1.5 text-right font-mono font-bold text-emerald-600 tabular-nums">
-                                  {Number(line.debit) > 0 ? `$${Number(line.debit).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                                  {Number(line.debit) > 0 ? formatCurrency(line.debit) : '—'}
                                 </td>
                                 <td className="py-1.5 text-right font-mono font-bold text-slate-700 tabular-nums">
-                                  {Number(line.credit) > 0 ? `$${Number(line.credit).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                                  {Number(line.credit) > 0 ? formatCurrency(line.credit) : '—'}
                                 </td>
                               </tr>
                             ))}
@@ -370,7 +371,7 @@ export default function AccountingPage() {
                             <p className="font-bold text-slate-800">{a.name}</p>
                             <p className="text-[10px] font-mono text-slate-400">Code {a.code} · {a.category}</p>
                           </div>
-                          <span className="font-mono font-bold text-sm text-slate-900 tabular-nums">${Number(a.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                          <span className="font-mono font-bold text-sm text-slate-900 tabular-nums">{formatCurrency(a.balance)}</span>
                         </div>
                       ))}
                     </div>
@@ -379,13 +380,12 @@ export default function AccountingPage() {
                   <div className="pt-4 mt-6 border-t-2 border-slate-300 flex justify-between items-center">
                     <span className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">TOTAL ASSETS</span>
                     <span className="text-xl font-extrabold text-blue-600 font-mono tabular-nums">
-                      ${Number(statements.balanceSheet.totalAssets).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      {formatCurrency(statements.balanceSheet.totalAssets)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Liabilities & Equity Section */}
               {/* Liabilities & Equity Section */}
               <div className="double-bezel">
                 <div className="double-bezel-inner h-full flex flex-col justify-between">
@@ -402,7 +402,7 @@ export default function AccountingPage() {
                         {statements.balanceSheet.liabilities.map(l => (
                           <div key={l.id} className="py-2 flex justify-between items-center">
                             <span className="text-slate-700">{l.name}</span>
-                            <span className="font-mono font-bold text-slate-900 tabular-nums">${Number(l.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            <span className="font-mono font-bold text-slate-900 tabular-nums">{formatCurrency(l.balance)}</span>
                           </div>
                         ))}
                       </div>
@@ -415,7 +415,7 @@ export default function AccountingPage() {
                         {statements.balanceSheet.equity.map(e => (
                           <div key={e.id} className="py-2 flex justify-between items-center">
                             <span className="text-slate-700">{e.name}</span>
-                            <span className="font-mono font-bold text-slate-900 tabular-nums">${Number(e.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            <span className="font-mono font-bold text-slate-900 tabular-nums">{formatCurrency(e.balance)}</span>
                           </div>
                         ))}
                       </div>
@@ -425,7 +425,7 @@ export default function AccountingPage() {
                   <div className="pt-4 mt-6 border-t-2 border-slate-300 flex justify-between items-center">
                     <span className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">TOTAL LIAB. + EQUITY</span>
                     <span className="text-xl font-extrabold text-blue-600 font-mono tabular-nums">
-                      ${Number(statements.balanceSheet.totalLiabilities + statements.balanceSheet.totalEquity).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      {formatCurrency(statements.balanceSheet.totalLiabilities + statements.balanceSheet.totalEquity)}
                     </span>
                   </div>
                 </div>
@@ -439,24 +439,24 @@ export default function AccountingPage() {
               <div className="double-bezel-inner !p-8 text-xs space-y-6">
                 <div className="text-center pb-4 border-b border-slate-200">
                   <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-tight">Statement of Profit and Loss (Income Statement)</h2>
-                  <p className="text-slate-500 text-xs mt-1">GAAP Financial Accounting Period 2026 (Currency: USD)</p>
+                  <p className="text-slate-500 text-xs mt-1">GAAP Financial Accounting Period 2026 (Currency: PKR)</p>
                 </div>
 
                 {/* Operating Revenue */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center font-bold text-emerald-700 uppercase text-[11px] tracking-wider">
                     <span>Gross Commercial Revenue</span>
-                    <span>Amount ($)</span>
+                    <span>Amount</span>
                   </div>
                   {statements.incomeStatement.revenue.map(r => (
                     <div key={r.id} className="flex justify-between items-center py-1 text-slate-700">
                       <span>{r.name}</span>
-                      <span className="font-mono font-bold tabular-nums">${Number(r.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      <span className="font-mono font-bold tabular-nums">{formatCurrency(r.balance)}</span>
                     </div>
                   ))}
                   <div className="flex justify-between font-extrabold text-sm pt-2 border-t border-slate-200 text-slate-900">
                     <span>Total Revenue</span>
-                    <span className="text-emerald-600 font-mono tabular-nums">${Number(statements.incomeStatement.totalRevenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="text-emerald-600 font-mono tabular-nums">{formatCurrency(statements.incomeStatement.totalRevenue)}</span>
                   </div>
                 </div>
 
@@ -467,11 +467,11 @@ export default function AccountingPage() {
                   </div>
                   <div className="flex justify-between items-center py-1 text-slate-700">
                     <span>Direct Production & Hardware Acquisition Costs</span>
-                    <span className="font-mono font-bold text-red-600 tabular-nums">-${Number(statements.incomeStatement.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="font-mono font-bold text-red-600 tabular-nums">-{formatCurrency(statements.incomeStatement.cogs)}</span>
                   </div>
                   <div className="flex justify-between font-extrabold text-sm pt-2 border-t border-slate-200 text-slate-900">
                     <span>Gross Profit</span>
-                    <span className="text-blue-600 font-mono tabular-nums">${Number(statements.incomeStatement.grossProfit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="text-blue-600 font-mono tabular-nums">{formatCurrency(statements.incomeStatement.grossProfit)}</span>
                   </div>
                 </div>
 
@@ -483,12 +483,12 @@ export default function AccountingPage() {
                   {statements.incomeStatement.expenses.map(e => (
                     <div key={e.id} className="flex justify-between items-center py-1 text-slate-700">
                       <span>{e.name}</span>
-                      <span className="font-mono tabular-nums">${Number(e.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      <span className="font-mono tabular-nums">{formatCurrency(e.balance)}</span>
                     </div>
                   ))}
                   <div className="flex justify-between font-bold text-slate-800 pt-2 border-t border-slate-200">
                     <span>Total Operating Expenses</span>
-                    <span className="font-mono text-red-600 tabular-nums">-${Number(statements.incomeStatement.totalExpenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span className="font-mono text-red-600 tabular-nums">-{formatCurrency(statements.incomeStatement.totalExpenses)}</span>
                   </div>
                 </div>
 
@@ -496,7 +496,7 @@ export default function AccountingPage() {
                 <div className="pt-4 border-t-2 border-slate-400 flex justify-between items-center text-base font-extrabold">
                   <span className="text-slate-900 uppercase tracking-wider">NET OPERATING PROFIT</span>
                   <span className="text-blue-600 font-mono text-xl tabular-nums">
-                    ${Number(statements.incomeStatement.netIncome).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    {formatCurrency(statements.incomeStatement.netIncome)}
                   </span>
                 </div>
               </div>
@@ -518,7 +518,7 @@ export default function AccountingPage() {
                   </span>
                 </div>
                 <div className="font-mono font-bold tabular-nums">
-                  Dr: ${Number(statements.trialBalance.totalDebits).toLocaleString()} · Cr: ${Number(statements.trialBalance.totalCredits).toLocaleString()}
+                  Dr: {formatCurrency(statements.trialBalance.totalDebits)} · Cr: {formatCurrency(statements.trialBalance.totalCredits)}
                 </div>
               </div>
 
@@ -530,8 +530,8 @@ export default function AccountingPage() {
                         <th className="py-3 px-4">Code</th>
                         <th className="py-3 px-4">Account Description</th>
                         <th className="py-3 px-4">Classification</th>
-                        <th className="py-3 px-4 text-right">Debit Balance ($)</th>
-                        <th className="py-3 px-4 text-right">Credit Balance ($)</th>
+                        <th className="py-3 px-4 text-right">Debit Balance</th>
+                        <th className="py-3 px-4 text-right">Credit Balance</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-mono">
@@ -541,10 +541,10 @@ export default function AccountingPage() {
                           <td className="py-2.5 px-4 font-sans font-medium text-slate-800">{item.name}</td>
                           <td className="py-2.5 px-4 font-sans text-slate-500">{item.type}</td>
                           <td className="py-2.5 px-4 text-right text-slate-900 tabular-nums">
-                            {item.debit > 0 ? `$${item.debit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                            {item.debit > 0 ? formatCurrency(item.debit) : '—'}
                           </td>
                           <td className="py-2.5 px-4 text-right text-slate-900 tabular-nums">
-                            {item.credit > 0 ? `$${item.credit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                            {item.credit > 0 ? formatCurrency(item.credit) : '—'}
                           </td>
                         </tr>
                       ))}
@@ -553,10 +553,10 @@ export default function AccountingPage() {
                       <tr className="border-t-2 border-slate-400 bg-slate-50 font-bold text-slate-900 font-mono">
                         <td colSpan="3" className="py-3 px-4 uppercase tracking-wider font-sans">Trial Balance Totals</td>
                         <td className="py-3 px-4 text-right text-blue-600 font-extrabold text-sm tabular-nums">
-                          ${Number(statements.trialBalance.totalDebits).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          {formatCurrency(statements.trialBalance.totalDebits)}
                         </td>
                         <td className="py-3 px-4 text-right text-blue-600 font-extrabold text-sm tabular-nums">
-                          ${Number(statements.trialBalance.totalCredits).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          {formatCurrency(statements.trialBalance.totalCredits)}
                         </td>
                       </tr>
                     </tfoot>
@@ -623,10 +623,10 @@ export default function AccountingPage() {
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Opening Balance ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Opening Balance (PKR)</label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 value={accountForm.balance}
                 onChange={(e) => setAccountForm({ ...accountForm, balance: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-mono outline-none focus:border-blue-600"
@@ -712,7 +712,7 @@ export default function AccountingPage() {
                 <div className="w-32">
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="0"
                     value={line.debit}
                     onChange={(e) => updateJournalLine(idx, 'debit', Number(e.target.value))}
@@ -724,7 +724,7 @@ export default function AccountingPage() {
                 <div className="w-32">
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="0"
                     value={line.credit}
                     onChange={(e) => updateJournalLine(idx, 'credit', Number(e.target.value))}
@@ -756,7 +756,7 @@ export default function AccountingPage() {
               <span>{isVoucherBalanced ? 'Voucher Balanced (Debits = Credits)' : 'Out of Balance: Total Debits must equal Credits'}</span>
             </div>
             <div>
-              Dr: ${totalDebits.toFixed(2)} | Cr: ${totalCredits.toFixed(2)}
+              Dr: {formatCurrency(totalDebits)} | Cr: {formatCurrency(totalCredits)}
             </div>
           </div>
 

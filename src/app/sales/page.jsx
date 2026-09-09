@@ -12,6 +12,7 @@ import {
   Trash2, RefreshCw, Printer, Download,
   CreditCard, Ban
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 
 export default function SalesPage() {
   const toast = useToast();
@@ -285,35 +286,35 @@ export default function SalesPage() {
       </div>
 
       {/* Metrics Banner */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80 h-28 flex flex-col justify-between">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Gross Sales Volume</p>
-            <p className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">${totalSalesVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            <p className="text-[10px] text-slate-400 mt-1">{validOrders.length} active orders booked</p>
+            <p className="text-2xl font-extrabold text-slate-900 tabular-nums">{formatCurrency(totalSalesVolume)}</p>
+            <p className="text-[10px] text-slate-400">{validOrders.length} active orders booked</p>
           </div>
         </div>
         <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80 h-28 flex flex-col justify-between">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Settled (Paid)</p>
-            <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            <p className="text-[10px] text-slate-400 mt-1">Direct wire & ACH deposits</p>
+            <p className="text-2xl font-extrabold text-emerald-600 tabular-nums">{formatCurrency(totalPaid)}</p>
+            <p className="text-[10px] text-slate-400">Direct wire & RTGS deposits</p>
           </div>
         </div>
         <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80 h-28 flex flex-col justify-between">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Receivables Due</p>
-            <p className="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums">${pendingReceivables.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            <p className="text-[10px] text-slate-400 mt-1">GAAP Account #1100 AR</p>
+            <p className="text-2xl font-extrabold text-amber-600 tabular-nums">{formatCurrency(pendingReceivables)}</p>
+            <p className="text-[10px] text-slate-400">GAAP Account #1100 AR</p>
           </div>
         </div>
         <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80 h-28 flex flex-col justify-between">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Average Order Size</p>
-            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">
-              ${validOrders.length > 0 ? Math.round(totalSalesVolume / validOrders.length).toLocaleString() : 0}
+            <p className="text-2xl font-extrabold text-blue-600 tabular-nums">
+              {formatCurrency(validOrders.length > 0 ? Math.round(totalSalesVolume / validOrders.length) : 0)}
             </p>
-            <p className="text-[10px] text-slate-400 mt-1">Commercial client average</p>
+            <p className="text-[10px] text-slate-400">Commercial client average</p>
           </div>
         </div>
       </div>
@@ -392,7 +393,7 @@ export default function SalesPage() {
                         </td>
                         <td className="py-3.5 px-4 text-slate-500 font-medium">{order.order_date}</td>
                         <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
-                          ${parseFloat(order.net_amount || order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {formatCurrency(order.net_amount || order.total_amount)}
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           {isCancelled ? (
@@ -482,7 +483,7 @@ export default function SalesPage() {
                 required
               >
                 {customers.map(c => (
-                  <option key={c.id} value={c.id}>{c.name} (Credit: ${Number(c.credit_limit).toLocaleString()})</option>
+                  <option key={c.id} value={c.id}>{c.name} (Credit: {formatCurrency(c.credit_limit)})</option>
                 ))}
               </select>
             </div>
@@ -526,7 +527,7 @@ export default function SalesPage() {
                   >
                     <option value="" disabled>Select a catalog item...</option>
                     {products.map(p => (
-                      <option key={p.id} value={p.id}>{p.name} ({p.sku}) - ${p.selling_price} ({p.quantity} avail)</option>
+                      <option key={p.id} value={p.id}>{p.name} ({p.sku}) - {formatCurrency(p.selling_price)} ({p.quantity} avail)</option>
                     ))}
                   </select>
                 </div>
@@ -543,7 +544,7 @@ export default function SalesPage() {
                 </div>
 
                 <div className="w-28 text-right font-mono font-bold text-slate-900">
-                  ${(Number(item.quantity) * Number(item.unit_price)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  {formatCurrency(Number(item.quantity) * Number(item.unit_price))}
                 </div>
 
                 <button
@@ -561,7 +562,7 @@ export default function SalesPage() {
           {/* Subtotal / Tax Calculation Preview */}
           <div className="pt-3 border-t border-slate-200 flex justify-between items-end">
             <div className="w-48">
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Contract Discount ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Contract Discount (PKR)</label>
               <input
                 type="number"
                 min="0"
@@ -572,10 +573,10 @@ export default function SalesPage() {
             </div>
 
             <div className="text-right space-y-1 font-mono">
-              <p className="text-slate-500">Subtotal: ${calculateSubtotal().toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-              <p className="text-slate-500">Estimated Tax (8.5%): ${((Math.max(0, calculateSubtotal() - discountAmount)) * 0.085).toFixed(2)}</p>
+              <p className="text-slate-500">Subtotal: {formatCurrency(calculateSubtotal())}</p>
+              <p className="text-slate-500">Estimated Tax (8.5%): {formatCurrency((Math.max(0, calculateSubtotal() - discountAmount)) * 0.085)}</p>
               <p className="text-base font-bold text-slate-900">
-                Net Total: ${(Math.max(0, calculateSubtotal() - discountAmount) * 1.085).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                Net Total: {formatCurrency(Math.max(0, calculateSubtotal() - discountAmount) * 1.085)}
               </p>
             </div>
           </div>
@@ -603,14 +604,14 @@ export default function SalesPage() {
         <form onSubmit={handleRecordPayment} className="space-y-4 text-xs">
           <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
             <p className="text-slate-500 font-medium">Customer: <strong className="text-slate-900">{selectedPaymentOrder?.customer_name}</strong></p>
-            <p className="text-slate-500 font-medium">Order Net Value: <strong className="text-slate-900 font-mono">${Number(selectedPaymentOrder?.net_amount || selectedPaymentOrder?.total_amount || 0).toFixed(2)}</strong></p>
+            <p className="text-slate-500 font-medium">Order Net Value: <strong className="text-slate-900 font-mono">{formatCurrency(selectedPaymentOrder?.net_amount || selectedPaymentOrder?.total_amount || 0)}</strong></p>
           </div>
 
           <div>
-            <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Receipt Amount ($)</label>
+            <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Receipt Amount (PKR)</label>
             <input
               type="number"
-              step="0.01"
+              step="1"
               value={paymentAmount}
               onChange={(e) => setPaymentAmount(Number(e.target.value))}
               className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono text-base font-bold focus:border-blue-600"

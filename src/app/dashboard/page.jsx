@@ -4,14 +4,15 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppShell from '@/components/layout/AppShell';
 import { 
-  DollarSign, ShoppingCart, Package, Users, TrendingUp, 
+  Banknote, ShoppingCart, Package, Users, TrendingUp, 
   TrendingDown, AlertTriangle, ArrowUpRight, Plus, 
   Clock, ShieldCheck, Loader2, RefreshCw, ArrowRight,
-  Activity, Sparkles
+  Activity, Landmark, Wallet
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid 
 } from 'recharts';
+import { formatCurrency } from '@/lib/currency';
 
 export default function DashboardPage() {
   const [data, setData] = useState(null);
@@ -39,20 +40,18 @@ export default function DashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const getStatIcon = (id, title) => {
+  const getStatIcon = (id) => {
     switch (id) {
-      case 'revenue': return <DollarSign className="w-4 h-4 text-blue-600" />;
+      case 'revenue': return <Banknote className="w-4 h-4 text-blue-600" />;
       case 'gross_profit': return <TrendingUp className="w-4 h-4 text-emerald-600" />;
-      case 'treasury': return <ShieldCheck className="w-4 h-4 text-indigo-600" />;
-      case 'inventory_val': return <Package className="w-4 h-4 text-amber-600" />;
+      case 'net_profit': return <Activity className="w-4 h-4 text-indigo-600" />;
+      case 'cash_bank': return <Landmark className="w-4 h-4 text-sky-600" />;
       case 'ar': return <ArrowUpRight className="w-4 h-4 text-violet-600" />;
       case 'ap': return <TrendingDown className="w-4 h-4 text-rose-600" />;
-      default: {
-        if (title?.includes('Revenue')) return <DollarSign className="w-4 h-4 text-blue-600" />;
-        if (title?.includes('Treasury')) return <ShieldCheck className="w-4 h-4 text-indigo-600" />;
-        if (title?.includes('Stock')) return <Package className="w-4 h-4 text-amber-600" />;
-        return <Users className="w-4 h-4 text-slate-700" />;
-      }
+      case 'inventory_val': return <Package className="w-4 h-4 text-amber-600" />;
+      case 'low_stock': return <AlertTriangle className="w-4 h-4 text-orange-600" />;
+      case 'orders': return <ShoppingCart className="w-4 h-4 text-blue-600" />;
+      default: return <Banknote className="w-4 h-4 text-blue-600" />;
     }
   };
 
@@ -61,7 +60,7 @@ export default function DashboardPage() {
       {/* =========================================================================
           EXECUTIVE COMMAND HEADER
           ========================================================================= */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-200">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200/80">
@@ -80,7 +79,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Live Synchronizer & Nested Button-in-Button CTA */}
+        {/* Live Synchronizer & Nested CTA */}
         <div className="flex items-center gap-2.5">
           <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200/90 text-xs font-mono text-slate-700 shadow-2xs">
             <Clock size={14} className="text-blue-600" />
@@ -96,7 +95,6 @@ export default function DashboardPage() {
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
 
-          {/* Nested Button-in-Button CTA */}
           <Link
             href="/sales"
             className="group px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 flex items-center gap-2.5 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]"
@@ -117,45 +115,54 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* =========================================================================
-              DOUBLE-BEZEL KPI BENTO TILES (6-Metric Ledger)
+              9 RECOMMENDED ENTERPRISE KPI CARDS (Equal-Height, Clickable 3x3 Grid)
               ========================================================================= */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
-            {data?.stats?.map((card, i) => (
-              <div
-                key={card.id || i}
-                className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs hover:bg-slate-200/90 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group"
-              >
-                {/* Inner Precision Core */}
-                <div className="p-3.5 sm:p-4 rounded-[1rem] bg-white border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] flex flex-col justify-between h-full space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 truncate pr-1">{card.title}</p>
-                    <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors flex-shrink-0">
-                      {getStatIcon(card.id, card.title)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {data?.stats?.map((card, i) => {
+              const CardWrapper = card.href ? Link : 'div';
+              return (
+                <CardWrapper
+                  key={card.id || i}
+                  href={card.href || '#'}
+                  className="block p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs hover:bg-slate-200/90 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group"
+                >
+                  <div className="p-4 rounded-[1rem] bg-white border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] flex flex-col justify-between h-40">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 truncate pr-1">
+                        {card.title}
+                      </p>
+                      <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors flex-shrink-0">
+                        {getStatIcon(card.id)}
+                      </div>
+                    </div>
+
+                    <div className="my-auto">
+                      <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-mono truncate">
+                        {card.isCurrency 
+                          ? formatCurrency(card.value)
+                          : Number(card.value).toLocaleString()
+                        }
+                      </h3>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
+                      <span className={`flex items-center gap-1 font-bold text-[10px] ${
+                        card.trend === 'down' ? 'text-rose-600' : 'text-emerald-600'
+                      }`}>
+                        {card.trend === 'down' ? <TrendingDown size={11} /> : <TrendingUp size={11} />}
+                        {card.change}
+                      </span>
+                      <span className="text-slate-400 text-[10px] font-medium truncate ml-1">
+                        {card.subtitle}
+                      </span>
                     </div>
                   </div>
-
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-mono truncate">
-                      {card.isCurrency && '$'}
-                      {Number(card.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                    </h3>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
-                    <span className={`flex items-center gap-1 font-bold text-[10px] ${
-                      card.trend === 'down' ? 'text-rose-600' : 'text-emerald-600'
-                    }`}>
-                      {card.trend === 'down' ? <TrendingDown size={11} /> : <TrendingUp size={11} />}
-                      {card.change}
-                    </span>
-                    <span className="text-slate-400 text-[10px] font-medium truncate ml-1">{card.subtitle}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+                </CardWrapper>
+              );
+            })}
           </div>
 
-          {/* Executive Action Banner (Pending PO Approvals & Overdue Collections) */}
+          {/* Executive Action Banner */}
           {(data?.actionItems?.pendingApprovals?.length > 0 || data?.actionItems?.overdueInvoices?.length > 0) && (
             <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -193,9 +200,8 @@ export default function DashboardPage() {
             </div>
           )}
 
-
           {/* =========================================================================
-              ANALYTICS & OPERATIONAL SPLIT SECTION (Double-Bezel Architecture)
+              ANALYTICS & OPERATIONAL SPLIT SECTION
               ========================================================================= */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Revenue Trend Area Chart */}
@@ -209,7 +215,7 @@ export default function DashboardPage() {
                         GAAP #4010 vs #5010
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-0.5">Commercial Revenue vs Cost of Goods Sold (USD)</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Commercial Revenue vs Cost of Goods Sold (PKR)</p>
                   </div>
                   <div className="flex items-center gap-3 text-xs">
                     <span className="flex items-center gap-1.5 text-slate-700 font-bold">
@@ -223,13 +229,18 @@ export default function DashboardPage() {
 
                 <div className="h-72 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={data?.monthlyTrends || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <AreaChart data={data?.monthlyTrends || []} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                       <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} />
-                      <YAxis stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(v) => `$${v / 1000}k`} />
+                      <YAxis 
+                        stroke="#64748b" 
+                        fontSize={11} 
+                        tickLine={false} 
+                        tickFormatter={(v) => formatCurrency(v, { compact: true })} 
+                      />
                       <Tooltip 
                         contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '0.75rem', fontSize: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-                        formatter={(v) => [`$${v.toLocaleString()}`, '']}
+                        formatter={(v) => [formatCurrency(v), '']}
                       />
                       <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#2563eb" strokeWidth={2.5} fillOpacity={0.08} fill="#2563eb" />
                       <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#64748b" strokeWidth={2} fillOpacity={0.05} fill="#64748b" />
@@ -287,7 +298,7 @@ export default function DashboardPage() {
           </div>
 
           {/* =========================================================================
-              RECENT SALES ORDERS TABLE (Double-Bezel)
+              RECENT SALES ORDERS TABLE
               ========================================================================= */}
           <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
             <div className="p-6 rounded-[1rem] bg-white border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)]">
@@ -323,7 +334,7 @@ export default function DashboardPage() {
                         <td className="py-3 px-3.5 font-semibold text-slate-800">{order.customer_name}</td>
                         <td className="py-3 px-3.5 text-slate-500 font-mono text-[11px]">{order.date}</td>
                         <td className="py-3 px-3.5 text-right font-mono font-bold text-slate-900">
-                          ${parseFloat(order.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          {formatCurrency(order.amount)}
                         </td>
                         <td className="py-3 px-3.5 text-center">
                           <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${

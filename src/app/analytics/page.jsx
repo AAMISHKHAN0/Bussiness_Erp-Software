@@ -12,6 +12,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
   CartesianGrid, Legend 
 } from 'recharts';
+import { formatCurrency } from '@/lib/currency';
 
 export default function AnalyticsPage() {
   const [data, setData] = useState(null);
@@ -50,21 +51,21 @@ export default function AnalyticsPage() {
     // 1. Financial Summary
     sections.push('=== EXECUTIVE FINANCIAL KPI SUMMARY ===');
     sections.push('Metric,Value');
-    sections.push(`Total Commercial Sales Volume,$${(financialSummary?.totalSalesVolume || 0).toFixed(2)}`);
-    sections.push(`Realized (Paid) Collections,$${(financialSummary?.totalPaidSales || 0).toFixed(2)}`);
-    sections.push(`Outstanding Receivables (AR),$${(financialSummary?.accountsReceivable || 0).toFixed(2)}`);
-    sections.push(`Total Procurement Expenditures,$${(financialSummary?.totalProcurement || 0).toFixed(2)}`);
-    sections.push(`Received Restock Commitments,$${(financialSummary?.totalReceivedProcurement || 0).toFixed(2)}`);
-    sections.push(`Outstanding Payables (AP),$${(financialSummary?.accountsPayable || 0).toFixed(2)}`);
-    sections.push(`Gross Operating Margin,$${(financialSummary?.grossMargin || 0).toFixed(2)} (${financialSummary?.grossMarginPercent || 0}%)`);
-    sections.push(`Capitalized Inventory (Cost Basis),$${(financialSummary?.inventoryCostValuation || 0).toFixed(2)}`);
-    sections.push(`Projected Inventory (Retail Value),$${(financialSummary?.inventoryRetailValuation || 0).toFixed(2)}`);
+    sections.push(`Total Commercial Sales Volume,${formatCurrency(financialSummary?.totalSalesVolume || 0)}`);
+    sections.push(`Realized (Paid) Collections,${formatCurrency(financialSummary?.totalPaidSales || 0)}`);
+    sections.push(`Outstanding Receivables (AR),${formatCurrency(financialSummary?.accountsReceivable || 0)}`);
+    sections.push(`Total Procurement Expenditures,${formatCurrency(financialSummary?.totalProcurement || 0)}`);
+    sections.push(`Received Restock Commitments,${formatCurrency(financialSummary?.totalReceivedProcurement || 0)}`);
+    sections.push(`Outstanding Payables (AP),${formatCurrency(financialSummary?.accountsPayable || 0)}`);
+    sections.push(`Gross Operating Margin,${formatCurrency(financialSummary?.grossMargin || 0)} (${financialSummary?.grossMarginPercent || 0}%)`);
+    sections.push(`Capitalized Inventory (Cost Basis),${formatCurrency(financialSummary?.inventoryCostValuation || 0)}`);
+    sections.push(`Projected Inventory (Retail Value),${formatCurrency(financialSummary?.inventoryRetailValuation || 0)}`);
     sections.push(`Critical Low Stock Items,${financialSummary?.lowStockCount || 0} SKUs`);
     sections.push('');
 
     // 2. Sales Orders
     sections.push('=== COMMERCIAL SALES ORDERS LEDGER ===');
-    sections.push('Order Number,Date,Customer,Payment Terms,Fulfillment Status,Payment Status,Net Amount ($)');
+    sections.push('Order Number,Date,Customer,Payment Terms,Fulfillment Status,Payment Status,Net Amount (PKR)');
     salesOrders.forEach(o => {
       sections.push(`"${o.order_number}","${o.order_date || ''}","${o.customer_name || ''}","${o.payment_method || 'Net-30'}","${o.status || 'Confirmed'}","${o.payment_status || 'Pending'}",${(o.net_amount || o.total_amount || 0).toFixed(2)}`);
     });
@@ -72,7 +73,7 @@ export default function AnalyticsPage() {
 
     // 3. Procurement Orders
     sections.push('=== VENDOR PROCUREMENT & EXPENDITURES ===');
-    sections.push('PO Number,Order Date,Supplier Partner,Expected Delivery,Status,Payment Status,Total Commitment ($)');
+    sections.push('PO Number,Order Date,Supplier Partner,Expected Delivery,Status,Payment Status,Total Commitment (PKR)');
     purchaseOrders.forEach(po => {
       sections.push(`"${po.order_number}","${po.order_date || ''}","${po.supplier_name || ''}","${po.expected_delivery_date || ''}","${po.status || 'Ordered'}","${po.payment_status || 'Unpaid'}",${(po.total_amount || 0).toFixed(2)}`);
     });
@@ -80,7 +81,7 @@ export default function AnalyticsPage() {
 
     // 4. Inventory Catalog
     sections.push('=== WAREHOUSE INVENTORY VALUATION & REORDER THRESHOLDS ===');
-    sections.push('SKU,Item Description,Classification,Bin Location,Stock On Hand,Safety Level,Unit Cost ($),Unit Retail ($),Total Cost Valuation ($),Status');
+    sections.push('SKU,Item Description,Classification,Bin Location,Stock On Hand,Safety Level,Unit Cost (PKR),Unit Retail (PKR),Total Cost Valuation (PKR),Status');
     products.forEach(p => {
       const val = (Number(p.quantity) || 0) * (Number(p.purchase_price) || 0);
       sections.push(`"${p.sku}","${p.name}","${p.category_name}","${p.location || ''}",${p.quantity},${p.min_stock_level},${p.purchase_price},${p.selling_price},${val.toFixed(2)},"${p.status}"`);
@@ -182,13 +183,13 @@ export default function AnalyticsPage() {
                     N
                   </div>
                   <div>
-                    <h1 className="text-xl font-black tracking-tight text-slate-900">GLOBAL ENTERPRISE SOLUTIONS INC.</h1>
-                    <p className="text-xs text-slate-600">Nexis ERP Enterprise Operating Environment</p>
+                    <h1 className="text-xl font-black tracking-tight text-slate-900">NEXIS ENTERPRISE TECHNOLOGIES</h1>
+                    <p className="text-xs text-slate-600">Enterprise Operating Cloud Environment</p>
                   </div>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
-                  450 Lexington Avenue, 28th Floor, New York, NY 10017<br />
-                  Tax Identification EIN: US-12-3456789 · GAAP Compliant General Ledger
+                  Level 14, Corporate Tower, I.I. Chundrigar Road, Karachi, Pakistan<br />
+                  National Tax Number (NTN): 4892011-7 · Corporate Sales Tax STRN: 3277876123456
                 </p>
               </div>
 
@@ -213,11 +214,11 @@ export default function AnalyticsPage() {
                   <ShoppingCart size={14} className="text-blue-600" />
                 </div>
                 <p className="text-2xl font-extrabold text-slate-900 mt-1.5 tabular-nums">
-                  ${(fin.totalSalesVolume || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatCurrency(fin.totalSalesVolume || 0)}
                 </p>
                 <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1">
-                  <span>Settled: ${(fin.totalPaidSales || 0).toLocaleString()}</span>
-                  <span className="text-amber-600 font-semibold">AR: ${(fin.accountsReceivable || 0).toLocaleString()}</span>
+                  <span>Settled: {formatCurrency(fin.totalPaidSales || 0)}</span>
+                  <span className="text-amber-600 font-semibold">AR: {formatCurrency(fin.accountsReceivable || 0)}</span>
                 </div>
               </div>
             </div>
@@ -229,11 +230,11 @@ export default function AnalyticsPage() {
                   <Truck size={14} className="text-blue-600" />
                 </div>
                 <p className="text-2xl font-extrabold text-slate-900 mt-1.5 tabular-nums">
-                  ${(fin.totalProcurement || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatCurrency(fin.totalProcurement || 0)}
                 </p>
                 <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1">
-                  <span>Received: ${(fin.totalReceivedProcurement || 0).toLocaleString()}</span>
-                  <span className="text-slate-500">{fin.totalProcurementCount || 0} Purchase Orders</span>
+                  <span>Received: {formatCurrency(fin.totalReceivedProcurement || 0)}</span>
+                  <span className="text-slate-500">{fin.totalProcurementCount || 0} POs</span>
                 </div>
               </div>
             </div>
@@ -245,10 +246,10 @@ export default function AnalyticsPage() {
                   <TrendingUp size={14} className="text-emerald-600" />
                 </div>
                 <p className="text-2xl font-extrabold text-emerald-600 mt-1.5 tabular-nums">
-                  ${(fin.grossMargin || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatCurrency(fin.grossMargin || 0)}
                 </p>
                 <p className="text-[10px] text-slate-400 mt-1">
-                  ~{fin.grossMarginPercent || 0}% Operating Margin on B2B Hardware
+                  ~{fin.grossMarginPercent || 0}% Operating Margin on Enterprise Sales
                 </p>
               </div>
             </div>
@@ -260,10 +261,10 @@ export default function AnalyticsPage() {
                   <Package size={14} className="text-blue-600" />
                 </div>
                 <p className="text-2xl font-extrabold text-blue-600 mt-1.5 tabular-nums">
-                  ${(fin.inventoryCostValuation || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatCurrency(fin.inventoryCostValuation || 0)}
                 </p>
                 <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1">
-                  <span>Retail: ${(fin.inventoryRetailValuation || 0).toLocaleString()}</span>
+                  <span>Retail: {formatCurrency(fin.inventoryRetailValuation || 0)}</span>
                   <span className={fin.lowStockCount > 0 ? 'text-amber-600 font-bold' : 'text-slate-400'}>
                     {fin.lowStockCount || 0} Low Stock
                   </span>
@@ -370,7 +371,7 @@ export default function AnalyticsPage() {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">
-                            ${parseFloat(order.net_amount || order.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {formatCurrency(order.net_amount || order.total_amount || 0)}
                           </td>
                         </tr>
                       ))}
@@ -381,7 +382,7 @@ export default function AnalyticsPage() {
                           Total Commercial Billings Listed:
                         </td>
                         <td className="py-3 px-4 text-right font-mono text-sm text-blue-600">
-                          ${filteredSales.reduce((sum, o) => sum + (Number(o.net_amount) || Number(o.total_amount) || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {formatCurrency(filteredSales.reduce((sum, o) => sum + (Number(o.net_amount) || Number(o.total_amount) || 0), 0))}
                         </td>
                       </tr>
                     </tfoot>
@@ -440,7 +441,7 @@ export default function AnalyticsPage() {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">
-                            ${parseFloat(po.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {formatCurrency(po.total_amount || 0)}
                           </td>
                         </tr>
                       ))}
@@ -451,7 +452,7 @@ export default function AnalyticsPage() {
                           Total Procurement Expenditures Listed:
                         </td>
                         <td className="py-3 px-4 text-right font-mono text-sm text-slate-900">
-                          ${filteredPurchases.reduce((sum, po) => sum + (Number(po.total_amount) || 0), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {formatCurrency(filteredPurchases.reduce((sum, po) => sum + (Number(po.total_amount) || 0), 0))}
                         </td>
                       </tr>
                     </tfoot>
@@ -511,10 +512,10 @@ export default function AnalyticsPage() {
                               </span>
                               <span className="text-slate-400 font-normal"> / {p.min_stock_level}</span>
                             </td>
-                            <td className="py-3 px-4 text-right font-mono text-slate-500">${Number(p.purchase_price).toFixed(2)}</td>
-                            <td className="py-3 px-4 text-right font-mono text-slate-900 font-semibold">${Number(p.selling_price).toFixed(2)}</td>
+                            <td className="py-3 px-4 text-right font-mono text-slate-500">{formatCurrency(p.purchase_price)}</td>
+                            <td className="py-3 px-4 text-right font-mono text-slate-900 font-semibold">{formatCurrency(p.selling_price)}</td>
                             <td className="py-3 px-4 text-right font-mono font-bold text-blue-600">
-                              ${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              {formatCurrency(val)}
                             </td>
                             <td className="py-3 px-4 text-center">
                               <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${
@@ -533,7 +534,7 @@ export default function AnalyticsPage() {
                           Total Capitalized Inventory Cost Basis:
                         </td>
                         <td className="py-3 px-4 text-right font-mono text-sm text-blue-600">
-                          ${filteredProducts.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.purchase_price)), 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {formatCurrency(filteredProducts.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.purchase_price)), 0))}
                         </td>
                         <td></td>
                       </tr>
@@ -579,13 +580,13 @@ export default function AnalyticsPage() {
                         <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
                           <td className="py-3.5 px-4 font-bold text-slate-900">{client.name}</td>
                           <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
-                            ${parseFloat(client.spent || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            {formatCurrency(client.spent || 0)}
                           </td>
                           <td className="py-3.5 px-4 text-right font-mono font-bold text-blue-600">
-                            ${parseFloat(client.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            {formatCurrency(client.balance || 0)}
                           </td>
                           <td className="py-3.5 px-4 text-right font-mono text-slate-600">
-                            ${parseFloat(client.credit_limit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            {formatCurrency(client.credit_limit || 0)}
                           </td>
                           <td className="py-3.5 px-4 text-center">
                             <span className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-300">
@@ -619,7 +620,7 @@ export default function AnalyticsPage() {
                     <BarChart data={data?.historicalPerformance || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                       <XAxis dataKey="quarter" stroke="#64748b" fontSize={11} tickLine={false} />
-                      <YAxis stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(v) => `$${v / 1000}k`} />
+                      <YAxis stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(v) => formatCurrency(v, { compact: true })} />
                       <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '0.5rem', fontSize: '11px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
                       <Legend wrapperStyle={{ fontSize: '11px' }} />
                       <Bar dataKey="revenue" name="Gross Revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
@@ -645,10 +646,10 @@ export default function AnalyticsPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data?.categoryDistribution || []} layout="vertical" margin={{ top: 10, right: 20, left: 40, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                      <XAxis type="number" stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(v) => `$${v / 1000}k`} />
+                      <XAxis type="number" stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(v) => formatCurrency(v, { compact: true })} />
                       <YAxis type="category" dataKey="name" stroke="#64748b" fontSize={10} tickLine={false} />
                       <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '0.5rem', fontSize: '11px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                      <Bar dataKey="stockValue" name="Asset Value ($)" fill="#2563eb" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="stockValue" name="Asset Value (PKR)" fill="#2563eb" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

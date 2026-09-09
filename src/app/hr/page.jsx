@@ -10,6 +10,7 @@ import {
   Search, RefreshCw, Send 
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { formatCurrency } from '@/lib/currency';
 
 export default function HRPage() {
   const toast = useToast();
@@ -32,7 +33,7 @@ export default function HRPage() {
     phone: '',
     department: 'Operations & Engineering',
     designation: 'Infrastructure Specialist',
-    basic_salary: 11000
+    basic_salary: 175000
   });
 
   const fetchHRData = async () => {
@@ -198,7 +199,7 @@ export default function HRPage() {
         <div className="double-bezel">
           <div className="double-bezel-inner">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Monthly Compensation Commitment</p>
-            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">${totalMonthlyPayroll.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">{formatCurrency(totalMonthlyPayroll)}</p>
             <p className="text-[10px] text-slate-400 mt-1">GAAP Account #6010 Payroll Expense</p>
           </div>
         </div>
@@ -328,7 +329,7 @@ export default function HRPage() {
                         </td>
                         <td className="py-3.5 px-4 text-slate-500 font-medium">{emp.join_date}</td>
                         <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
-                          ${Number(emp.basic_salary).toLocaleString(undefined, { minimumFractionDigits: 2 })}/mo
+                          {formatCurrency(emp.basic_salary)}/mo
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           <span className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-300">
@@ -410,7 +411,7 @@ export default function HRPage() {
 
                       <div className="flex items-center gap-3">
                         <span className="font-mono font-extrabold text-blue-600 text-lg tabular-nums">
-                          ${Number(p.total_net).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          {formatCurrency(p.total_net)}
                         </span>
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">
                           {p.status}
@@ -432,10 +433,10 @@ export default function HRPage() {
                         {p.items?.map((item, idx) => (
                           <tr key={idx}>
                             <td className="py-2.5 font-sans font-medium text-slate-800">{item.employee_name}</td>
-                            <td className="py-2.5 text-right text-slate-600 tabular-nums">${Number(item.basic).toLocaleString()}</td>
-                            <td className="py-2.5 text-right text-slate-600 tabular-nums">${Number(item.allowance).toLocaleString()}</td>
-                            <td className="py-2.5 text-right text-red-600 tabular-nums">-${Number(item.deductions).toLocaleString()}</td>
-                            <td className="py-2.5 text-right font-bold text-slate-900 tabular-nums">${Number(item.net).toLocaleString()}</td>
+                            <td className="py-2.5 text-right text-slate-600 tabular-nums">{formatCurrency(item.basic)}</td>
+                            <td className="py-2.5 text-right text-slate-600 tabular-nums">{formatCurrency(item.allowance)}</td>
+                            <td className="py-2.5 text-right text-red-600 tabular-nums">-{formatCurrency(item.deductions)}</td>
+                            <td className="py-2.5 text-right font-bold text-slate-900 tabular-nums">{formatCurrency(item.net)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -518,7 +519,7 @@ export default function HRPage() {
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Monthly Gross Base Salary ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Monthly Gross Base Salary (PKR)</label>
               <input
                 type="number"
                 value={employeeForm.basic_salary}

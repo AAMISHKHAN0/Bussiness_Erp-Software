@@ -17,9 +17,9 @@ export default function AdminSettingsPage() {
     company_email: '',
     company_phone: '',
     address: '',
-    currency: 'USD',
-    currency_symbol: '$',
-    default_tax_rate: 8.5
+    currency: 'PKR',
+    currency_symbol: 'Rs. ',
+    default_tax_rate: 18
   });
   const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -221,24 +221,51 @@ export default function AdminSettingsPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Operating Currency Code</label>
-                  <input
-                    type="text"
-                    value={settings.currency}
-                    onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono"
-                  />
+                <div className="sm:col-span-2 pt-3 border-t border-slate-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      Settings → Finance → Currency Configuration
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                      Default: PKR — Pakistani Rupee
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mb-3">
+                    Configures the primary accounting currency and transaction display symbol across all operational ledgers.
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Currency Symbol</label>
+                  <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Standard ERP Currency</label>
+                  <select
+                    value={settings.currency || 'PKR'}
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      const sym = code === 'PKR' ? 'Rs. ' : code === 'USD' ? '$' : code === 'EUR' ? '€' : code === 'GBP' ? '£' : code === 'AED' ? 'AED ' : code === 'SAR' ? 'SAR ' : '$';
+                      setSettings({ ...settings, currency: code, currency_symbol: sym });
+                    }}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-semibold"
+                  >
+                    <option value="PKR">PKR — Pakistani Rupee (Default, Rs. )</option>
+                    <option value="USD">USD — United States Dollar ($)</option>
+                    <option value="EUR">EUR — Euro (€)</option>
+                    <option value="GBP">GBP — British Pound (£)</option>
+                    <option value="AED">AED — UAE Dirham (AED )</option>
+                    <option value="SAR">SAR — Saudi Riyal (SAR )</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Currency Display Symbol</label>
                   <input
                     type="text"
-                    value={settings.currency_symbol}
+                    value={settings.currency_symbol || 'Rs. '}
                     onChange={(e) => setSettings({ ...settings, currency_symbol: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono text-center"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono text-center font-bold"
                   />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Sample display: <strong className="text-slate-700">{settings.currency_symbol || 'Rs. '}328,180</strong>
+                  </p>
                 </div>
               </div>
 

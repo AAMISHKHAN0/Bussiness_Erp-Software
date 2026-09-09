@@ -1,32 +1,32 @@
-// Standard Corporate Enterprise Seed Dataset for Global Enterprise Solutions ERP
-// Realistic, interconnected GAAP compliant data spanning all operational modules
+// Standard Corporate Enterprise Seed Dataset for NEXIS ERP
+// Denominated in PKR (Pakistani Rupee) - Realistic, interconnected GAAP compliant dataset
 
 export const INITIAL_SEED_DATA = {
   settings: {
-    company_name: "Global Enterprise Solutions Inc.",
-    legal_name: "Global Business Technologies & Systems Inc.",
-    tax_id: "US-EIN-12-3456789",
-    company_email: "contact@globalenterprise.com",
-    company_phone: "+1 (212) 555-0180",
-    address: "450 Lexington Avenue, 28th Floor, New York, NY 10017",
-    currency: "USD",
-    currency_symbol: "$",
-    timezone: "America/New_York",
-    fiscal_year_start: "January",
+    company_name: "NEXIS Solutions Technologies",
+    legal_name: "NEXIS Business Technologies & Systems Ltd.",
+    tax_id: "PK-NTN-4029184-7",
+    company_email: "corporate@nexis-erp.com",
+    company_phone: "+92 (21) 3582-0190",
+    address: "Executive Tower B, 14th Floor, Main Clifton Road, Karachi 75600",
+    currency: "PKR",
+    currency_symbol: "Rs. ",
+    timezone: "Asia/Karachi",
+    fiscal_year_start: "July",
     default_tax_rate: 8.5,
     logo_url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=128&auto=format&fit=crop&q=80"
   },
 
   branches: [
-    { id: "b-1", name: "HQ - New York Corporate Center", code: "NYC-HQ", address: "450 Lexington Ave, New York, NY", is_main: true },
-    { id: "b-2", name: "Central Distribution & Logistics", code: "CHI-DIST", address: "3500 Logistics Way, Chicago, IL", is_main: false },
-    { id: "b-3", name: "West Coast Technical Operations", code: "SJC-OPS", address: "100 Innovation Blvd, San Jose, CA", is_main: false }
+    { id: "b-1", name: "HQ - Karachi Corporate Tower", code: "KHI-HQ", address: "Executive Tower B, Main Clifton Road, Karachi", is_main: true },
+    { id: "b-2", name: "Lahore Regional Logistics Hub", code: "LHR-DIST", address: "Plot 42, Industrial Area, Kot Lakhpat, Lahore", is_main: false },
+    { id: "b-3", name: "Islamabad Technical Operations", code: "ISB-OPS", address: "Evacuee Trust Complex, F-5/1, Islamabad", is_main: false }
   ],
 
   warehouses: [
-    { id: "wh-1", name: "HQ East Coast Staging Hub", code: "WH-NYC-01", branch_id: "b-1", address: "450 Lexington Ave, New York, NY", capacity_units: 50000, is_active: true },
-    { id: "wh-2", name: "Midwest Logistics Distribution Center", code: "WH-CHI-01", branch_id: "b-2", address: "3500 Logistics Way, Chicago, IL", capacity_units: 75000, is_active: true },
-    { id: "wh-3", name: "West Coast Micro-Depot", code: "WH-SJC-01", branch_id: "b-3", address: "100 Innovation Blvd, San Jose, CA", capacity_units: 35000, is_active: true }
+    { id: "wh-1", name: "Central Distribution Hub (Karachi Port)", code: "WH-KHI-01", branch_id: "b-1", address: "Clifton Logistics Yard, Karachi", capacity_units: 50000, is_active: true },
+    { id: "wh-2", name: "Punjab Regional Distribution Depot", code: "WH-LHR-01", branch_id: "b-2", address: "Kot Lakhpat Logistics Center, Lahore", capacity_units: 75000, is_active: true },
+    { id: "wh-3", name: "Northern Micro-Fulfillment Staging", code: "WH-ISB-01", branch_id: "b-3", address: "Industrial Triangle, Islamabad", capacity_units: 35000, is_active: true }
   ],
 
   roles: [
@@ -50,7 +50,7 @@ export const INITIAL_SEED_DATA = {
       branch_id: "b-1",
       department: "Executive Leadership",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=96&auto=format&fit=crop&q=80",
-      phone: "+1 (212) 555-0101",
+      phone: "+92 (300) 829-0101",
       is_active: true
     },
     {
@@ -64,7 +64,7 @@ export const INITIAL_SEED_DATA = {
       branch_id: "b-1",
       department: "Finance & Corporate Accounting",
       avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=96&auto=format&fit=crop&q=80",
-      phone: "+1 (212) 555-0102",
+      phone: "+92 (301) 829-0102",
       is_active: true
     },
     {
@@ -78,7 +78,7 @@ export const INITIAL_SEED_DATA = {
       branch_id: "b-2",
       department: "Supply Chain & Operations",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=96&auto=format&fit=crop&q=80",
-      phone: "+1 (212) 555-0103",
+      phone: "+92 (302) 829-0103",
       is_active: true
     },
     {
@@ -92,7 +92,7 @@ export const INITIAL_SEED_DATA = {
       branch_id: "b-1",
       department: "Human Resources",
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=96&auto=format&fit=crop&q=80",
-      phone: "+1 (212) 555-0104",
+      phone: "+92 (303) 829-0104",
       is_active: true
     },
     {
@@ -106,7 +106,7 @@ export const INITIAL_SEED_DATA = {
       branch_id: "b-3",
       department: "Commercial Enterprise Sales",
       avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=96&auto=format&fit=crop&q=80",
-      phone: "+1 (212) 555-0105",
+      phone: "+92 (304) 829-0105",
       is_active: true
     }
   ],
@@ -119,6 +119,7 @@ export const INITIAL_SEED_DATA = {
     { id: "cat-5", name: "Structured Cabling & Racks", code: "CAB", description: "Enclosure cabinets, patch panels, and bulk Cat6A copper" }
   ],
 
+  // Products: Exactly matches Inventory Cost = Rs. 32,818,000 and Retail = Rs. 56,855,000
   products: [
     {
       id: "p-1",
@@ -128,8 +129,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-1",
       category_name: "Enterprise Rack Servers",
       unit: "Units",
-      purchase_price: 3450.00,
-      selling_price: 5890.00,
+      purchase_price: 345000,
+      selling_price: 589000,
       quantity: 35,
       min_stock_level: 8,
       location: "Warehouse Bay A-04",
@@ -146,8 +147,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-2",
       category_name: "Industrial Networking",
       unit: "Units",
-      purchase_price: 2800.00,
-      selling_price: 4750.00,
+      purchase_price: 280000,
+      selling_price: 475000,
       quantity: 28,
       min_stock_level: 6,
       location: "Warehouse Bay B-12",
@@ -164,8 +165,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-1",
       category_name: "Enterprise Rack Servers",
       unit: "Units",
-      purchase_price: 3100.00,
-      selling_price: 5400.00,
+      purchase_price: 310000,
+      selling_price: 540000,
       quantity: 18,
       min_stock_level: 6,
       location: "Warehouse Bay A-06",
@@ -182,8 +183,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-3",
       category_name: "Power & Infrastructure",
       unit: "Units",
-      purchase_price: 240.00,
-      selling_price: 480.00,
+      purchase_price: 24000,
+      selling_price: 48000,
       quantity: 6,
       min_stock_level: 10,
       location: "Warehouse Bay C-02",
@@ -200,8 +201,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-3",
       category_name: "Power & Infrastructure",
       unit: "Units",
-      purchase_price: 2600.00,
-      selling_price: 4800.00,
+      purchase_price: 260000,
+      selling_price: 480000,
       quantity: 9,
       min_stock_level: 4,
       location: "Freight Dock Staging 2",
@@ -218,8 +219,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-4",
       category_name: "Network Security & Firewalls",
       unit: "Units",
-      purchase_price: 1850.00,
-      selling_price: 3200.00,
+      purchase_price: 185000,
+      selling_price: 320000,
       quantity: 15,
       min_stock_level: 5,
       location: "Security Storage Vault 1",
@@ -236,8 +237,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-5",
       category_name: "Structured Cabling & Racks",
       unit: "Units",
-      purchase_price: 750.00,
-      selling_price: 1350.00,
+      purchase_price: 75000,
+      selling_price: 135000,
       quantity: 12,
       min_stock_level: 4,
       location: "Freight Dock Staging 1",
@@ -254,8 +255,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-4",
       category_name: "Network Security & Firewalls",
       unit: "Units",
-      purchase_price: 480.00,
-      selling_price: 890.00,
+      purchase_price: 48000,
+      selling_price: 89000,
       quantity: 4,
       min_stock_level: 8,
       location: "Warehouse Bay B-02",
@@ -272,8 +273,8 @@ export const INITIAL_SEED_DATA = {
       category_id: "cat-5",
       category_name: "Structured Cabling & Racks",
       unit: "Spools",
-      purchase_price: 180.00,
-      selling_price: 340.00,
+      purchase_price: 18000,
+      selling_price: 34000,
       quantity: 54,
       min_stock_level: 15,
       location: "Warehouse Bay D-05",
@@ -287,72 +288,72 @@ export const INITIAL_SEED_DATA = {
   customers: [
     {
       id: "cust-1",
-      name: "Apex Logistics International",
-      company_name: "Apex Logistics International Corp",
-      contact_person: "David Vance",
-      email: "dvance@apexlogistics.com",
-      phone: "+1 (312) 555-0144",
-      address: "200 South Wacker Drive, Suite 1800, Chicago, IL 60606",
-      tax_number: "US-IL-992104",
-      credit_limit: 75000.00,
-      total_spent: 86400.00,
-      current_balance: 14250.00,
+      name: "Habib Bank Limited (HBL)",
+      company_name: "HBL Financial Technology Division",
+      contact_person: "Tariq Mansoor",
+      email: "tmansoor@hbl.com",
+      phone: "+92 (21) 3241-8000",
+      address: "HBL Tower, I.I. Chundrigar Road, Karachi",
+      tax_number: "PK-NTN-110294-8",
+      credit_limit: 15000000,
+      total_spent: 18450000,
+      current_balance: 2875250,
       status: "Active"
     },
     {
       id: "cust-2",
-      name: "Vanguard Health Systems Inc.",
-      company_name: "Vanguard Regional Hospital Network",
-      contact_person: "Dr. Marcus Sterling",
-      email: "msterling@vanguardhealth.org",
-      phone: "+1 (617) 555-0182",
-      address: "100 Binney Street, Cambridge, MA 02142",
-      tax_number: "US-MA-441029",
-      credit_limit: 120000.00,
-      total_spent: 194500.00,
-      current_balance: 28900.00,
+      name: "Shaukat Khanum Memorial Trust",
+      company_name: "SKMT Regional Healthcare Network",
+      contact_person: "Dr. Asim Farooq",
+      email: "afarooq@skm.org.pk",
+      phone: "+92 (42) 3590-5000",
+      address: "7A Block R-3, Johar Town, Lahore",
+      tax_number: "PK-NTN-220491-3",
+      credit_limit: 10000000,
+      total_spent: 12500000,
+      current_balance: 1929130,
       status: "Active"
     },
     {
       id: "cust-3",
-      name: "Horizon Renewable Power LLC",
-      company_name: "Horizon Clean Energy Microgrids",
-      contact_person: "Chloe Bennett",
-      email: "cbennett@horizonpower.com",
-      phone: "+1 (512) 555-0193",
-      address: "301 Congress Avenue, Suite 1200, Austin, TX 78701",
-      tax_number: "US-TX-779330",
-      credit_limit: 50000.00,
-      total_spent: 58200.00,
-      current_balance: 0.00,
+      name: "Engro Corporation Limited",
+      company_name: "Engro Digital Infrastructure",
+      contact_person: "Zainab Bokhari",
+      email: "zbokhari@engro.com",
+      phone: "+92 (21) 111-211-211",
+      address: "Harbour Front Building, HC-3, Marine Drive, Clifton, Karachi",
+      tax_number: "PK-NTN-330592-1",
+      credit_limit: 25000000,
+      total_spent: 34200000,
+      current_balance: 0,
       status: "Active"
     },
     {
       id: "cust-4",
-      name: "Morgan & Sterling Capital",
-      company_name: "Morgan & Sterling Financial Partners LLC",
-      contact_person: "Arthur Pendelton",
-      email: "apendelton@mscapital.com",
-      phone: "+1 (212) 555-0115",
-      address: "40 Wall Street, 42nd Floor, New York, NY 10005",
-      tax_number: "US-NY-990445",
-      credit_limit: 200000.00,
-      total_spent: 342000.00,
-      current_balance: 47250.00,
+      name: "Lucky Core Industries (ICI)",
+      company_name: "Lucky Core Chemicals & Tech",
+      contact_person: "Khurram Qureshi",
+      email: "kqureshi@luckycore.com",
+      phone: "+92 (21) 3583-7490",
+      address: "ICI House, 5 West Wharf, Karachi",
+      tax_number: "PK-NTN-440693-5",
+      credit_limit: 20000000,
+      total_spent: 42800000,
+      current_balance: 0,
       status: "Active"
     },
     {
       id: "cust-5",
-      name: "Pacific Coast Manufacturing Group",
-      company_name: "Pacific Coast Precision Assemblies Corp",
-      contact_person: "Elena Rostova",
-      email: "erostova@pacificmfg.com",
-      phone: "+1 (415) 555-0177",
-      address: "500 Howard Street, San Francisco, CA 94105",
-      tax_number: "US-CA-555321",
-      credit_limit: 90000.00,
-      total_spent: 128400.00,
-      current_balance: 8500.00,
+      name: "Systems Limited (SysNet)",
+      company_name: "Systems Limited Enterprise Services",
+      contact_person: "Omer Saeed",
+      email: "osaeed@systemsltd.com",
+      phone: "+92 (42) 111-797-836",
+      address: "E-1, Seepz Industrial Estate, Lahore",
+      tax_number: "PK-NTN-550794-9",
+      credit_limit: 12000000,
+      total_spent: 16800000,
+      current_balance: 0,
       status: "Active"
     }
   ],
@@ -425,69 +426,72 @@ export const INITIAL_SEED_DATA = {
     }
   ],
 
+  // Sales Orders: Sum of order amounts = Rs. 11,278,000 (Exactly matches user example)
   sales_orders: [
     {
       id: "so-101",
       order_number: "SO-2026-0891",
       customer_id: "cust-4",
-      customer_name: "Morgan & Sterling Capital",
+      customer_name: "Lucky Core Industries (ICI)",
       branch_id: "b-1",
       order_date: "2026-09-07",
       due_date: "2026-09-21",
       status: "Delivered",
-      total_amount: 34250.00,
-      tax_amount: 2911.25,
-      discount_amount: 500.00,
-      net_amount: 36661.25,
+      total_amount: 6850000,
+      tax_amount: 582250,
+      discount_amount: 34250,
+      net_amount: 7398000,
       payment_status: "Paid",
-      payment_method: "Wire Transfer (ACH)",
+      payment_method: "Corporate RTGS Settlement",
       created_by: "Derrick Cole",
       items: [
-        { product_id: "p-1", name: "HPE ProLiant DL380 Gen11 2U Server", sku: "HPE-DL380-G11", quantity: 5, unit_price: 5890.00, total: 29450.00 },
-        { product_id: "p-2", name: "Cisco Catalyst 9300 48-Port PoE+ Switch", sku: "CSCO-CAT-9300", quantity: 1, unit_price: 4750.00, total: 4750.00 }
+        { product_id: "p-1", name: "HPE ProLiant DL380 Gen11 2U Server", sku: "HPE-DL380-G11", quantity: 10, unit_price: 589000, purchase_cost: 345000, total: 5890000 },
+        { product_id: "p-6", name: "Fortinet FortiGate 200F Enterprise Firewall", sku: "FTNT-FG-200F", quantity: 3, unit_price: 320000, purchase_cost: 185000, total: 960000 }
       ]
     },
     {
       id: "so-102",
       order_number: "SO-2026-0892",
       customer_id: "cust-1",
-      customer_name: "Apex Logistics International",
+      customer_name: "Habib Bank Limited (HBL)",
       branch_id: "b-2",
       order_date: "2026-09-08",
       due_date: "2026-09-22",
       status: "Shipped",
-      total_amount: 19800.00,
-      tax_amount: 1683.00,
-      discount_amount: 0.00,
-      net_amount: 21483.00,
+      total_amount: 2650000,
+      tax_amount: 225250,
+      discount_amount: 0,
+      net_amount: 2875250,
       payment_status: "Pending",
       payment_method: "Net-30 Invoice",
       created_by: "Derrick Cole",
       items: [
-        { product_id: "p-2", name: "Cisco Catalyst 9300 48-Port PoE+ Switch", sku: "CSCO-CAT-9300", quantity: 3, unit_price: 4750.00, total: 14250.00 },
-        { product_id: "p-3", name: "Dell PowerEdge R760 Dual-Xeon Server", sku: "DELL-PE-R760", quantity: 1, unit_price: 5400.00, total: 5400.00 }
+        { product_id: "p-2", name: "Cisco Catalyst 9300 48-Port PoE+ Switch", sku: "CSCO-CAT-9300", quantity: 4, unit_price: 475000, purchase_cost: 280000, total: 1900000 },
+        { product_id: "p-7", name: "Tripp Lite 42U Server Rack Enclosure Cabinet", sku: "TPL-SR-42U", quantity: 5, unit_price: 135000, purchase_cost: 75000, total: 675000 },
+        { product_id: "p-9", name: "Belden Cat6A 1000ft Shielded Bulk Cable Spool", sku: "BLD-CAT6A-1K", quantity: 2, unit_price: 34000, purchase_cost: 18000, total: 68000 }
       ]
     },
     {
       id: "so-103",
       order_number: "SO-2026-0893",
       customer_id: "cust-2",
-      customer_name: "Vanguard Health Systems Inc.",
+      customer_name: "Shaukat Khanum Memorial Trust",
       branch_id: "b-1",
       order_date: "2026-09-09",
       due_date: "2026-09-23",
       status: "Confirmed",
-      total_amount: 15400.00,
-      tax_amount: 1309.00,
-      discount_amount: 200.00,
-      net_amount: 16509.00,
+      total_amount: 1778000,
+      tax_amount: 151130,
+      discount_amount: 0,
+      net_amount: 1929130,
       payment_status: "Pending",
       payment_method: "Net-30 Invoice",
       created_by: "Derrick Cole",
       items: [
-        { product_id: "p-5", name: "Eaton 9PX 10kVA Double-Conversion UPS", sku: "ETN-UPS-10K", quantity: 2, unit_price: 4800.00, total: 9600.00 },
-        { product_id: "p-6", name: "Fortinet FortiGate 200F Enterprise Firewall", sku: "FTNT-FG-200F", quantity: 1, unit_price: 3200.00, total: 3200.00 },
-        { product_id: "p-7", name: "Tripp Lite 42U Server Rack Enclosure Cabinet", sku: "TPL-SR-42U", quantity: 1, unit_price: 1350.00, total: 1350.00 }
+        { product_id: "p-3", name: "Dell PowerEdge R760 Dual-Xeon Server", sku: "DELL-PE-R760", quantity: 2, unit_price: 540000, purchase_cost: 310000, total: 1080000 },
+        { product_id: "p-5", name: "Eaton 9PX 10kVA Double-Conversion UPS", sku: "ETN-UPS-10K", quantity: 1, unit_price: 480000, purchase_cost: 260000, total: 480000 },
+        { product_id: "p-8", name: "Honeywell Pro-Watch IP Biometric Terminal", sku: "HON-BIO-900", quantity: 2, unit_price: 89000, purchase_cost: 48000, total: 178000 },
+        { product_id: "p-4", name: "APC NetShelter 30A Zero-U Metered PDU", sku: "APC-PDU-30A", quantity: 1, unit_price: 48000, purchase_cost: 24000, total: 48000 }
       ]
     }
   ],
@@ -502,11 +506,11 @@ export const INITIAL_SEED_DATA = {
       order_date: "2026-09-04",
       expected_delivery_date: "2026-09-14",
       status: "Received",
-      total_amount: 31000.00,
+      total_amount: 3100000,
       payment_status: "Paid",
       created_by: "Marcus Vance",
       items: [
-        { product_id: "p-3", name: "Dell PowerEdge R760 Dual-Xeon Server", quantity: 10, unit_price: 3100.00, total: 31000.00 }
+        { product_id: "p-3", name: "Dell PowerEdge R760 Dual-Xeon Server", quantity: 10, unit_price: 310000, total: 3100000 }
       ]
     },
     {
@@ -518,11 +522,11 @@ export const INITIAL_SEED_DATA = {
       order_date: "2026-09-07",
       expected_delivery_date: "2026-09-18",
       status: "Ordered",
-      total_amount: 28000.00,
+      total_amount: 2800000,
       payment_status: "Partial",
       created_by: "Marcus Vance",
       items: [
-        { product_id: "p-2", name: "Cisco Catalyst 9300 48-Port PoE+ Switch", quantity: 10, unit_price: 2800.00, total: 28000.00 }
+        { product_id: "p-2", name: "Cisco Catalyst 9300 48-Port PoE+ Switch", quantity: 10, unit_price: 280000, total: 2800000 }
       ]
     },
     {
@@ -534,35 +538,36 @@ export const INITIAL_SEED_DATA = {
       order_date: "2026-09-09",
       expected_delivery_date: "2026-09-22",
       status: "Draft",
-      total_amount: 7200.00,
+      total_amount: 720000,
       payment_status: "Unpaid",
       created_by: "Marcus Vance",
       items: [
-        { product_id: "p-4", name: "APC NetShelter 30A Zero-U Metered PDU", quantity: 20, unit_price: 240.00, total: 4800.00 },
-        { product_id: "p-9", name: "Belden Cat6A 1000ft Shielded Bulk Cable Spool", quantity: 10, unit_price: 180.00, total: 1800.00 }
+        { product_id: "p-4", name: "APC NetShelter 30A Zero-U Metered PDU", quantity: 20, unit_price: 24000, total: 480000 },
+        { product_id: "p-9", name: "Belden Cat6A 1000ft Shielded Bulk Cable Spool", quantity: 10, unit_price: 18000, total: 180000 }
       ]
     }
   ],
 
-  // GAAP Compliant Standard Chart of Accounts
+  // GAAP Compliant Standard Chart of Accounts (in PKR)
+  // Operating Treasury (#1010 + #1020) = Rs. 38,450,000 (Exactly matches user example)
   accounts: [
-    { id: "acc-1010", code: "1010", name: "Operating Checking Account (Chase)", type: "Asset", category: "Current Assets", balance: 412500.00, is_active: true },
-    { id: "acc-1020", code: "1020", name: "Payroll Clearing Account", type: "Asset", category: "Current Assets", balance: 55000.00, is_active: true },
-    { id: "acc-1100", code: "1100", name: "Accounts Receivable", type: "Asset", category: "Current Assets", balance: 98900.00, is_active: true },
-    { id: "acc-1200", code: "1200", name: "Finished Goods Merchandise Inventory", type: "Asset", category: "Current Assets", balance: 278400.00, is_active: true },
-    { id: "acc-1500", code: "1500", name: "Machinery, Test Equipment & Hardware", type: "Asset", category: "Fixed Assets", balance: 185000.00, is_active: true },
-    { id: "acc-2010", code: "2010", name: "Accounts Payable", type: "Liability", category: "Current Liabilities", balance: 74600.00, is_active: true },
-    { id: "acc-2100", code: "2100", name: "Accrued Payroll & Statutory Liabilities", type: "Liability", category: "Current Liabilities", balance: 31200.00, is_active: true },
-    { id: "acc-2200", code: "2200", name: "Commercial Revolving Credit Facility", type: "Liability", category: "Long-term Liabilities", balance: 95000.00, is_active: true },
-    { id: "acc-3010", code: "3010", name: "Common Stock & Paid-in Capital", type: "Equity", category: "Equity", balance: 250000.00, is_active: true },
-    { id: "acc-3020", code: "3020", name: "Retained Earnings", type: "Equity", category: "Equity", balance: 579000.00, is_active: true },
-    { id: "acc-4010", code: "4010", name: "Commercial Hardware Sales Revenue", type: "Revenue", category: "Operating Revenue", balance: 486200.00, is_active: true },
-    { id: "acc-4020", code: "4020", name: "Enterprise Support & SLA Maintenance", type: "Revenue", category: "Operating Revenue", balance: 94800.00, is_active: true },
-    { id: "acc-5010", code: "5010", name: "Cost of Goods Sold (COGS)", type: "Expense", category: "Direct Costs", balance: 298400.00, is_active: true },
-    { id: "acc-6010", code: "6010", name: "Staff Salaries & Executive Compensation", type: "Expense", category: "Operating Expenses", balance: 135000.00, is_active: true },
-    { id: "acc-6020", code: "6020", name: "Office Facilities, Rent & Utilities", type: "Expense", category: "Operating Expenses", balance: 28500.00, is_active: true },
-    { id: "acc-6030", code: "6030", name: "Enterprise Cloud & Data Center Hosting", type: "Expense", category: "Operating Expenses", balance: 19400.00, is_active: true },
-    { id: "acc-6040", code: "6040", name: "Professional Legal, Accounting & Auditing", type: "Expense", category: "Operating Expenses", balance: 14700.00, is_active: true }
+    { id: "acc-1010", code: "1010", name: "Operating Checking Account (Habib Bank)", type: "Asset", category: "Current Assets", balance: 33650000, is_active: true },
+    { id: "acc-1020", code: "1020", name: "Payroll Clearing Account (Meezan Bank)", type: "Asset", category: "Current Assets", balance: 4800000, is_active: true },
+    { id: "acc-1100", code: "1100", name: "Accounts Receivable", type: "Asset", category: "Current Assets", balance: 4804380, is_active: true },
+    { id: "acc-1200", code: "1200", name: "Finished Goods Merchandise Inventory", type: "Asset", category: "Current Assets", balance: 32818000, is_active: true },
+    { id: "acc-1500", code: "1500", name: "Machinery, Data Center & Test Equipment", type: "Asset", category: "Fixed Assets", balance: 18500000, is_active: true },
+    { id: "acc-2010", code: "2010", name: "Accounts Payable", type: "Liability", category: "Current Liabilities", balance: 3520000, is_active: true },
+    { id: "acc-2100", code: "2100", name: "Accrued Statutory Tax & Payroll Liabilities", type: "Liability", category: "Current Liabilities", balance: 2150000, is_active: true },
+    { id: "acc-2200", code: "2200", name: "Commercial Credit Facility (HBL Term Finance)", type: "Liability", category: "Long-term Liabilities", balance: 9500000, is_active: true },
+    { id: "acc-3010", code: "3010", name: "Paid-in Share Capital", type: "Equity", category: "Equity", balance: 25000000, is_active: true },
+    { id: "acc-3020", code: "3020", name: "Retained Corporate Reserves", type: "Equity", category: "Equity", balance: 54602380, is_active: true },
+    { id: "acc-4010", code: "4010", name: "Commercial Hardware Sales Revenue", type: "Revenue", category: "Operating Revenue", balance: 11278000, is_active: true },
+    { id: "acc-4020", code: "4020", name: "Enterprise Maintenance & Support Contracts", type: "Revenue", category: "Operating Revenue", balance: 2450000, is_active: true },
+    { id: "acc-5010", code: "5010", name: "Cost of Goods Sold (COGS)", type: "Expense", category: "Direct Costs", balance: 6840000, is_active: true },
+    { id: "acc-6010", code: "6010", name: "Staff Salaries & Executive Compensation", type: "Expense", category: "Operating Expenses", balance: 1500000, is_active: true },
+    { id: "acc-6020", code: "6020", name: "Office Facilities, Rent & Utilities", type: "Expense", category: "Operating Expenses", balance: 450000, is_active: true },
+    { id: "acc-6030", code: "6030", name: "Data Center Hosting & Network Bandwidth", type: "Expense", category: "Operating Expenses", balance: 320000, is_active: true },
+    { id: "acc-6040", code: "6040", name: "Legal, Corporate Audit & Compliance Fees", type: "Expense", category: "Operating Expenses", balance: 180000, is_active: true }
   ],
 
   journal_entries: [
@@ -571,12 +576,12 @@ export const INITIAL_SEED_DATA = {
       entry_number: "JE-2026-0044",
       entry_date: "2026-09-07",
       reference_number: "REF-SO-891",
-      description: "Recognize revenue & settlement for SO-2026-0891 (Morgan & Sterling)",
-      total_amount: 36661.25,
+      description: "Recognize revenue & settlement for SO-2026-0891 (Lucky Core Industries)",
+      total_amount: 7398000,
       created_by: "Victoria Chen",
       lines: [
-        { account_id: "acc-1010", account_name: "Operating Checking Account (Chase)", debit: 36661.25, credit: 0 },
-        { account_id: "acc-4010", account_name: "Commercial Hardware Sales Revenue", debit: 0, credit: 36661.25 }
+        { account_id: "acc-1010", account_name: "Operating Checking Account (Habib Bank)", debit: 7398000, credit: 0 },
+        { account_id: "acc-4010", account_name: "Commercial Hardware Sales Revenue", debit: 0, credit: 7398000 }
       ]
     },
     {
@@ -585,11 +590,11 @@ export const INITIAL_SEED_DATA = {
       entry_date: "2026-09-08",
       reference_number: "REF-PO-410",
       description: "Inventory capitalization for PO-2026-0410 from Dell Technologies",
-      total_amount: 31000.00,
+      total_amount: 3100000,
       created_by: "Victoria Chen",
       lines: [
-        { account_id: "acc-1200", account_name: "Finished Goods Merchandise Inventory", debit: 31000.00, credit: 0 },
-        { account_id: "acc-1010", account_name: "Operating Checking Account (Chase)", debit: 0, credit: 31000.00 }
+        { account_id: "acc-1200", account_name: "Finished Goods Merchandise Inventory", debit: 3100000, credit: 0 },
+        { account_id: "acc-1010", account_name: "Operating Checking Account (Habib Bank)", debit: 0, credit: 3100000 }
       ]
     },
     {
@@ -598,11 +603,11 @@ export const INITIAL_SEED_DATA = {
       entry_date: "2026-09-09",
       reference_number: "REF-PAYROLL-08",
       description: "Disbursement of monthly executive & staff payroll",
-      total_amount: 55000.00,
+      total_amount: 1500000,
       created_by: "Victoria Chen",
       lines: [
-        { account_id: "acc-6010", account_name: "Staff Salaries & Executive Compensation", debit: 55000.00, credit: 0 },
-        { account_id: "acc-1020", account_name: "Payroll Clearing Account", debit: 0, credit: 55000.00 }
+        { account_id: "acc-6010", account_name: "Staff Salaries & Executive Compensation", debit: 1500000, credit: 0 },
+        { account_id: "acc-1020", account_name: "Payroll Clearing Account (Meezan Bank)", debit: 0, credit: 1500000 }
       ]
     }
   ],
@@ -610,85 +615,85 @@ export const INITIAL_SEED_DATA = {
   employees: [
     {
       id: "emp-101",
-      employee_code: "GES-101",
+      employee_code: "NEX-101",
       first_name: "Alexander",
       last_name: "Sterling",
       email: "admin@company.com",
-      phone: "+1 (212) 555-0101",
+      phone: "+92 (300) 829-0101",
       department: "Executive Leadership",
       designation: "Chief Executive Officer",
       join_date: "2021-04-01",
-      basic_salary: 19500.00,
+      basic_salary: 350000,
       status: "Active",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=96&auto=format&fit=crop&q=80"
     },
     {
       id: "emp-102",
-      employee_code: "GES-102",
+      employee_code: "NEX-102",
       first_name: "Victoria",
       last_name: "Chen",
       email: "accountant@company.com",
-      phone: "+1 (212) 555-0102",
+      phone: "+92 (301) 829-0102",
       department: "Finance & Accounting",
       designation: "Chief Financial Officer",
       join_date: "2021-06-15",
-      basic_salary: 15200.00,
+      basic_salary: 280000,
       status: "Active",
       avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=96&auto=format&fit=crop&q=80"
     },
     {
       id: "emp-103",
-      employee_code: "GES-103",
+      employee_code: "NEX-103",
       first_name: "Marcus",
       last_name: "Vance",
       email: "inventory@company.com",
-      phone: "+1 (212) 555-0103",
+      phone: "+92 (302) 829-0103",
       department: "Supply Chain & Operations",
       designation: "Director of Logistics & Inventory",
       join_date: "2022-01-10",
-      basic_salary: 12000.00,
+      basic_salary: 220000,
       status: "Active",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=96&auto=format&fit=crop&q=80"
     },
     {
       id: "emp-104",
-      employee_code: "GES-104",
+      employee_code: "NEX-104",
       first_name: "Sophia",
       last_name: "Martinez",
       email: "hr@company.com",
-      phone: "+1 (212) 555-0104",
+      phone: "+92 (303) 829-0104",
       department: "Human Resources",
       designation: "Head of People & Operations",
       join_date: "2022-05-15",
-      basic_salary: 10500.00,
+      basic_salary: 195000,
       status: "Active",
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=96&auto=format&fit=crop&q=80"
     },
     {
       id: "emp-105",
-      employee_code: "GES-105",
+      employee_code: "NEX-105",
       first_name: "Derrick",
       last_name: "Cole",
       email: "sales@company.com",
-      phone: "+1 (212) 555-0105",
+      phone: "+92 (304) 829-0105",
       department: "Enterprise Sales",
-      designation: "VP of Enterprise Accounts",
+      designation: "VP of Commercial Accounts",
       join_date: "2022-09-01",
-      basic_salary: 11000.00,
+      basic_salary: 210000,
       status: "Active",
       avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=96&auto=format&fit=crop&q=80"
     },
     {
       id: "emp-106",
-      employee_code: "GES-106",
+      employee_code: "NEX-106",
       first_name: "David",
       last_name: "Vance",
       email: "dvance@company.com",
-      phone: "+1 (212) 555-0106",
+      phone: "+92 (305) 829-0106",
       department: "Operations",
       designation: "Principal Infrastructure Lead",
       join_date: "2023-03-12",
-      basic_salary: 13500.00,
+      basic_salary: 245000,
       status: "Active",
       avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=96&auto=format&fit=crop&q=80"
     }
@@ -708,27 +713,27 @@ export const INITIAL_SEED_DATA = {
       id: "pay-01",
       month: "August",
       year: 2026,
-      total_gross: 81700.00,
-      total_deductions: 12255.00,
-      total_net: 69445.00,
+      total_gross: 1500000,
+      total_deductions: 185000,
+      total_net: 1315000,
       status: "Disbursed",
       payment_date: "2026-08-31",
       items: [
-        { employee_id: "emp-101", employee_name: "Alexander Sterling", basic: 19500.00, allowance: 2000.00, deductions: 3225.00, net: 18275.00 },
-        { employee_id: "emp-102", employee_name: "Victoria Chen", basic: 15200.00, allowance: 1500.00, deductions: 2505.00, net: 14195.00 },
-        { employee_id: "emp-103", employee_name: "Marcus Vance", basic: 12000.00, allowance: 1000.00, deductions: 1950.00, net: 11050.00 },
-        { employee_id: "emp-104", employee_name: "Sophia Martinez", basic: 10500.00, allowance: 800.00, deductions: 1695.00, net: 9605.00 },
-        { employee_id: "emp-105", employee_name: "Derrick Cole", basic: 11000.00, allowance: 2500.00, deductions: 2025.00, net: 11475.00 },
-        { employee_id: "emp-106", employee_name: "David Vance", basic: 13500.00, allowance: 1200.00, deductions: 2205.00, net: 12495.00 }
+        { employee_id: "emp-101", employee_name: "Alexander Sterling", basic: 350000, allowance: 30000, deductions: 45000, net: 335000 },
+        { employee_id: "emp-102", employee_name: "Victoria Chen", basic: 280000, allowance: 25000, deductions: 36000, net: 269000 },
+        { employee_id: "emp-103", employee_name: "Marcus Vance", basic: 220000, allowance: 20000, deductions: 28000, net: 212000 },
+        { employee_id: "emp-104", employee_name: "Sophia Martinez", basic: 195000, allowance: 18000, deductions: 24000, net: 189000 },
+        { employee_id: "emp-105", employee_name: "Derrick Cole", basic: 210000, allowance: 35000, deductions: 26000, net: 219000 },
+        { employee_id: "emp-106", employee_name: "David Vance", basic: 245000, allowance: 22000, deductions: 26000, net: 241000 }
       ]
     }
   ],
 
   audit_logs: [
-    { id: "log-1", timestamp: "2026-09-09T10:45:00Z", user: "Alexander Sterling", role: "Super Admin", action: "SYSTEM_INITIALIZATION", module: "Core", ip: "192.168.1.1", details: "Global Enterprise ERP initialized with standard GAAP ledger." },
-    { id: "log-2", timestamp: "2026-09-09T09:30:12Z", user: "Victoria Chen", role: "Financial Controller", action: "JOURNAL_POSTING", module: "Accounting", ip: "192.168.1.14", details: "Posted journal voucher JE-2026-0044 balanced at $36,661.25." },
-    { id: "log-3", timestamp: "2026-09-09T08:15:33Z", user: "Marcus Vance", role: "Inventory Specialist", action: "PURCHASE_ORDER_ISSUED", module: "Procurement", ip: "192.168.2.45", details: "Generated PO-2026-0412 for Schneider Electric & Fastenal supplies." },
-    { id: "log-4", timestamp: "2026-09-08T16:20:00Z", user: "Derrick Cole", role: "Senior Sales Representative", action: "SALES_ORDER_CONFIRMED", module: "Sales", ip: "192.168.3.10", details: "Order SO-2026-0892 confirmed for Apex Logistics International." },
+    { id: "log-1", timestamp: "2026-09-09T10:45:00Z", user: "Alexander Sterling", role: "Super Admin", action: "SYSTEM_INITIALIZATION", module: "Core", ip: "192.168.1.1", details: "NEXIS ERP enterprise initialized with PKR GAAP general ledger." },
+    { id: "log-2", timestamp: "2026-09-09T09:30:12Z", user: "Victoria Chen", role: "Financial Controller", action: "JOURNAL_POSTING", module: "Accounting", ip: "192.168.1.14", details: "Posted journal voucher JE-2026-0044 balanced at Rs. 7,398,000." },
+    { id: "log-3", timestamp: "2026-09-09T08:15:33Z", user: "Marcus Vance", role: "Inventory Specialist", action: "PURCHASE_ORDER_ISSUED", module: "Procurement", ip: "192.168.2.45", details: "Generated PO-2026-0412 for Schneider Electric infrastructure." },
+    { id: "log-4", timestamp: "2026-09-08T16:20:00Z", user: "Derrick Cole", role: "Senior Sales Representative", action: "SALES_ORDER_CONFIRMED", module: "Sales", ip: "192.168.3.10", details: "Order SO-2026-0892 confirmed for Habib Bank Limited." },
     { id: "log-5", timestamp: "2026-09-08T11:00:00Z", user: "Sophia Martinez", role: "HR Director", action: "ATTENDANCE_VERIFICATION", module: "HR", ip: "192.168.1.22", details: "Staff clock-in records synchronized across corporate facilities." }
   ],
 
@@ -743,7 +748,7 @@ export const INITIAL_SEED_DATA = {
       balance_before: 8,
       balance_after: 18,
       warehouse_id: "wh-1",
-      warehouse_name: "HQ East Coast Staging Hub",
+      warehouse_name: "Central Distribution Hub (Karachi Port)",
       reference_id: "PO-2026-0410",
       notes: "Goods received from Dell Technologies",
       performed_by: "Marcus Vance",
@@ -755,13 +760,13 @@ export const INITIAL_SEED_DATA = {
       sku: "HPE-DL380-G11",
       product_name: "HPE ProLiant DL380 Gen11 2U Server",
       movement_type: "SALES_DISPATCH",
-      quantity_change: -5,
-      balance_before: 40,
+      quantity_change: -10,
+      balance_before: 45,
       balance_after: 35,
       warehouse_id: "wh-1",
-      warehouse_name: "HQ East Coast Staging Hub",
+      warehouse_name: "Central Distribution Hub (Karachi Port)",
       reference_id: "SO-2026-0891",
-      notes: "Fulfilled for Morgan & Sterling Capital",
+      notes: "Fulfilled for Lucky Core Industries",
       performed_by: "Derrick Cole",
       timestamp: "2026-09-07T11:15:00Z"
     },
@@ -771,15 +776,15 @@ export const INITIAL_SEED_DATA = {
       sku: "CSCO-CAT-9300",
       product_name: "Cisco Catalyst 9300 48-Port PoE+ Switch",
       movement_type: "SALES_DISPATCH",
-      quantity_change: -1,
-      balance_before: 29,
+      quantity_change: -4,
+      balance_before: 32,
       balance_after: 28,
       warehouse_id: "wh-2",
-      warehouse_name: "Midwest Logistics Distribution Center",
-      reference_id: "SO-2026-0891",
-      notes: "Fulfilled for Morgan & Sterling Capital",
+      warehouse_name: "Punjab Regional Distribution Depot",
+      reference_id: "SO-2026-0892",
+      notes: "Fulfilled for Habib Bank Limited",
       performed_by: "Derrick Cole",
-      timestamp: "2026-09-07T11:20:00Z"
+      timestamp: "2026-09-08T11:20:00Z"
     }
   ],
 
@@ -788,19 +793,19 @@ export const INITIAL_SEED_DATA = {
       id: "quote-301",
       quotation_number: "QT-2026-0155",
       customer_id: "cust-2",
-      customer_name: "Vanguard Health Systems Inc.",
+      customer_name: "Shaukat Khanum Memorial Trust",
       created_by: "Derrick Cole",
       issue_date: "2026-09-08",
       expiry_date: "2026-09-22",
       status: "Draft",
-      total_amount: 22800.00,
-      tax_amount: 1938.00,
-      discount_amount: 300.00,
-      net_amount: 24438.00,
+      total_amount: 2280000,
+      tax_amount: 193800,
+      discount_amount: 30000,
+      net_amount: 2443800,
       payment_terms: "Net-30 Invoice",
       items: [
-        { product_id: "p-1", name: "HPE ProLiant DL380 Gen11 2U Server", sku: "HPE-DL380-G11", quantity: 3, unit_price: 5890.00, total: 17670.00 },
-        { product_id: "p-5", name: "Eaton 9PX 10kVA Double-Conversion UPS", sku: "ETN-UPS-10K", quantity: 1, unit_price: 4800.00, total: 4800.00 }
+        { product_id: "p-1", name: "HPE ProLiant DL380 Gen11 2U Server", sku: "HPE-DL380-G11", quantity: 3, unit_price: 589000, total: 1767000 },
+        { product_id: "p-5", name: "Eaton 9PX 10kVA Double-Conversion UPS", sku: "ETN-UPS-10K", quantity: 1, unit_price: 480000, total: 480000 }
       ]
     }
   ],
@@ -812,16 +817,16 @@ export const INITIAL_SEED_DATA = {
       order_id: "so-101",
       order_number: "SO-2026-0891",
       customer_id: "cust-4",
-      customer_name: "Morgan & Sterling Capital",
+      customer_name: "Lucky Core Industries (ICI)",
       invoice_date: "2026-09-07",
       due_date: "2026-09-21",
-      total_amount: 34250.00,
-      tax_amount: 2911.25,
-      net_amount: 36661.25,
-      paid_amount: 36661.25,
-      balance_due: 0.00,
+      total_amount: 6850000,
+      tax_amount: 582250,
+      net_amount: 7398000,
+      paid_amount: 7398000,
+      balance_due: 0,
       status: "Paid",
-      payment_method: "Wire Transfer (ACH)"
+      payment_method: "Corporate RTGS Settlement"
     },
     {
       id: "inv-402",
@@ -829,14 +834,14 @@ export const INITIAL_SEED_DATA = {
       order_id: "so-102",
       order_number: "SO-2026-0892",
       customer_id: "cust-1",
-      customer_name: "Apex Logistics International",
+      customer_name: "Habib Bank Limited (HBL)",
       invoice_date: "2026-09-08",
       due_date: "2026-09-22",
-      total_amount: 19800.00,
-      tax_amount: 1683.00,
-      net_amount: 21483.00,
-      paid_amount: 0.00,
-      balance_due: 21483.00,
+      total_amount: 2650000,
+      tax_amount: 225250,
+      net_amount: 2875250,
+      paid_amount: 0,
+      balance_due: 2875250,
       status: "Unpaid",
       payment_method: "Net-30 Invoice"
     }
@@ -849,13 +854,13 @@ export const INITIAL_SEED_DATA = {
       invoice_id: "inv-401",
       invoice_number: "INV-2026-0891",
       customer_id: "cust-4",
-      customer_name: "Morgan & Sterling Capital",
+      customer_name: "Lucky Core Industries (ICI)",
       payment_date: "2026-09-07",
-      amount: 36661.25,
-      payment_method: "Wire Transfer (ACH)",
-      transaction_reference: "ACH-WIRE-NY-8910",
+      amount: 7398000,
+      payment_method: "Corporate RTGS Settlement",
+      transaction_reference: "RTGS-PK-HBL-920194",
       received_by: "Victoria Chen",
-      notes: "Settled in full against Chase checking account"
+      notes: "Settled in full against Habib Bank checking account"
     }
   ],
 
@@ -867,12 +872,24 @@ export const INITIAL_SEED_DATA = {
       entity_id: "po-202",
       entity_reference: "PO-2026-0411",
       requested_by: "Marcus Vance",
-      amount: 28000.00,
-      threshold_triggered: "PO value > $10,000",
+      amount: 2800000,
+      threshold_triggered: "PO value > Rs. 1,000,000",
       status: "Approved",
       reviewed_by: "Alexander Sterling",
       reviewed_at: "2026-09-07T12:00:00Z",
-      comments: "Approved for Midwest logistics switch rollout."
+      comments: "Approved for Punjab logistics switch deployment."
     }
-  ]
+  ],
+
+  settings: {
+    company_name: "NEXIS Enterprise Technologies Ltd.",
+    legal_name: "NEXIS Cloud Operating Systems Pvt. Ltd.",
+    tax_id: "NTN-4892011-7",
+    company_email: "finance@nexiserp.com",
+    company_phone: "+92 (21) 3582-9100",
+    address: "Level 14, Executive Tower, Clifton Block 4, Karachi, Pakistan",
+    currency: "PKR",
+    currency_symbol: "Rs. ",
+    default_tax_rate: 18.0
+  }
 };

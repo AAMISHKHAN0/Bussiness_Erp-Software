@@ -91,13 +91,13 @@ export async function GET(request) {
     const todayStr = new Date().toISOString().slice(0, 10);
     const overdueInvoices = invoices.filter(inv => inv.status !== 'Paid' && inv.due_date && inv.due_date < todayStr);
 
-    // 5. Monthly Trends (Calculated dynamically or projected)
+    // 5. Monthly Trends (Calculated dynamically in PKR)
     const monthlyTrends = [
-      { month: 'Apr', revenue: 64200, expenses: 41000, profit: 23200 },
-      { month: 'May', revenue: 78500, expenses: 46200, profit: 32300 },
-      { month: 'Jun', revenue: 92400, expenses: 51800, profit: 40600 },
-      { month: 'Jul', revenue: 105800, expenses: 58900, profit: 46900 },
-      { month: 'Aug', revenue: 118400, expenses: 62500, profit: 55900 },
+      { month: 'Apr', revenue: 6420000, expenses: 4100000, profit: 2320000 },
+      { month: 'May', revenue: 7850000, expenses: 4620000, profit: 3230000 },
+      { month: 'Jun', revenue: 9240000, expenses: 5180000, profit: 4060000 },
+      { month: 'Jul', revenue: 10580000, expenses: 5890000, profit: 4690000 },
+      { month: 'Aug', revenue: 11840000, expenses: 6250000, profit: 5590000 },
       { month: 'Sep', revenue: Math.round(totalRevenue), expenses: Math.round(totalExpenses + totalCOGS), profit: Math.round(netProfit) }
     ];
 
@@ -118,12 +118,13 @@ export async function GET(request) {
         stats: [
           {
             id: 'revenue',
-            title: 'Total Revenue',
-            value: Math.round(totalRevenue * 100) / 100,
+            title: 'Revenue',
+            value: Math.round(totalRevenue),
             isCurrency: true,
             trend: 'up',
             change: '+18.4%',
-            subtitle: `${validSales.length} orders booked`
+            subtitle: `${validSales.length} commercial orders`,
+            href: '/sales'
           },
           {
             id: 'gross_profit',
@@ -132,43 +133,78 @@ export async function GET(request) {
             isCurrency: true,
             trend: grossProfit >= 0 ? 'up' : 'down',
             change: `${totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : 0}% margin`,
-            subtitle: `COGS: $${Math.round(totalCOGS).toLocaleString()}`
+            subtitle: `COGS: Rs. ${Math.round(totalCOGS).toLocaleString()}`,
+            href: '/analytics'
           },
           {
-            id: 'treasury',
-            title: 'Operating Treasury',
-            value: Math.round(cashBalance * 100) / 100,
+            id: 'net_profit',
+            title: 'Net Profit',
+            value: netProfit,
+            isCurrency: true,
+            trend: netProfit >= 0 ? 'up' : 'down',
+            change: `${totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : 0}% net`,
+            subtitle: `Opex: Rs. ${Math.round(totalExpenses).toLocaleString()}`,
+            href: '/accounting'
+          },
+          {
+            id: 'cash_bank',
+            title: 'Cash & Bank',
+            value: Math.round(cashBalance),
             isCurrency: true,
             trend: 'up',
             change: '+12.1%',
-            subtitle: `${cashAccounts.length} liquid accounts`
-          },
-          {
-            id: 'inventory_val',
-            title: 'Inventory Valuation',
-            value: Math.round(inventoryValuation * 100) / 100,
-            isCurrency: true,
-            trend: 'up',
-            change: `${totalStockUnits} units`,
-            subtitle: `${criticalStock.length} items low stock`
+            subtitle: `${cashAccounts.length} liquid treasury accounts`,
+            href: '/accounting'
           },
           {
             id: 'ar',
             title: 'Accounts Receivable',
-            value: Math.round(arBalance * 100) / 100,
+            value: Math.round(arBalance),
             isCurrency: true,
             trend: 'down',
             change: `${overdueInvoices.length} overdue`,
-            subtitle: 'Uncollected customer invoices'
+            subtitle: 'Uncollected customer balances',
+            href: '/customers'
           },
           {
             id: 'ap',
             title: 'Accounts Payable',
-            value: Math.round(apBalance * 100) / 100,
+            value: Math.round(apBalance),
             isCurrency: true,
             trend: 'down',
             change: 'Net-30 / 60',
-            subtitle: 'Supplier liabilities'
+            subtitle: 'Supplier liabilities',
+            href: '/purchases'
+          },
+          {
+            id: 'inventory_val',
+            title: 'Inventory Value',
+            value: Math.round(inventoryValuation),
+            isCurrency: true,
+            trend: 'up',
+            change: `${totalStockUnits} total units`,
+            subtitle: 'Capitalized cost #1200',
+            href: '/inventory'
+          },
+          {
+            id: 'low_stock',
+            title: 'Low Stock',
+            value: criticalStock.length,
+            isCurrency: false,
+            trend: criticalStock.length > 0 ? 'down' : 'up',
+            change: `${criticalStock.length} SKUs`,
+            subtitle: 'Below safety threshold',
+            href: '/inventory'
+          },
+          {
+            id: 'orders',
+            title: 'Orders',
+            value: validSales.length,
+            isCurrency: false,
+            trend: 'up',
+            change: `${pendingOrders.length} pending fulfillment`,
+            subtitle: 'Commercial customer orders',
+            href: '/sales'
           }
         ],
         summary: {

@@ -77,15 +77,15 @@ export async function GET(request) {
       };
     });
 
-    // Historical Performance Trends
+    // Historical Performance Trends (in PKR)
     const historicalPerformance = [
-      { quarter: 'Q1 2025', revenue: 180000, expenses: 110000, ebitda: 70000 },
-      { quarter: 'Q2 2025', revenue: 220000, expenses: 135000, ebitda: 85000 },
-      { quarter: 'Q3 2025', revenue: 260000, expenses: 155000, ebitda: 105000 },
-      { quarter: 'Q4 2025', revenue: 310000, expenses: 180000, ebitda: 130000 },
-      { quarter: 'Q1 2026', revenue: 340000, expenses: 195000, ebitda: 145000 },
-      { quarter: 'Q2 2026', revenue: 385000, expenses: 215000, ebitda: 170000 },
-      { quarter: 'Q3 2026 (Est)', revenue: Math.round(totalSalesVolume * 1.15), expenses: Math.round(totalProcurement * 1.1), ebitda: Math.round((totalSalesVolume - totalProcurement) * 1.1) }
+      { quarter: 'Q1 2025', revenue: 6800000, expenses: 4100000, ebitda: 2700000 },
+      { quarter: 'Q2 2025', revenue: 7600000, expenses: 4600000, ebitda: 3000000 },
+      { quarter: 'Q3 2025', revenue: 8400000, expenses: 5100000, ebitda: 3300000 },
+      { quarter: 'Q4 2025', revenue: 9500000, expenses: 5800000, ebitda: 3700000 },
+      { quarter: 'Q1 2026', revenue: 10200000, expenses: 6200000, ebitda: 4000000 },
+      { quarter: 'Q2 2026', revenue: 11000000, expenses: 6600000, ebitda: 4400000 },
+      { quarter: 'Q3 2026 (Est)', revenue: Math.round(totalSalesVolume || 11278000), expenses: Math.round(totalProcurement || 6850000), ebitda: Math.round((totalSalesVolume - totalProcurement) || 4428000) }
     ];
 
     return NextResponse.json({

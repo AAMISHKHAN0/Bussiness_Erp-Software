@@ -11,6 +11,10 @@ import {
   ArrowRightLeft, History, Building2
 } from 'lucide-react';
 
+import Button from '@/components/common/Button';
+import EnterpriseTable from '@/components/common/EnterpriseTable';
+import { formatCurrency } from '@/lib/currency';
+
 export default function InventoryPage() {
   const toast = useToast();
   const [products, setProducts] = useState([]);
@@ -19,7 +23,6 @@ export default function InventoryPage() {
   const [warehouses, setWarehouses] = useState([]);
   const [stockMovements, setStockMovements] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [filterCriticalOnly, setFilterCriticalOnly] = useState(false);
 
@@ -49,8 +52,8 @@ export default function InventoryPage() {
     sku: '',
     barcode: '',
     category_name: 'Enterprise Rack Servers',
-    purchase_price: 1500,
-    selling_price: 2800,
+    purchase_price: 320000,
+    selling_price: 550000,
     quantity: 10,
     min_stock_level: 5,
     location: 'Warehouse Bay A-01',
@@ -116,8 +119,8 @@ export default function InventoryPage() {
           sku: '',
           barcode: '',
           category_name: 'Enterprise Rack Servers',
-          purchase_price: 1500,
-          selling_price: 2800,
+          purchase_price: 320000,
+          selling_price: 550000,
           quantity: 10,
           min_stock_level: 5,
           location: 'Warehouse Bay A-01',
@@ -249,38 +252,119 @@ export default function InventoryPage() {
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = ['SKU,Name,Category,Stock,MinStock,BuyPrice,SellPrice,Location,Status'];
-    const rows = products.map(p => 
-      `"${p.sku}","${p.name}","${p.category_name}",${p.quantity},${p.min_stock_level},${p.purchase_price},${p.selling_price},"${p.location}","${p.status}"`
-    );
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers, ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Inventory_Catalog_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.info('Exported catalog manifest to CSV');
-  };
-
-  // Filtered list
+  // Filtered list based on dropdown & toggle
   const filteredProducts = products.filter(p => {
-    const matchesSearch = 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.barcode && p.barcode.includes(searchTerm));
-
     const matchesCategory = selectedCategory === 'All' || p.category_name === selectedCategory;
     const matchesCritical = !filterCriticalOnly || Number(p.quantity) <= Number(p.min_stock_level);
-
-    return matchesSearch && matchesCategory && matchesCritical;
+    return matchesCategory && matchesCritical;
   });
 
   const totalCostValuation = products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.purchase_price)), 0);
   const totalRetailValuation = products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.selling_price)), 0);
   const criticalCount = products.filter(p => Number(p.quantity) <= Number(p.min_stock_level)).length;
+
+  const tableColumns = [
+    {
+      key: 'name',
+      header: 'Item Description',
+      sortable: true,
+      render: (p) => (
+        <div>
+          <div className="font-bold text-slate-900">{p.name}</div>
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
+            <MapPin size={11} className="text-slate-400 shrink-0" />
+            <span className="truncate">{p.location || 'Warehouse Bay A'}</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'sku',
+      header: 'SKU & Barcode',
+      sortable: true,
+      width: 'w-44',
+      render: (p) => (
+        <div className="font-mono">
+          <div className="font-bold text-blue-600">{p.sku}</div>
+          <div className="text-[10px] text-slate-400">{p.barcode || '--'}</div>
+        </div>
+      )
+    },
+    {
+      key: 'category_name',
+      header: 'Classification',
+      sortable: true,
+      render: (p) => (
+        <span className="inline-block px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[10px]">
+          {p.category_name}
+        </span>
+      )
+    },
+    {
+      key: 'purchase_price',
+      header: 'Cost / Selling (PKR)',
+      sortable: true,
+      align: 'right',
+      render: (p) => (
+        <div className="font-mono text-right">
+          <div className="text-slate-400 text-[11px]">{formatCurrency(p.purchase_price)}</div>
+          <div className="font-bold text-slate-900">{formatCurrency(p.selling_price)}</div>
+        </div>
+      )
+    },
+    {
+      key: 'quantity',
+      header: 'In Stock',
+      sortable: true,
+      align: 'center',
+      render: (p) => {
+        const isLow = Number(p.quantity) <= Number(p.min_stock_level);
+        return (
+          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-mono font-bold text-xs ${
+            isLow ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+          }`}>
+            {p.quantity} Units
+          </span>
+        );
+      }
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      sortable: false,
+      align: 'right',
+      render: (p) => (
+        <div className="flex items-center justify-end gap-1">
+          <button
+            onClick={() => {
+              setSelectedProduct(p);
+              setAdjustAmount(0);
+              setAdjustReason('');
+              setIsAdjustModalOpen(true);
+            }}
+            className="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+            title="Stock Cycle Adjustment"
+          >
+            <ArrowUpDown size={15} />
+          </button>
+          <button
+            onClick={() => handleOpenEdit(p)}
+            className="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+            title="Edit Specifications"
+          >
+            <Pencil size={15} />
+          </button>
+          <button
+            onClick={() => handleDelete(p.id, Number(p.quantity))}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+            title="Retire Product"
+          >
+            <Trash2 size={15} />
+          </button>
+        </div>
+      )
+    }
+  ];
 
   return (
     <AppShell>
@@ -300,107 +384,100 @@ export default function InventoryPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            size="md"
+            icon={RefreshCw}
             onClick={fetchData}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer"
             title="Refresh"
-          >
-            <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
-          </button>
+            className={loading ? 'animate-spin' : ''}
+          />
 
-          <button
+          <Button
+            variant="secondary"
+            size="md"
+            icon={History}
             onClick={() => setIsLedgerModalOpen(true)}
-            className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
           >
-            <History size={14} className="text-blue-600" />
-            <span>Movement History</span>
-          </button>
+            Movement History
+          </Button>
 
-          <button
+          <Button
+            variant="secondary"
+            size="md"
+            icon={ArrowRightLeft}
             onClick={() => {
               if (products.length > 0 && !transferForm.product_id) {
                 setTransferForm(prev => ({ ...prev, product_id: products[0].id }));
               }
               setIsTransferModalOpen(true);
             }}
-            className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
           >
-            <ArrowRightLeft size={14} className="text-emerald-600" />
-            <span>Transfer Stock</span>
-          </button>
+            Transfer Stock
+          </Button>
 
-          <button
-            onClick={handleExportCSV}
-            className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
-          >
-            <Download size={14} />
-            <span>Export CSV</span>
-          </button>
-
-          <button
+          <Button
+            variant="primary"
+            size="md"
+            icon={Plus}
             onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 flex items-center gap-2 transition-all cursor-pointer"
           >
-            <span>Register New SKU</span>
-            <Plus size={13} className="text-white" />
-          </button>
+            Register New SKU
+          </Button>
         </div>
       </div>
 
       {/* Metrics Banner */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80 h-28 flex flex-col justify-between">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Active SKUs</p>
-            <p className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">{products.length}</p>
-            <p className="text-[10px] text-slate-400 mt-1">Across {categories.length} classifications</p>
+            <p className="text-2xl font-extrabold text-slate-900 tabular-nums">{products.length}</p>
+            <p className="text-[10px] text-slate-400">Across {categories.length} classifications</p>
           </div>
         </div>
         <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80 h-28 flex flex-col justify-between">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Asset Valuation (Cost)</p>
-            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">${totalCostValuation.toLocaleString()}</p>
-            <p className="text-[10px] text-slate-400 mt-1">GAAP Account #1200 Inventory</p>
+            <p className="text-2xl font-extrabold text-blue-600 tabular-nums">{formatCurrency(totalCostValuation)}</p>
+            <p className="text-[10px] text-slate-400">GAAP Account #1200 Inventory</p>
           </div>
         </div>
         <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80 h-28 flex flex-col justify-between">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Projected Retail Value</p>
-            <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">${totalRetailValuation.toLocaleString()}</p>
-            <p className="text-[10px] text-slate-400 mt-1">~{Math.round(((totalRetailValuation - totalCostValuation) / (totalRetailValuation || 1)) * 100)}% Average Markup</p>
+            <p className="text-2xl font-extrabold text-emerald-600 tabular-nums">{formatCurrency(totalRetailValuation)}</p>
+            <p className="text-[10px] text-slate-400">~{Math.round(((totalRetailValuation - totalCostValuation) / (totalRetailValuation || 1)) * 100)}% Average Markup</p>
           </div>
         </div>
         <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80 h-28 flex flex-col justify-between">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Low Stock Warnings</p>
-            <p className={`text-2xl font-extrabold mt-1 tabular-nums ${criticalCount > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+            <p className={`text-2xl font-extrabold tabular-nums ${criticalCount > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
               {criticalCount} SKUs
             </p>
-            <p className="text-[10px] text-slate-400 mt-1">Below safety reorder threshold</p>
+            <p className="text-[10px] text-slate-400">Below safety reorder threshold</p>
           </div>
         </div>
       </div>
 
-      {/* Filters & Search Toolbar */}
-      <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-        <div className="p-3 rounded-[1rem] bg-white border border-white/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="relative flex-1 w-full max-w-md">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by Product Name, SKU, or Barcode..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+      {/* Enterprise Reusable Table Component */}
+      <EnterpriseTable
+        columns={tableColumns}
+        data={filteredProducts}
+        searchPlaceholder="Search product description, SKU, or barcode..."
+        searchKeys={['name', 'sku', 'barcode', 'category_name', 'location']}
+        defaultPageSize={10}
+        selectable={true}
+        loading={loading}
+        exportFileName={`NEXIS_Inventory_Catalog_${new Date().toISOString().slice(0, 10)}.csv`}
+        filterComponent={
+          <div className="flex items-center gap-2">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 outline-none cursor-pointer"
+              className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 outline-none cursor-pointer hover:bg-white focus:bg-white"
             >
               <option value="All">All Classifications</option>
               {categories.map(c => (
@@ -410,121 +487,18 @@ export default function InventoryPage() {
 
             <button
               onClick={() => setFilterCriticalOnly(!filterCriticalOnly)}
-              className={`px-3 py-2 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`h-9 px-3 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                 filterCriticalOnly 
                   ? 'bg-amber-50 text-amber-700 border-amber-300' 
-                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
+                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <AlertTriangle size={13} />
-              <span>Low Stock Alert</span>
+              <span>Low Stock Only</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Main Table */}
-      <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
-        <div className="rounded-[1rem] bg-white border border-white/80 overflow-hidden">
-          {loading ? (
-            <div className="py-20 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-              <p className="text-xs font-bold text-slate-500">Loading catalog items...</p>
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="py-16 text-center text-slate-400">
-              <Package size={36} className="mx-auto text-slate-300 mb-2" />
-              <p className="font-bold text-sm text-slate-700">No products matched the filter criteria</p>
-              <p className="text-xs mt-1 text-slate-500">Try clearing filters or search query.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
-                    <th className="py-3 px-4">Item Description</th>
-                    <th className="py-3 px-4">SKU & Barcode</th>
-                    <th className="py-3 px-4">Classification</th>
-                    <th className="py-3 px-4 text-right">Cost / Selling</th>
-                    <th className="py-3 px-4 text-center">In Stock</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredProducts.map((p) => {
-                    const isLow = Number(p.quantity) <= Number(p.min_stock_level);
-                    return (
-                      <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-bold text-slate-900">{p.name}</div>
-                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
-                            <MapPin size={11} className="text-slate-400" />
-                            <span>{p.location || 'Warehouse Bay A'}</span>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 font-mono">
-                          <div className="font-bold text-blue-600">{p.sku}</div>
-                          <div className="text-[10px] text-slate-400">{p.barcode || '--'}</div>
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <span className="inline-block px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[10px]">
-                            {p.category_name}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-right font-mono">
-                          <div className="text-slate-500 line-through text-[11px]">
-                            ${Number(p.purchase_price).toFixed(2)}
-                          </div>
-                          <div className="font-bold text-slate-900">
-                            ${Number(p.selling_price).toFixed(2)}
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-mono font-bold text-xs ${
-                            isLow ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          }`}>
-                            {p.quantity} Units
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => {
-                                setSelectedProduct(p);
-                                setAdjustAmount(0);
-                                setAdjustReason('');
-                                setIsAdjustModalOpen(true);
-                              }}
-                              className="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
-                              title="Stock Cycle Adjustment"
-                            >
-                              <ArrowUpDown size={15} />
-                            </button>
-                            <button
-                              onClick={() => handleOpenEdit(p)}
-                              className="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
-                              title="Edit Specifications"
-                            >
-                              <Pencil size={15} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(p.id, Number(p.quantity))}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                              title="Retire Product"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
+        }
+      />
 
       {/* MODAL: Register New Product SKU */}
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Register New Inventory SKU">
@@ -583,10 +557,10 @@ export default function InventoryPage() {
               </select>
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Cost Price ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Cost Price (PKR)</label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 value={form.purchase_price}
                 onChange={(e) => setForm({ ...form, purchase_price: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
@@ -594,10 +568,10 @@ export default function InventoryPage() {
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Selling Price ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Selling Price (PKR)</label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 value={form.selling_price}
                 onChange={(e) => setForm({ ...form, selling_price: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
@@ -920,10 +894,10 @@ export default function InventoryPage() {
               </select>
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Cost Price ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Cost Price (PKR)</label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 value={editForm.purchase_price}
                 onChange={(e) => setEditForm({ ...editForm, purchase_price: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
@@ -931,10 +905,10 @@ export default function InventoryPage() {
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Selling Price ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Selling Price (PKR)</label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 value={editForm.selling_price}
                 onChange={(e) => setEditForm({ ...editForm, selling_price: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"

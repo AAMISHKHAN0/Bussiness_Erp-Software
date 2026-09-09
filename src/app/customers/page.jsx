@@ -8,6 +8,7 @@ import {
   Users, Plus, Search, Mail, Phone, MapPin, 
   CreditCard, DollarSign, Loader2, RefreshCw, Download, Pencil, Trash2 
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 
 export default function CustomersPage() {
   const toast = useToast();
@@ -246,14 +247,14 @@ export default function CustomersPage() {
         <div className="double-bezel">
           <div className="double-bezel-inner">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Lifetime Gross Spend</p>
-            <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">${totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">{formatCurrency(totalSpent)}</p>
             <p className="text-[10px] text-slate-400 mt-1">Cumulative settled invoices</p>
           </div>
         </div>
         <div className="double-bezel">
           <div className="double-bezel-inner">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Receivables Outstanding</p>
-            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">${totalReceivables.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">{formatCurrency(totalReceivables)}</p>
             <p className="text-[10px] text-slate-400 mt-1">Net-30 open receivables</p>
           </div>
         </div>
@@ -323,18 +324,18 @@ export default function CustomersPage() {
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
                       <p className="text-[10px] font-bold uppercase text-slate-500">Credit Limit</p>
-                      <p className="font-mono font-bold text-slate-900 mt-0.5 tabular-nums">${Number(client.credit_limit || 0).toLocaleString()}</p>
+                      <p className="font-mono font-bold text-slate-900 mt-0.5 tabular-nums">{formatCurrency(client.credit_limit || 0)}</p>
                     </div>
                     <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
                       <p className="text-[10px] font-bold uppercase text-slate-500">AR Balance</p>
-                      <p className="font-mono font-bold text-blue-600 mt-0.5 tabular-nums">${Number(client.current_balance || 0).toLocaleString()}</p>
+                      <p className="font-mono font-bold text-blue-600 mt-0.5 tabular-nums">{formatCurrency(client.current_balance || 0)}</p>
                     </div>
                   </div>
 
                   {/* Action Buttons: Edit & Delete */}
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-[11px] text-slate-400 font-mono">
-                      Spent: ${Number(client.total_spent || 0).toLocaleString()}
+                      Spent: {formatCurrency(client.total_spent || 0)}
                     </span>
                     <div className="flex items-center gap-1.5">
                       <button
@@ -418,7 +419,7 @@ export default function CustomersPage() {
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Authorized Credit Limit ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Authorized Credit Limit (PKR)</label>
               <input
                 type="number"
                 value={form.credit_limit}
@@ -508,7 +509,7 @@ export default function CustomersPage() {
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Authorized Credit Limit ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Authorized Credit Limit (PKR)</label>
               <input
                 type="number"
                 value={editForm.credit_limit}
