@@ -24,8 +24,10 @@
   body {
     background-color: var(--bg-page);
     color: var(--text-main);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -45,18 +47,101 @@
   background: #94a3b8;
 }
 
+/* Tabular figures for alignment in data tables and currency metrics */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Agency-Grade Double-Bezel (Doppelrand) Architecture */
+.double-bezel {
+  padding: 0.25rem;
+  border-radius: 1.25rem;
+  background-color: rgba(241, 245, 249, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.double-bezel:hover {
+  border-color: rgba(203, 213, 225, 0.9);
+  box-shadow: 0 6px 24px -4px rgba(15, 23, 42, 0.06);
+}
+.double-bezel-inner {
+  border-radius: 1rem;
+  background-color: #ffffff;
+  padding: 1.25rem;
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* Tactile Button-in-Button Pods */
+.btn-pod-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.1);
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.btn-pod-primary:hover {
+  background-color: #1e293b;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.2);
+}
+.btn-pod-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-pod-blue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.2);
+  transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.btn-pod-blue:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.35);
+}
+.btn-pod-blue:active {
+  transform: scale(0.98);
+}
+
+.pod-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.btn-pod-primary:hover .pod-icon,
+.btn-pod-blue:hover .pod-icon {
+  transform: translateX(1px);
+}
+
 /* Crisp Card & Panel Styling */
 .card-enterprise {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
 }
 
 .table-header-enterprise {
   background-color: #f8fafc;
   color: #475569;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;

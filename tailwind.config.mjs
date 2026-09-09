@@ -29,7 +29,13 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+      },
+      boxShadow: {
+        'bezel-outer': '0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 16px -2px rgba(15, 23, 42, 0.04)',
+        'bezel-inner': 'inset 0 1px 1px rgba(255, 255, 255, 0.95)',
+        'glow-primary': '0 0 25px -4px rgba(37, 99, 235, 0.25)',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

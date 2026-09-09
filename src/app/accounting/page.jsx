@@ -153,59 +153,65 @@ export default function AccountingPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={fetchAccounting}
-            className="p-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
             title="Refresh"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
           <button
             onClick={() => setIsJournalModalOpen(true)}
-            className="px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1.5 transition-colors shadow-2xs"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-2 transition-colors shadow-2xs"
           >
-            <Repeat size={14} className="text-blue-600" />
+            <span className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+              <Repeat size={12} />
+            </span>
             <span>Post Journal Voucher</span>
           </button>
           <button
             onClick={() => setIsAccountModalOpen(true)}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors active:scale-95"
+            className="btn-pod-blue group"
           >
-            <Plus size={16} />
             <span>New Ledger Account</span>
+            <span className="pod-icon">
+              <Plus size={13} className="text-white" />
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white p-1.5 rounded-xl border border-slate-200 shadow-xs flex items-center gap-1 overflow-x-auto">
-        {[
-          { id: 'coa', label: 'Chart of Accounts', icon: BookOpen, count: accounts.length },
-          { id: 'gl', label: 'Journal Vouchers', icon: Repeat, count: journalEntries.length },
-          { id: 'balanceSheet', label: 'Balance Sheet', icon: Scale },
-          { id: 'pnl', label: 'Income Statement (P&L)', icon: TrendingUp },
-          { id: 'trialBalance', label: 'Trial Balance', icon: FileBarChart },
-        ].map(tab => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                isActive 
-                  ? 'bg-blue-600 text-white shadow-xs' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <Icon size={14} />
-              <span>{tab.label}</span>
-              {tab.count !== undefined && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      {/* Navigation Tabs with Double-Bezel Frame */}
+      <div className="double-bezel">
+        <div className="double-bezel-inner !p-1.5 flex items-center gap-1.5 overflow-x-auto">
+          {[
+            { id: 'coa', label: 'Chart of Accounts', icon: BookOpen, count: accounts.length },
+            { id: 'gl', label: 'Journal Vouchers', icon: Repeat, count: journalEntries.length },
+            { id: 'balanceSheet', label: 'Balance Sheet', icon: Scale },
+            { id: 'pnl', label: 'Income Statement (P&L)', icon: TrendingUp },
+            { id: 'trialBalance', label: 'Trial Balance', icon: FileBarChart },
+          ].map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                  isActive 
+                    ? 'bg-blue-600 text-white shadow-xs' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <Icon size={14} />
+                <span>{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {loading ? (
@@ -218,54 +224,58 @@ export default function AccountingPage() {
           {/* TAB 1: CHART OF ACCOUNTS */}
           {activeTab === 'coa' && (
             <div className="space-y-4">
-              <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
-                <div className="relative flex-1 max-w-md">
-                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search Account Code, Name, or Classification..."
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
-                  />
+              <div className="double-bezel">
+                <div className="double-bezel-inner !p-2.5 flex items-center justify-between gap-3">
+                  <div className="relative flex-1 max-w-md">
+                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search Account Code, Name, or Classification..."
+                      className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="rounded-xl bg-white border border-slate-200 shadow-xs overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
-                      <th className="py-3 px-4">Account Code</th>
-                      <th className="py-3 px-4">Account Description</th>
-                      <th className="py-3 px-4">Classification</th>
-                      <th className="py-3 px-4">Category Group</th>
-                      <th className="py-3 px-4 text-right">Running Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredAccounts.map((acc) => (
-                      <tr key={acc.id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="py-3 px-4 font-mono font-bold text-blue-600">{acc.code}</td>
-                        <td className="py-3 px-4 font-bold text-slate-900">{acc.name}</td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
-                            acc.type === 'Asset' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                            acc.type === 'Liability' ? 'bg-red-50 text-red-700 border-red-200' :
-                            acc.type === 'Equity' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                            acc.type === 'Revenue' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                            'bg-amber-50 text-amber-700 border-amber-200'
-                          }`}>
-                            {acc.type}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-slate-600 font-medium">{acc.category}</td>
-                        <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 text-sm">
-                          ${parseFloat(acc.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </td>
+              <div className="double-bezel">
+                <div className="double-bezel-inner !p-0 overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                        <th className="py-3 px-4">Account Code</th>
+                        <th className="py-3 px-4">Account Description</th>
+                        <th className="py-3 px-4">Classification</th>
+                        <th className="py-3 px-4">Category Group</th>
+                        <th className="py-3 px-4 text-right">Running Balance</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredAccounts.map((acc) => (
+                        <tr key={acc.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-3 px-4 font-mono font-bold text-blue-600">{acc.code}</td>
+                          <td className="py-3 px-4 font-bold text-slate-900">{acc.name}</td>
+                          <td className="py-3 px-4">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                              acc.type === 'Asset' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                              acc.type === 'Liability' ? 'bg-red-50 text-red-700 border-red-200' :
+                              acc.type === 'Equity' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                              acc.type === 'Revenue' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                              'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}>
+                              {acc.type}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-600 font-medium">{acc.category}</td>
+                          <td className="py-3 px-4 text-right font-mono font-bold text-slate-900 text-sm tabular-nums">
+                            ${parseFloat(acc.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -273,59 +283,61 @@ export default function AccountingPage() {
           {/* TAB 2: GENERAL LEDGER ENTRIES */}
           {activeTab === 'gl' && (
             <div className="space-y-4">
-              <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-xs space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900">Journal Transaction Vouchers</h3>
-                    <p className="text-xs text-slate-500">Chronological verified GAAP double-entry postings</p>
-                  </div>
-                  <span className="text-xs font-mono text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
-                    {journalEntries.length} Vouchers Posted
-                  </span>
-                </div>
-
-                <div className="space-y-4">
-                  {journalEntries.map((entry) => (
-                    <div key={entry.id} className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-blue-600 text-sm">{entry.entry_number}</span>
-                          <span className="text-slate-400">·</span>
-                          <span className="text-xs text-slate-800 font-semibold">{entry.description}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-slate-500 font-mono">
-                          <span>Ref: {entry.reference_number}</span>
-                          <span>{entry.entry_date}</span>
-                        </div>
-                      </div>
-
-                      {/* Lines Table */}
-                      <table className="w-full text-left text-xs border-t border-slate-200 pt-2">
-                        <thead>
-                          <tr className="text-slate-500 font-bold uppercase text-[10px]">
-                            <th className="py-1">Account</th>
-                            <th className="py-1 text-right">Debit (Dr)</th>
-                            <th className="py-1 text-right">Credit (Cr)</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200/60">
-                          {entry.lines?.map((line, idx) => (
-                            <tr key={idx}>
-                              <td className="py-1.5 text-slate-700 font-medium">
-                                {line.account_name || `Account ID: ${line.account_id}`}
-                              </td>
-                              <td className="py-1.5 text-right font-mono font-bold text-emerald-600">
-                                {Number(line.debit) > 0 ? `$${Number(line.debit).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
-                              </td>
-                              <td className="py-1.5 text-right font-mono font-bold text-slate-700">
-                                {Number(line.credit) > 0 ? `$${Number(line.credit).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+              <div className="double-bezel">
+                <div className="double-bezel-inner space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900">Journal Transaction Vouchers</h3>
+                      <p className="text-xs text-slate-500">Chronological verified GAAP double-entry postings</p>
                     </div>
-                  ))}
+                    <span className="text-xs font-mono text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+                      {journalEntries.length} Vouchers Posted
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {journalEntries.map((entry) => (
+                      <div key={entry.id} className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-blue-600 text-sm">{entry.entry_number}</span>
+                            <span className="text-slate-400">·</span>
+                            <span className="text-xs text-slate-800 font-semibold">{entry.description}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-slate-500 font-mono">
+                            <span>Ref: {entry.reference_number}</span>
+                            <span>{entry.entry_date}</span>
+                          </div>
+                        </div>
+
+                        {/* Lines Table */}
+                        <table className="w-full text-left text-xs border-t border-slate-200 pt-2">
+                          <thead>
+                            <tr className="text-slate-500 font-bold uppercase text-[10px]">
+                              <th className="py-1">Account</th>
+                              <th className="py-1 text-right">Debit (Dr)</th>
+                              <th className="py-1 text-right">Credit (Cr)</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200/60">
+                            {entry.lines?.map((line, idx) => (
+                              <tr key={idx}>
+                                <td className="py-1.5 text-slate-700 font-medium">
+                                  {line.account_name || `Account ID: ${line.account_id}`}
+                                </td>
+                                <td className="py-1.5 text-right font-mono font-bold text-emerald-600 tabular-nums">
+                                  {Number(line.debit) > 0 ? `$${Number(line.debit).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                                </td>
+                                <td className="py-1.5 text-right font-mono font-bold text-slate-700 tabular-nums">
+                                  {Number(line.credit) > 0 ? `$${Number(line.credit).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -335,73 +347,78 @@ export default function AccountingPage() {
           {activeTab === 'balanceSheet' && statements.balanceSheet && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Assets Section */}
-              <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-                    <h3 className="text-lg font-extrabold text-slate-900">ASSETS</h3>
-                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Resources Owned</span>
-                  </div>
-                  <div className="divide-y divide-slate-100 mt-4 text-xs">
-                    {statements.balanceSheet.assets.map(a => (
-                      <div key={a.id} className="py-2.5 flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-slate-800">{a.name}</p>
-                          <p className="text-[10px] font-mono text-slate-400">Code {a.code} · {a.category}</p>
+              <div className="double-bezel">
+                <div className="double-bezel-inner h-full flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                      <h3 className="text-lg font-extrabold text-slate-900">ASSETS</h3>
+                      <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Resources Owned</span>
+                    </div>
+                    <div className="divide-y divide-slate-100 mt-4 text-xs">
+                      {statements.balanceSheet.assets.map(a => (
+                        <div key={a.id} className="py-2.5 flex justify-between items-center">
+                          <div>
+                            <p className="font-bold text-slate-800">{a.name}</p>
+                            <p className="text-[10px] font-mono text-slate-400">Code {a.code} · {a.category}</p>
+                          </div>
+                          <span className="font-mono font-bold text-sm text-slate-900 tabular-nums">${Number(a.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                         </div>
-                        <span className="font-mono font-bold text-sm text-slate-900">${Number(a.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                <div className="pt-4 mt-6 border-t-2 border-slate-300 flex justify-between items-center">
-                  <span className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">TOTAL ASSETS</span>
-                  <span className="text-xl font-extrabold text-blue-600 font-mono">
-                    ${Number(statements.balanceSheet.totalAssets).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </span>
+                  <div className="pt-4 mt-6 border-t-2 border-slate-300 flex justify-between items-center">
+                    <span className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">TOTAL ASSETS</span>
+                    <span className="text-xl font-extrabold text-blue-600 font-mono tabular-nums">
+                      ${Number(statements.balanceSheet.totalAssets).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Liabilities & Equity Section */}
-              <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-                    <h3 className="text-lg font-extrabold text-slate-900">LIABILITIES & EQUITY</h3>
-                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Obligations & Capital</span>
-                  </div>
+              {/* Liabilities & Equity Section */}
+              <div className="double-bezel">
+                <div className="double-bezel-inner h-full flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                      <h3 className="text-lg font-extrabold text-slate-900">LIABILITIES & EQUITY</h3>
+                      <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Obligations & Capital</span>
+                    </div>
 
-                  {/* Liabilities */}
-                  <div className="mt-4">
-                    <p className="text-[11px] font-bold uppercase text-red-600 tracking-wider mb-2">Liabilities</p>
-                    <div className="divide-y divide-slate-100 text-xs">
-                      {statements.balanceSheet.liabilities.map(l => (
-                        <div key={l.id} className="py-2 flex justify-between items-center">
-                          <span className="text-slate-700">{l.name}</span>
-                          <span className="font-mono font-bold text-slate-900">${Number(l.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                        </div>
-                      ))}
+                    {/* Liabilities */}
+                    <div className="mt-4">
+                      <p className="text-[11px] font-bold uppercase text-red-600 tracking-wider mb-2">Liabilities</p>
+                      <div className="divide-y divide-slate-100 text-xs">
+                        {statements.balanceSheet.liabilities.map(l => (
+                          <div key={l.id} className="py-2 flex justify-between items-center">
+                            <span className="text-slate-700">{l.name}</span>
+                            <span className="font-mono font-bold text-slate-900 tabular-nums">${Number(l.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Equity */}
+                    <div className="mt-5">
+                      <p className="text-[11px] font-bold uppercase text-purple-700 tracking-wider mb-2">Stockholders Equity</p>
+                      <div className="divide-y divide-slate-100 text-xs">
+                        {statements.balanceSheet.equity.map(e => (
+                          <div key={e.id} className="py-2 flex justify-between items-center">
+                            <span className="text-slate-700">{e.name}</span>
+                            <span className="font-mono font-bold text-slate-900 tabular-nums">${Number(e.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Equity */}
-                  <div className="mt-5">
-                    <p className="text-[11px] font-bold uppercase text-purple-700 tracking-wider mb-2">Stockholders Equity</p>
-                    <div className="divide-y divide-slate-100 text-xs">
-                      {statements.balanceSheet.equity.map(e => (
-                        <div key={e.id} className="py-2 flex justify-between items-center">
-                          <span className="text-slate-700">{e.name}</span>
-                          <span className="font-mono font-bold text-slate-900">${Number(e.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="pt-4 mt-6 border-t-2 border-slate-300 flex justify-between items-center">
+                    <span className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">TOTAL LIAB. + EQUITY</span>
+                    <span className="text-xl font-extrabold text-blue-600 font-mono tabular-nums">
+                      ${Number(statements.balanceSheet.totalLiabilities + statements.balanceSheet.totalEquity).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
                   </div>
-                </div>
-
-                <div className="pt-4 mt-6 border-t-2 border-slate-300 flex justify-between items-center">
-                  <span className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">TOTAL LIAB. + EQUITY</span>
-                  <span className="text-xl font-extrabold text-blue-600 font-mono">
-                    ${Number(statements.balanceSheet.totalLiabilities + statements.balanceSheet.totalEquity).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </span>
                 </div>
               </div>
             </div>
@@ -409,68 +426,70 @@ export default function AccountingPage() {
 
           {/* TAB 4: INCOME STATEMENT (P&L) */}
           {activeTab === 'pnl' && statements.incomeStatement && (
-            <div className="max-w-3xl mx-auto p-8 rounded-xl bg-white border border-slate-200 shadow-xs text-xs space-y-6">
-              <div className="text-center pb-4 border-b border-slate-200">
-                <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-tight">Statement of Profit and Loss (Income Statement)</h2>
-                <p className="text-slate-500 text-xs mt-1">GAAP Financial Accounting Period 2026 (Currency: USD)</p>
-              </div>
-
-              {/* Operating Revenue */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center font-bold text-emerald-700 uppercase text-[11px] tracking-wider">
-                  <span>Gross Commercial Revenue</span>
-                  <span>Amount ($)</span>
+            <div className="max-w-3xl mx-auto double-bezel">
+              <div className="double-bezel-inner !p-8 text-xs space-y-6">
+                <div className="text-center pb-4 border-b border-slate-200">
+                  <h2 className="text-xl font-extrabold text-slate-900 uppercase tracking-tight">Statement of Profit and Loss (Income Statement)</h2>
+                  <p className="text-slate-500 text-xs mt-1">GAAP Financial Accounting Period 2026 (Currency: USD)</p>
                 </div>
-                {statements.incomeStatement.revenue.map(r => (
-                  <div key={r.id} className="flex justify-between items-center py-1 text-slate-700">
-                    <span>{r.name}</span>
-                    <span className="font-mono font-bold">${Number(r.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+
+                {/* Operating Revenue */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center font-bold text-emerald-700 uppercase text-[11px] tracking-wider">
+                    <span>Gross Commercial Revenue</span>
+                    <span>Amount ($)</span>
                   </div>
-                ))}
-                <div className="flex justify-between font-extrabold text-sm pt-2 border-t border-slate-200 text-slate-900">
-                  <span>Total Revenue</span>
-                  <span className="text-emerald-600 font-mono">${Number(statements.incomeStatement.totalRevenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-
-              {/* Cost of Goods Sold */}
-              <div className="space-y-2 pt-2">
-                <div className="flex justify-between items-center font-bold text-slate-600 uppercase text-[11px] tracking-wider">
-                  <span>Cost of Goods Sold (COGS)</span>
-                </div>
-                <div className="flex justify-between items-center py-1 text-slate-700">
-                  <span>Direct Production & Hardware Acquisition Costs</span>
-                  <span className="font-mono font-bold text-red-600">-${Number(statements.incomeStatement.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between font-extrabold text-sm pt-2 border-t border-slate-200 text-slate-900">
-                  <span>Gross Profit</span>
-                  <span className="text-blue-600 font-mono">${Number(statements.incomeStatement.grossProfit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-
-              {/* Operating Expenses */}
-              <div className="space-y-2 pt-2">
-                <div className="flex justify-between items-center font-bold text-slate-700 uppercase text-[11px] tracking-wider">
-                  <span>Operating Expenses (OPEX)</span>
-                </div>
-                {statements.incomeStatement.expenses.map(e => (
-                  <div key={e.id} className="flex justify-between items-center py-1 text-slate-700">
-                    <span>{e.name}</span>
-                    <span className="font-mono">${Number(e.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  {statements.incomeStatement.revenue.map(r => (
+                    <div key={r.id} className="flex justify-between items-center py-1 text-slate-700">
+                      <span>{r.name}</span>
+                      <span className="font-mono font-bold tabular-nums">${Number(r.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between font-extrabold text-sm pt-2 border-t border-slate-200 text-slate-900">
+                    <span>Total Revenue</span>
+                    <span className="text-emerald-600 font-mono tabular-nums">${Number(statements.incomeStatement.totalRevenue).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
-                ))}
-                <div className="flex justify-between font-bold text-slate-800 pt-2 border-t border-slate-200">
-                  <span>Total Operating Expenses</span>
-                  <span className="font-mono text-red-600">-${Number(statements.incomeStatement.totalExpenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
-              </div>
 
-              {/* Net Income */}
-              <div className="pt-4 border-t-2 border-slate-400 flex justify-between items-center text-base font-extrabold">
-                <span className="text-slate-900 uppercase tracking-wider">NET OPERATING PROFIT</span>
-                <span className="text-blue-600 font-mono text-xl">
-                  ${Number(statements.incomeStatement.netIncome).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
+                {/* Cost of Goods Sold */}
+                <div className="space-y-2 pt-2">
+                  <div className="flex justify-between items-center font-bold text-slate-600 uppercase text-[11px] tracking-wider">
+                    <span>Cost of Goods Sold (COGS)</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 text-slate-700">
+                    <span>Direct Production & Hardware Acquisition Costs</span>
+                    <span className="font-mono font-bold text-red-600 tabular-nums">-${Number(statements.incomeStatement.cogs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between font-extrabold text-sm pt-2 border-t border-slate-200 text-slate-900">
+                    <span>Gross Profit</span>
+                    <span className="text-blue-600 font-mono tabular-nums">${Number(statements.incomeStatement.grossProfit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                {/* Operating Expenses */}
+                <div className="space-y-2 pt-2">
+                  <div className="flex justify-between items-center font-bold text-slate-700 uppercase text-[11px] tracking-wider">
+                    <span>Operating Expenses (OPEX)</span>
+                  </div>
+                  {statements.incomeStatement.expenses.map(e => (
+                    <div key={e.id} className="flex justify-between items-center py-1 text-slate-700">
+                      <span>{e.name}</span>
+                      <span className="font-mono tabular-nums">${Number(e.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between font-bold text-slate-800 pt-2 border-t border-slate-200">
+                    <span>Total Operating Expenses</span>
+                    <span className="font-mono text-red-600 tabular-nums">-${Number(statements.incomeStatement.totalExpenses).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </div>
+
+                {/* Net Income */}
+                <div className="pt-4 border-t-2 border-slate-400 flex justify-between items-center text-base font-extrabold">
+                  <span className="text-slate-900 uppercase tracking-wider">NET OPERATING PROFIT</span>
+                  <span className="text-blue-600 font-mono text-xl tabular-nums">
+                    ${Number(statements.incomeStatement.netIncome).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
               </div>
             </div>
           )}
@@ -489,49 +508,51 @@ export default function AccountingPage() {
                     {statements.trialBalance.isBalanced ? 'Trial Balance Reconciled: Total Debits Exactly Match Credits' : 'Warning: Debits and Credits Out of Balance'}
                   </span>
                 </div>
-                <div className="font-mono font-bold">
+                <div className="font-mono font-bold tabular-nums">
                   Dr: ${Number(statements.trialBalance.totalDebits).toLocaleString()} · Cr: ${Number(statements.trialBalance.totalCredits).toLocaleString()}
                 </div>
               </div>
 
-              <div className="rounded-xl bg-white border border-slate-200 shadow-xs overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
-                      <th className="py-3 px-4">Code</th>
-                      <th className="py-3 px-4">Account Description</th>
-                      <th className="py-3 px-4">Classification</th>
-                      <th className="py-3 px-4 text-right">Debit Balance ($)</th>
-                      <th className="py-3 px-4 text-right">Credit Balance ($)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-mono">
-                    {statements.trialBalance.items?.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="py-2.5 px-4 font-bold text-blue-600">{item.code}</td>
-                        <td className="py-2.5 px-4 font-sans font-medium text-slate-800">{item.name}</td>
-                        <td className="py-2.5 px-4 font-sans text-slate-500">{item.type}</td>
-                        <td className="py-2.5 px-4 text-right text-slate-900">
-                          {item.debit > 0 ? `$${item.debit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+              <div className="double-bezel">
+                <div className="double-bezel-inner !p-0 overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                        <th className="py-3 px-4">Code</th>
+                        <th className="py-3 px-4">Account Description</th>
+                        <th className="py-3 px-4">Classification</th>
+                        <th className="py-3 px-4 text-right">Debit Balance ($)</th>
+                        <th className="py-3 px-4 text-right">Credit Balance ($)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-mono">
+                      {statements.trialBalance.items?.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-2.5 px-4 font-bold text-blue-600">{item.code}</td>
+                          <td className="py-2.5 px-4 font-sans font-medium text-slate-800">{item.name}</td>
+                          <td className="py-2.5 px-4 font-sans text-slate-500">{item.type}</td>
+                          <td className="py-2.5 px-4 text-right text-slate-900 tabular-nums">
+                            {item.debit > 0 ? `$${item.debit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                          </td>
+                          <td className="py-2.5 px-4 text-right text-slate-900 tabular-nums">
+                            {item.credit > 0 ? `$${item.credit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-slate-400 bg-slate-50 font-bold text-slate-900 font-mono">
+                        <td colSpan="3" className="py-3 px-4 uppercase tracking-wider font-sans">Trial Balance Totals</td>
+                        <td className="py-3 px-4 text-right text-blue-600 font-extrabold text-sm tabular-nums">
+                          ${Number(statements.trialBalance.totalDebits).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="py-2.5 px-4 text-right text-slate-900">
-                          {item.credit > 0 ? `$${item.credit.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}
+                        <td className="py-3 px-4 text-right text-blue-600 font-extrabold text-sm tabular-nums">
+                          ${Number(statements.trialBalance.totalCredits).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-slate-400 bg-slate-50 font-bold text-slate-900 font-mono">
-                      <td colSpan="3" className="py-3 px-4 uppercase tracking-wider font-sans">Trial Balance Totals</td>
-                      <td className="py-3 px-4 text-right text-blue-600 font-extrabold text-sm">
-                        ${Number(statements.trialBalance.totalDebits).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="py-3 px-4 text-right text-blue-600 font-extrabold text-sm">
-                        ${Number(statements.trialBalance.totalCredits).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
+                    </tfoot>
+                  </table>
+                </div>
               </div>
             </div>
           )}

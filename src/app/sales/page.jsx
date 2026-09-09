@@ -171,17 +171,19 @@ export default function SalesPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={fetchSalesData}
-            className="p-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
             title="Refresh"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
           <button
             onClick={() => setIsSalesReportOpen(true)}
-            className="px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs flex items-center gap-2 transition-colors active:scale-98"
             title="Executive Sales Report & PDF Export"
           >
-            <FileText size={15} className="text-blue-600" />
+            <span className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+              <FileText size={12} />
+            </span>
             <span>Sales Report (PDF)</span>
           </button>
           <button
@@ -191,77 +193,90 @@ export default function SalesPage() {
               }
               setIsCreateOpen(true);
             }}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors active:scale-95"
+            className="btn-pod-blue group"
           >
-            <Plus size={16} />
             <span>Create Sales Order</span>
+            <span className="pod-icon">
+              <Plus size={13} className="text-white" />
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Metrics Banner */}
+      {/* Metrics Banner with Double-Bezel Architecture */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Gross Sales Volume</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">${totalSalesVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">{orders.length} total orders recorded</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Gross Sales Volume</p>
+            <p className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">${totalSalesVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-[10px] text-slate-400 mt-1">{orders.length} total orders recorded</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Settled (Paid)</p>
-          <p className="text-2xl font-extrabold text-emerald-600 mt-1">${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">Direct wire & ACH deposits</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Settled (Paid)</p>
+            <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-[10px] text-slate-400 mt-1">Direct wire & ACH deposits</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Receivables Due</p>
-          <p className="text-2xl font-extrabold text-amber-600 mt-1">${pendingReceivables.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">GAAP Account #1100 AR</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Receivables Due</p>
+            <p className="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums">${pendingReceivables.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-[10px] text-slate-400 mt-1">GAAP Account #1100 AR</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Average Order Size</p>
-          <p className="text-2xl font-extrabold text-blue-600 mt-1">
-            ${orders.length > 0 ? Math.round(totalSalesVolume / orders.length).toLocaleString() : 0}
-          </p>
-          <p className="text-[10px] text-slate-400 mt-1">Commercial client average</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Average Order Size</p>
+            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">
+              ${orders.length > 0 ? Math.round(totalSalesVolume / orders.length).toLocaleString() : 0}
+            </p>
+            <p className="text-[10px] text-slate-400 mt-1">Commercial client average</p>
+          </div>
         </div>
       </div>
 
       {/* Search & Status Filters */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
-        <div className="relative flex-1 w-full max-w-md">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by SO Number or Client Name..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
-          />
-        </div>
+      <div className="double-bezel">
+        <div className="double-bezel-inner !p-2.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="relative flex-1 w-full max-w-md">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by SO Number or Client Name..."
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
+            />
+          </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
-          {['All', 'Confirmed', 'Shipped', 'Delivered', 'Draft'].map((st) => (
-            <button
-              key={st}
-              onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
-                statusFilter === st 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200'
-              }`}
-            >
-              {st}
-            </button>
-          ))}
+          <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
+            {['All', 'Confirmed', 'Shipped', 'Delivered', 'Draft'].map((st) => (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
+                  statusFilter === st 
+                    ? 'bg-blue-600 text-white shadow-xs' 
+                    : 'bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200'
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="rounded-xl bg-white border border-slate-200 shadow-xs overflow-hidden">
-        {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-            <p className="text-xs font-bold text-slate-500">Loading sales orders...</p>
-          </div>
+      {/* Orders Table with Double-Bezel Frame */}
+      <div className="double-bezel">
+        <div className="double-bezel-inner !p-0 overflow-hidden">
+          {loading ? (
+            <div className="py-20 flex flex-col items-center justify-center gap-3">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              <p className="text-xs font-bold text-slate-500">Loading sales orders...</p>
+            </div>
         ) : filteredOrders.length === 0 ? (
           <div className="py-16 text-center text-slate-400">
             <ShoppingCart size={36} className="mx-auto text-slate-300 mb-2" />
@@ -336,6 +351,7 @@ export default function SalesPage() {
             </table>
           </div>
         )}
+        </div>
       </div>
 
       {/* Modal: Create Sales Order */}

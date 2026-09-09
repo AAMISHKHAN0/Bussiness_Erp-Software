@@ -136,99 +136,111 @@ export default function HRPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={fetchHRData}
-            className="p-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
             title="Refresh"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
           <button
             onClick={() => setIsAddEmployeeOpen(true)}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors active:scale-95"
+            className="btn-pod-blue group"
           >
-            <Plus size={16} />
             <span>Onboard Employee</span>
+            <span className="pod-icon">
+              <Plus size={13} className="text-white" />
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Metrics Banner */}
+      {/* Metrics Banner with Double-Bezel Architecture */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Workforce</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">{employees.length} Members</p>
-          <p className="text-[10px] text-slate-400 mt-1">Direct corporate staff</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Workforce</p>
+            <p className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">{employees.length} Members</p>
+            <p className="text-[10px] text-slate-400 mt-1">Direct corporate staff</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Monthly Compensation Commitment</p>
-          <p className="text-2xl font-extrabold text-blue-600 mt-1">${totalMonthlyPayroll.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">GAAP Account #6010 Payroll Expense</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Monthly Compensation Commitment</p>
+            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">${totalMonthlyPayroll.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-[10px] text-slate-400 mt-1">GAAP Account #6010 Payroll Expense</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Attendance Today</p>
-          <p className="text-2xl font-extrabold text-emerald-600 mt-1">
-            {attendance.filter(a => a.status === 'Present' || a.status === 'Remote').length} / {employees.length} Checked In
-          </p>
-          <p className="text-[10px] text-slate-400 mt-1">Verified on-shift records</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Attendance Today</p>
+            <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">
+              {attendance.filter(a => a.status === 'Present' || a.status === 'Remote').length} / {employees.length} Checked In
+            </p>
+            <p className="text-[10px] text-slate-400 mt-1">Verified on-shift records</p>
+          </div>
         </div>
       </div>
 
       {/* Digital Attendance Punch Clock Action Card */}
-      <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200">
-            <Clock size={20} />
+      <div className="double-bezel">
+        <div className="double-bezel-inner !p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200">
+              <Clock size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Executive Digital Attendance Punch Clock</h3>
+              <p className="text-xs text-slate-500">Current active user: <strong className="text-slate-800">{user?.first_name} {user?.last_name} ({user?.role})</strong></p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">Executive Digital Attendance Punch Clock</h3>
-            <p className="text-xs text-slate-500">Current active user: <strong className="text-slate-800">{user?.first_name} {user?.last_name} ({user?.role})</strong></p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <button
-            onClick={() => handleClockPunch('in')}
-            className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow-xs transition-colors"
-          >
-            Clock In
-          </button>
-          <button
-            onClick={() => handleClockPunch('out')}
-            className="flex-1 sm:flex-none px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg font-bold text-xs shadow-xs transition-colors"
-          >
-            Clock Out
-          </button>
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
+            <button
+              onClick={() => handleClockPunch('in')}
+              className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all active:scale-95"
+            >
+              Clock In
+            </button>
+            <button
+              onClick={() => handleClockPunch('out')}
+              className="flex-1 sm:flex-none px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs shadow-xs transition-all active:scale-95"
+            >
+              Clock Out
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white p-1.5 rounded-xl border border-slate-200 shadow-xs flex items-center gap-1 overflow-x-auto">
-        {[
-          { id: 'employees', label: 'Employee Roster', icon: Users, count: employees.length },
-          { id: 'attendance', label: 'Attendance Ledger', icon: Clock, count: attendance.length },
-          { id: 'payroll', label: 'Payroll Issuance', icon: DollarSign, count: payroll.length },
-        ].map(tab => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                isActive 
-                  ? 'bg-blue-600 text-white shadow-xs' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <Icon size={14} />
-              <span>{tab.label}</span>
-              {tab.count !== undefined && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                  {tab.count}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      {/* Navigation Tabs with Double-Bezel Frame */}
+      <div className="double-bezel">
+        <div className="double-bezel-inner !p-1.5 flex items-center gap-1.5 overflow-x-auto">
+          {[
+            { id: 'employees', label: 'Employee Roster', icon: Users, count: employees.length },
+            { id: 'attendance', label: 'Attendance Ledger', icon: Clock, count: attendance.length },
+            { id: 'payroll', label: 'Payroll Issuance', icon: DollarSign, count: payroll.length },
+          ].map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                  isActive 
+                    ? 'bg-blue-600 text-white shadow-xs' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <Icon size={14} />
+                <span>{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {loading ? (
@@ -241,20 +253,23 @@ export default function HRPage() {
           {/* TAB 1: EMPLOYEE DIRECTORY */}
           {activeTab === 'employees' && (
             <div className="space-y-4">
-              <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
-                <div className="relative max-w-md">
-                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search employees by name, department, or job title..."
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
-                  />
+              <div className="double-bezel">
+                <div className="double-bezel-inner !p-2.5">
+                  <div className="relative max-w-md">
+                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search employees by name, department, or job title..."
+                      className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="rounded-xl bg-white border border-slate-200 shadow-xs overflow-hidden">
+              <div className="double-bezel">
+                <div className="double-bezel-inner !p-0 overflow-hidden">
                 <table className="w-full text-left text-xs">
                   <thead>
                     <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
@@ -291,43 +306,46 @@ export default function HRPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}
 
           {/* TAB 2: ATTENDANCE LEDGER */}
           {activeTab === 'attendance' && (
-            <div className="rounded-xl bg-white border border-slate-200 shadow-xs overflow-hidden">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
-                    <th className="py-3 px-4">Employee Name</th>
-                    <th className="py-3 px-4">Date</th>
-                    <th className="py-3 px-4">Clock In Time</th>
-                    <th className="py-3 px-4">Clock Out Time</th>
-                    <th className="py-3 px-4 text-center">Attendance Verification</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {attendance.map((att) => (
-                    <tr key={att.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-slate-900">{att.employee_name}</td>
-                      <td className="py-3.5 px-4 text-slate-500 font-medium">{att.date}</td>
-                      <td className="py-3.5 px-4 font-mono font-bold text-emerald-600">{att.check_in}</td>
-                      <td className="py-3.5 px-4 font-mono font-medium text-slate-600">{att.check_out}</td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                          att.status === 'Present' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
-                          att.status === 'Remote' ? 'bg-blue-50 text-blue-800 border-blue-300' :
-                          'bg-amber-50 text-amber-800 border-amber-300'
-                        }`}>
-                          {att.status}
-                        </span>
-                      </td>
+            <div className="double-bezel">
+              <div className="double-bezel-inner !p-0 overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                      <th className="py-3 px-4">Employee Name</th>
+                      <th className="py-3 px-4">Date</th>
+                      <th className="py-3 px-4">Clock In Time</th>
+                      <th className="py-3 px-4">Clock Out Time</th>
+                      <th className="py-3 px-4 text-center">Attendance Verification</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {attendance.map((att) => (
+                      <tr key={att.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-slate-900">{att.employee_name}</td>
+                        <td className="py-3.5 px-4 text-slate-500 font-medium">{att.date}</td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-600">{att.check_in}</td>
+                        <td className="py-3.5 px-4 font-mono font-medium text-slate-600">{att.check_out}</td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                            att.status === 'Present' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+                            att.status === 'Remote' ? 'bg-blue-50 text-blue-800 border-blue-300' :
+                            'bg-amber-50 text-amber-800 border-amber-300'
+                          }`}>
+                            {att.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
@@ -335,44 +353,46 @@ export default function HRPage() {
           {activeTab === 'payroll' && (
             <div className="space-y-4">
               {payroll.map((p) => (
-                <div key={p.id} className="p-6 rounded-xl bg-white border border-slate-200 shadow-xs space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-2">
-                    <div>
-                      <h3 className="font-bold text-base text-slate-900">Payroll Cycle: {p.month} {p.year}</h3>
-                      <p className="text-xs text-slate-500">Disbursed on {p.payment_date} via Corporate ACH</p>
+                <div key={p.id} className="double-bezel">
+                  <div className="double-bezel-inner !p-6 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-2">
+                      <div>
+                        <h3 className="font-bold text-base text-slate-900">Payroll Cycle: {p.month} {p.year}</h3>
+                        <p className="text-xs text-slate-500">Disbursed on {p.payment_date} via Corporate ACH</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono font-extrabold text-blue-600 text-lg tabular-nums">
+                          ${Number(p.total_net).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">
+                          {p.status}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono font-extrabold text-blue-600 text-lg">
-                        ${Number(p.total_net).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">
-                        {p.status}
-                      </span>
-                    </div>
-                  </div>
 
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="text-slate-500 font-bold uppercase text-[10px] border-b border-slate-100">
-                        <th className="py-2">Employee</th>
-                        <th className="py-2 text-right">Base Pay</th>
-                        <th className="py-2 text-right">Allowances</th>
-                        <th className="py-2 text-right">Statutory Deductions</th>
-                        <th className="py-2 text-right">Net Remittance</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-mono">
-                      {p.items?.map((item, idx) => (
-                        <tr key={idx}>
-                          <td className="py-2.5 font-sans font-medium text-slate-800">{item.employee_name}</td>
-                          <td className="py-2.5 text-right text-slate-600">${Number(item.basic).toLocaleString()}</td>
-                          <td className="py-2.5 text-right text-slate-600">${Number(item.allowance).toLocaleString()}</td>
-                          <td className="py-2.5 text-right text-red-600">-${Number(item.deductions).toLocaleString()}</td>
-                          <td className="py-2.5 text-right font-bold text-slate-900">${Number(item.net).toLocaleString()}</td>
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="text-slate-500 font-bold uppercase text-[10px] border-b border-slate-100">
+                          <th className="py-2">Employee</th>
+                          <th className="py-2 text-right">Base Pay</th>
+                          <th className="py-2 text-right">Allowances</th>
+                          <th className="py-2 text-right">Statutory Deductions</th>
+                          <th className="py-2 text-right">Net Remittance</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-mono">
+                        {p.items?.map((item, idx) => (
+                          <tr key={idx}>
+                            <td className="py-2.5 font-sans font-medium text-slate-800">{item.employee_name}</td>
+                            <td className="py-2.5 text-right text-slate-600 tabular-nums">${Number(item.basic).toLocaleString()}</td>
+                            <td className="py-2.5 text-right text-slate-600 tabular-nums">${Number(item.allowance).toLocaleString()}</td>
+                            <td className="py-2.5 text-right text-red-600 tabular-nums">-${Number(item.deductions).toLocaleString()}</td>
+                            <td className="py-2.5 text-right font-bold text-slate-900 tabular-nums">${Number(item.net).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               ))}
             </div>

@@ -181,100 +181,113 @@ export default function InventoryPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={fetchData}
-            className="p-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
             title="Refresh"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
           <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs"
           >
             <Download size={14} />
             <span>Export CSV</span>
           </button>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors active:scale-95"
+            className="btn-pod-blue group"
           >
-            <Plus size={16} />
             <span>Register New SKU</span>
+            <span className="pod-icon">
+              <Plus size={13} className="text-white" />
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Metrics Banner */}
+      {/* Metrics Banner with Double-Bezel Architecture */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Active SKUs</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">{products.length}</p>
-          <p className="text-[10px] text-slate-400 mt-1">Across 5 classifications</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Active SKUs</p>
+            <p className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">{products.length}</p>
+            <p className="text-[10px] text-slate-400 mt-1">Across 5 classifications</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Asset Valuation (Cost)</p>
-          <p className="text-2xl font-extrabold text-blue-600 mt-1">${totalCostValuation.toLocaleString()}</p>
-          <p className="text-[10px] text-slate-400 mt-1">GAAP Account #1200 Inventory</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Asset Valuation (Cost)</p>
+            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">${totalCostValuation.toLocaleString()}</p>
+            <p className="text-[10px] text-slate-400 mt-1">GAAP Account #1200 Inventory</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Projected Retail Value</p>
-          <p className="text-2xl font-extrabold text-emerald-600 mt-1">${totalRetailValuation.toLocaleString()}</p>
-          <p className="text-[10px] text-slate-400 mt-1">~{Math.round(((totalRetailValuation - totalCostValuation) / (totalRetailValuation || 1)) * 100)}% Average Markup</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Projected Retail Value</p>
+            <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">${totalRetailValuation.toLocaleString()}</p>
+            <p className="text-[10px] text-slate-400 mt-1">~{Math.round(((totalRetailValuation - totalCostValuation) / (totalRetailValuation || 1)) * 100)}% Average Markup</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Low Stock Warnings</p>
-          <p className={`text-2xl font-extrabold mt-1 ${criticalCount > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
-            {criticalCount} SKUs
-          </p>
-          <p className="text-[10px] text-slate-400 mt-1">Below minimum safe threshold</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Low Stock Warnings</p>
+            <p className={`text-2xl font-extrabold mt-1 tabular-nums ${criticalCount > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
+              {criticalCount} SKUs
+            </p>
+            <p className="text-[10px] text-slate-400 mt-1">Below minimum safe threshold</p>
+          </div>
         </div>
       </div>
 
       {/* Filters & Search Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
-        <div className="relative flex-1 w-full max-w-md">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by Product Name, SKU, or Barcode..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
-          />
-        </div>
+      <div className="double-bezel">
+        <div className="double-bezel-inner !p-2.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="relative flex-1 w-full max-w-md">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by Product Name, SKU, or Barcode..."
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
+            />
+          </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 outline-none cursor-pointer"
-          >
-            <option value="All">All Classifications</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.name}>{c.name}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 outline-none cursor-pointer"
+            >
+              <option value="All">All Classifications</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
+            </select>
 
-          <button
-            onClick={() => setFilterCriticalOnly(!filterCriticalOnly)}
-            className={`px-3 py-2 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1.5 whitespace-nowrap ${
-              filterCriticalOnly 
-                ? 'bg-amber-50 text-amber-700 border-amber-300' 
-                : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
-            }`}
-          >
-            <AlertTriangle size={13} />
-            <span>Low Stock Alert</span>
-          </button>
+            <button
+              onClick={() => setFilterCriticalOnly(!filterCriticalOnly)}
+              className={`px-3 py-2 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+                filterCriticalOnly 
+                  ? 'bg-amber-50 text-amber-700 border-amber-300' 
+                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
+              }`}
+            >
+              <AlertTriangle size={13} />
+              <span>Low Stock Alert</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Main Table */}
-      <div className="rounded-xl bg-white border border-slate-200 shadow-xs overflow-hidden">
-        {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-            <p className="text-xs font-bold text-slate-500">Loading catalog items...</p>
-          </div>
+      {/* Main Table with Double-Bezel Frame */}
+      <div className="double-bezel">
+        <div className="double-bezel-inner !p-0 overflow-hidden">
+          {loading ? (
+            <div className="py-20 flex flex-col items-center justify-center gap-3">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              <p className="text-xs font-bold text-slate-500">Loading catalog items...</p>
+            </div>
         ) : filteredProducts.length === 0 ? (
           <div className="py-16 text-center text-slate-400">
             <Package size={36} className="mx-auto text-slate-300 mb-2" />
@@ -363,6 +376,7 @@ export default function InventoryPage() {
             </table>
           </div>
         )}
+        </div>
       </div>
 
       {/* Modal: Register New SKU */}
