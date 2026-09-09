@@ -5,7 +5,7 @@ import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
 import { 
   Truck, Plus, Search, CheckCircle2, Clock, 
-  PackageCheck, Loader2, Trash2, RefreshCw 
+  PackageCheck, Loader2, Trash2, RefreshCw, Download 
 } from 'lucide-react';
 
 export default function PurchasesPage() {
@@ -44,6 +44,36 @@ export default function PurchasesPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleExportCSV = () => {
+    const headers = ['PO Number,Supplier,Order Date,Expected Delivery,Total Amount,Status'];
+    const rows = orders.map(o => 
+      `"${o.order_number}","${o.supplier_name}","${o.order_date}","${o.expected_delivery_date || ''}",${parseFloat(o.total_amount || 0).toFixed(2)},"${o.status}"`
+    );
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers, ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Procurement_POs_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDeletePO = async (id) => {
+    if (!confirm('Are you sure you want to cancel and remove this purchase order?')) return;
+    try {
+      const res = await fetch(`/api/purchases?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        fetchData();
+      } else {
+        alert(json.message);
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   const handleReceiveGoods = async (orderId) => {
     if (!confirm('Confirm goods receipt note (GRN)? This will immediately restock warehouse inventory.')) return;
@@ -129,13 +159,21 @@ export default function PurchasesPage() {
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
           <button
+            onClick={handleExportCSV}
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+            title="Download Procurement Sheet (CSV)"
+          >
+            <Download size={14} />
+            <span>Download Sheet</span>
+          </button>
+          <button
             onClick={() => {
               if (products.length > 0 && !lineItems[0].product_id) {
                 setLineItems([{ product_id: products[0].id, quantity: 10, unit_price: products[0].purchase_price }]);
               }
               setIsCreateOpen(true);
             }}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors active:scale-95"
+            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors active:scale-95 cursor-pointer"
           >
             <Plus size={16} />
             <span>Draft Purchase Order</span>
@@ -228,19 +266,28 @@ export default function PurchasesPage() {
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      {po.status !== 'Received' ? (
+                      <div className="flex items-center justify-end gap-1.5">
+                        {po.status !== 'Received' ? (
+                          <button
+                            onClick={() => handleReceiveGoods(po.id)}
+                            className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-md font-bold text-xs transition-colors border border-emerald-300 flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <PackageCheck size={14} />
+                            <span>Receive Shipment</span>
+                          </button>
+                        ) : (
+                          <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
+                            <CheckCircle2 size={13} /> Restocked
+                          </span>
+                        )}
                         <button
-                          onClick={() => handleReceiveGoods(po.id)}
-                          className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-md font-bold text-xs transition-colors border border-emerald-300 flex items-center gap-1.5 ml-auto"
+                          onClick={() => handleDeletePO(po.id)}
+                          className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                          title="Cancel & Delete Purchase Order"
                         >
-                          <PackageCheck size={14} />
-                          <span>Receive Shipment</span>
+                          <Trash2 size={15} />
                         </button>
-                      ) : (
-                        <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1 justify-end">
-                          <CheckCircle2 size={13} /> Restocked
-                        </span>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))}

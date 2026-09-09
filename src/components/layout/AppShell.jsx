@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { name: 'Vendors', href: '/vendors', icon: Building2 },
   { name: 'Accounting', href: '/accounting', icon: Calculator, badge: 'GAAP' },
   { name: 'HR & Payroll', href: '/hr', icon: UserCheck },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Analytics & Reports', href: '/analytics', icon: BarChart3, badge: 'Reports' },
   { name: 'Audit Logs', href: '/audit-logs', icon: ShieldAlert },
   { name: 'System Settings', href: '/admin', icon: Settings },
 ];

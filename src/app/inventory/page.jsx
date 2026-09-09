@@ -6,7 +6,7 @@ import Modal from '@/components/common/Modal';
 import { 
   Package, Plus, Search, AlertTriangle, 
   Download, Trash2, ArrowUpDown, 
-  RefreshCw, Loader2, MapPin
+  RefreshCw, Loader2, MapPin, Pencil
 } from 'lucide-react';
 
 export default function InventoryPage() {
@@ -21,6 +21,7 @@ export default function InventoryPage() {
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [adjustAmount, setAdjustAmount] = useState(0);
 
@@ -36,6 +37,20 @@ export default function InventoryPage() {
     min_stock_level: 5,
     location: 'Warehouse Bay A-01',
     supplier_name: 'Ingram Micro Global Distribution'
+  });
+
+  const [editForm, setEditForm] = useState({
+    id: '',
+    name: '',
+    sku: '',
+    barcode: '',
+    category_name: '',
+    purchase_price: 0,
+    selling_price: 0,
+    quantity: 0,
+    min_stock_level: 5,
+    location: '',
+    supplier_name: ''
   });
 
   const fetchData = async () => {
@@ -108,6 +123,44 @@ export default function InventoryPage() {
       const json = await res.json();
       if (json.success) {
         setIsAdjustModalOpen(false);
+        fetchData();
+      } else {
+        alert(json.message);
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleOpenEdit = (p) => {
+    setSelectedProduct(p);
+    setEditForm({
+      id: p.id,
+      name: p.name || '',
+      sku: p.sku || '',
+      barcode: p.barcode || '',
+      category_name: p.category_name || (categories[0]?.name || 'Enterprise Rack Servers'),
+      purchase_price: Number(p.purchase_price) || 0,
+      selling_price: Number(p.selling_price) || 0,
+      quantity: Number(p.quantity) || 0,
+      min_stock_level: Number(p.min_stock_level) || 5,
+      location: p.location || '',
+      supplier_name: p.supplier_name || (suppliers[0]?.name || '')
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/inventory', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+      const json = await res.json();
+      if (json.success) {
+        setIsEditModalOpen(false);
         fetchData();
       } else {
         alert(json.message);
@@ -350,6 +403,13 @@ export default function InventoryPage() {
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
+                            onClick={() => handleOpenEdit(p)}
+                            className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            title="Edit SKU Specifications"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          <button
                             onClick={() => {
                               setSelectedProduct(p);
                               setAdjustAmount(0);
@@ -545,6 +605,131 @@ export default function InventoryPage() {
               className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs"
             >
               Apply Adjustment
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Edit SKU Specifications */}
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title={`Edit SKU: ${selectedProduct?.name || ''}`}>
+        <form onSubmit={handleUpdateProduct} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="sm:col-span-2">
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Product Description / Title</label>
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">SKU Code</label>
+              <input
+                type="text"
+                value={editForm.sku}
+                onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Barcode (EAN/UPC)</label>
+              <input
+                type="text"
+                value={editForm.barcode}
+                onChange={(e) => setEditForm({ ...editForm, barcode: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Classification</label>
+              <select
+                value={editForm.category_name}
+                onChange={(e) => setEditForm({ ...editForm, category_name: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              >
+                {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Supplier Partner</label>
+              <select
+                value={editForm.supplier_name}
+                onChange={(e) => setEditForm({ ...editForm, supplier_name: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              >
+                {suppliers.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Cost Price ($)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={editForm.purchase_price}
+                onChange={(e) => setEditForm({ ...editForm, purchase_price: Number(e.target.value) })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Selling Price ($)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={editForm.selling_price}
+                onChange={(e) => setEditForm({ ...editForm, selling_price: Number(e.target.value) })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Stock on Hand</label>
+              <input
+                type="number"
+                value={editForm.quantity}
+                onChange={(e) => setEditForm({ ...editForm, quantity: Number(e.target.value) })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Safety Threshold Alert</label>
+              <input
+                type="number"
+                value={editForm.min_stock_level}
+                onChange={(e) => setEditForm({ ...editForm, min_stock_level: Number(e.target.value) })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
+                required
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Warehouse Bin / Location</label>
+              <input
+                type="text"
+                value={editForm.location}
+                onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                placeholder="Warehouse Bay A-12"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-200 flex justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs"
+            >
+              Update SKU Record
             </button>
           </div>
         </form>

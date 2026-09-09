@@ -119,3 +119,19 @@ export async function PUT(request) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) return NextResponse.json({ success: false, message: 'PO ID required' }, { status: 400 });
+
+    const po = db.findById('purchase_orders', id);
+    db.delete('purchase_orders', id);
+    db.logAudit('PO_DELETED', 'Procurement', `Cancelled and removed purchase order ${po?.order_number || id}`);
+    return NextResponse.json({ success: true, message: 'Purchase Order deleted' });
+  } catch (err) {
+    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+  }
+}
+

@@ -5,7 +5,7 @@ import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
 import { 
   Users, Plus, Search, Mail, Phone, MapPin, 
-  CreditCard, Loader2, RefreshCw 
+  CreditCard, DollarSign, Loader2, RefreshCw, Download, Pencil, Trash2 
 } from 'lucide-react';
 
 export default function CustomersPage() {
@@ -13,6 +13,8 @@ export default function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const [form, setForm] = useState({
     name: '',
@@ -21,7 +23,20 @@ export default function CustomersPage() {
     email: '',
     phone: '',
     address: '',
-    credit_limit: 75000
+    credit_limit: 50000,
+    status: 'Active'
+  });
+
+  const [editForm, setEditForm] = useState({
+    id: '',
+    name: '',
+    company_name: '',
+    contact_person: '',
+    email: '',
+    phone: '',
+    address: '',
+    credit_limit: 50000,
+    status: 'Active'
   });
 
   const fetchCustomers = async () => {
@@ -60,7 +75,8 @@ export default function CustomersPage() {
           email: '',
           phone: '',
           address: '',
-          credit_limit: 75000
+          credit_limit: 50000,
+          status: 'Active'
         });
       } else {
         alert(json.message);
@@ -70,10 +86,90 @@ export default function CustomersPage() {
     }
   };
 
+  const handleOpenEdit = (c) => {
+    setSelectedCustomer(c);
+    setEditForm({
+      id: c.id,
+      name: c.name,
+      company_name: c.company_name || c.name,
+      contact_person: c.contact_person || '',
+      email: c.email || '',
+      phone: c.phone || '',
+      address: c.address || '',
+      credit_limit: Number(c.credit_limit) || 25000,
+      status: c.status || 'Active'
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleUpdateCustomer = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/customers', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+      const json = await res.json();
+      if (json.success) {
+        setIsEditOpen(false);
+        fetchCustomers();
+      } else {
+        alert(json.message);
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteCustomer = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to remove customer "${name}"? This action cannot be undone.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/customers?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        fetchCustomers();
+      } else {
+        alert(json.message);
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (customers.length === 0) return alert('No customers to export');
+    const headers = ['ID', 'Trade Name', 'Company Name', 'Contact Person', 'Email', 'Phone', 'Address', 'Credit Limit', 'Total Spent', 'Current AR Balance', 'Status'];
+    const rows = customers.map(c => [
+      c.id,
+      `"${c.name}"`,
+      `"${c.company_name || c.name}"`,
+      `"${c.contact_person || ''}"`,
+      c.email || '',
+      c.phone || '',
+      `"${c.address || ''}"`,
+      c.credit_limit || 0,
+      c.total_spent || 0,
+      c.current_balance || 0,
+      c.status || 'Active'
+    ]);
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `corporate_customers_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const filtered = customers.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (c.company_name && c.company_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (c.contact_person && c.contact_person.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const totalSpent = customers.reduce((s, c) => s + (Number(c.total_spent) || 0), 0);
@@ -100,104 +196,150 @@ export default function CustomersPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={fetchCustomers}
-            className="p-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
             title="Refresh"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
           <button
-            onClick={() => setIsAddOpen(true)}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-colors active:scale-95"
+            onClick={handleExportCSV}
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs"
+            title="Download Customer Sheet (CSV)"
           >
-            <Plus size={16} />
+            <Download size={14} />
+            <span>Download Sheet (CSV)</span>
+          </button>
+          <button
+            onClick={() => setIsAddOpen(true)}
+            className="btn-pod-blue group"
+          >
             <span>Add Corporate Client</span>
+            <span className="pod-icon">
+              <Plus size={13} className="text-white" />
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Metrics Banner */}
+      {/* Metrics Banner with Double-Bezel Architecture */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Corporate Clients</p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">{customers.length}</p>
-          <p className="text-[10px] text-slate-400 mt-1">Active enterprise partners</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Corporate Clients</p>
+            <p className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">{customers.length}</p>
+            <p className="text-[10px] text-slate-400 mt-1">Active enterprise partners</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Lifetime Gross Spend</p>
-          <p className="text-2xl font-extrabold text-emerald-600 mt-1">${totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">Cumulative settled invoices</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Lifetime Gross Spend</p>
+            <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">${totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-[10px] text-slate-400 mt-1">Cumulative settled invoices</p>
+          </div>
         </div>
-        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Receivables Outstanding</p>
-          <p className="text-2xl font-extrabold text-blue-600 mt-1">${totalReceivables.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          <p className="text-[10px] text-slate-400 mt-1">Net-30 open receivables</p>
+        <div className="double-bezel">
+          <div className="double-bezel-inner">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Active Receivables Outstanding</p>
+            <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">${totalReceivables.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-[10px] text-slate-400 mt-1">Net-30 open receivables</p>
+          </div>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
-        <div className="relative max-w-md">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search clients by name, company, or email..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
-          />
+      <div className="double-bezel">
+        <div className="double-bezel-inner !p-2.5">
+          <div className="relative max-w-md">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search customers by company name or representative..."
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Clients Cards Grid */}
+      {/* Customer Directory Cards */}
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center gap-3">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-          <p className="text-xs font-bold text-slate-500">Loading client directory...</p>
+          <p className="text-xs font-bold text-slate-500">Loading client registry...</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-16 text-center text-slate-400 bg-white rounded-xl border border-slate-200">
+        <div className="py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
           <Users size={36} className="mx-auto text-slate-300 mb-2" />
-          <p className="font-bold text-sm text-slate-700">No client accounts found</p>
+          <p className="font-bold text-sm text-slate-700">No corporate clients found</p>
+          <p className="text-xs text-slate-500 mt-1">Try clearing filters or search query.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((client) => (
-            <div key={client.id} className="p-5 bg-white border border-slate-200 rounded-xl shadow-xs hover:border-slate-300 transition-colors flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-2 pb-3 border-b border-slate-100">
-                  <div>
-                    <h3 className="font-bold text-base text-slate-900">{client.name}</h3>
-                    <p className="text-xs text-slate-500">{client.company_name}</p>
+            <div key={client.id} className="double-bezel">
+              <div className="double-bezel-inner h-full flex flex-col justify-between">
+                <div>
+                  <div className="flex items-start justify-between gap-2 pb-3 border-b border-slate-100">
+                    <div>
+                      <h3 className="font-bold text-base text-slate-900">{client.company_name || client.name}</h3>
+                      <p className="text-xs text-slate-500 font-medium">Rep: {client.contact_person || client.name}</p>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">
+                      {client.status || 'Active'}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    {client.status || 'Active'}
-                  </span>
+
+                  <div className="py-3 space-y-2 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <Mail size={13} className="text-slate-400" />
+                      <span>{client.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone size={13} className="text-slate-400" />
+                      <span>{client.phone || '+1 (800) 555-0100'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin size={13} className="text-slate-400" />
+                      <span className="truncate">{client.address || 'Corporate Facility'}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="py-3 space-y-2 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <Mail size={13} className="text-slate-400" />
-                    <span>{client.email}</span>
+                <div className="pt-3 border-t border-slate-100 space-y-2">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
+                      <p className="text-[10px] font-bold uppercase text-slate-500">Credit Limit</p>
+                      <p className="font-mono font-bold text-slate-900 mt-0.5 tabular-nums">${Number(client.credit_limit || 0).toLocaleString()}</p>
+                    </div>
+                    <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
+                      <p className="text-[10px] font-bold uppercase text-slate-500">AR Balance</p>
+                      <p className="font-mono font-bold text-blue-600 mt-0.5 tabular-nums">${Number(client.current_balance || 0).toLocaleString()}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Phone size={13} className="text-slate-400" />
-                    <span>{client.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin size={13} className="text-slate-400" />
-                    <span className="truncate">{client.address}</span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
-                  <p className="text-[10px] font-bold uppercase text-slate-500">Credit Limit</p>
-                  <p className="font-mono font-bold text-slate-900 mt-0.5">${Number(client.credit_limit || 0).toLocaleString()}</p>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
-                  <p className="text-[10px] font-bold uppercase text-slate-500">AR Balance</p>
-                  <p className="font-mono font-bold text-blue-600 mt-0.5">${Number(client.current_balance || 0).toLocaleString()}</p>
+                  {/* Action Buttons: Edit & Delete */}
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      Spent: ${Number(client.total_spent || 0).toLocaleString()}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleOpenEdit(client)}
+                        className="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 transition-colors"
+                        title="Edit Customer"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCustomer(client.id, client.company_name || client.name)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 hover:border-red-200 transition-colors"
+                        title="Delete Customer"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -215,7 +357,7 @@ export default function CustomersPage() {
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Apex Logistics International"
+                placeholder="e.g. Apex Logistics"
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
                 required
               />
@@ -242,34 +384,33 @@ export default function CustomersPage() {
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Corporate Email</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Corporate Billing Email</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="dvance@apexlogistics.com"
+                placeholder="billing@apexlogistics.com"
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
                 required
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Telephone</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Phone Number</label>
               <input
                 type="text"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                placeholder="+1 (312) 555-0144"
+                placeholder="+1 (212) 555-0199"
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Credit Limit ($)</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Authorized Credit Limit ($)</label>
               <input
                 type="number"
                 value={form.credit_limit}
                 onChange={(e) => setForm({ ...form, credit_limit: Number(e.target.value) })}
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-mono outline-none focus:border-blue-600"
-                required
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono"
               />
             </div>
             <div className="sm:col-span-2">
@@ -278,26 +419,125 @@ export default function CustomersPage() {
                 type="text"
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
-                placeholder="200 South Wacker Drive, Suite 1800, Chicago, IL"
+                placeholder="1200 Harbor Boulevard, Weehawken, NJ 07086"
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
-                required
               />
             </div>
           </div>
-
-          <div className="pt-4 border-t border-slate-200 flex justify-end gap-2.5">
+          <div className="pt-2 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setIsAddOpen(false)}
-              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+              className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-xs"
             >
-              Save Client Account
+              Enroll Client
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Edit Customer */}
+      <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Corporate Client">
+        <form onSubmit={handleUpdateCustomer} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Entity / Trade Name</label>
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-bold"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Legal Company Name</label>
+              <input
+                type="text"
+                value={editForm.company_name}
+                onChange={(e) => setEditForm({ ...editForm, company_name: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Key Contact Person</label>
+              <input
+                type="text"
+                value={editForm.contact_person}
+                onChange={(e) => setEditForm({ ...editForm, contact_person: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Corporate Billing Email</label>
+              <input
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Phone Number</label>
+              <input
+                type="text"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Authorized Credit Limit ($)</label>
+              <input
+                type="number"
+                value={editForm.credit_limit}
+                onChange={(e) => setEditForm({ ...editForm, credit_limit: Number(e.target.value) })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Account Status</label>
+              <select
+                value={editForm.status}
+                onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-semibold"
+              >
+                <option value="Active">Active</option>
+                <option value="Credit Hold">Credit Hold</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Corporate Address</label>
+              <input
+                type="text"
+                value={editForm.address}
+                onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              />
+            </div>
+          </div>
+          <div className="pt-2 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsEditOpen(false)}
+              className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-xs"
+            >
+              Save Changes
             </button>
           </div>
         </form>

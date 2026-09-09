@@ -8,7 +8,7 @@ import SalesReportModal from '@/components/common/SalesReportModal';
 import { 
   ShoppingCart, Plus, Search, FileText, CheckCircle2, 
   Clock, DollarSign, Eye, Loader2, 
-  Trash2, RefreshCw, Printer
+  Trash2, RefreshCw, Printer, Download
 } from 'lucide-react';
 
 export default function SalesPage() {
@@ -55,6 +55,36 @@ export default function SalesPage() {
   useEffect(() => {
     fetchSalesData();
   }, []);
+
+  const handleExportCSV = () => {
+    const headers = ['Order Number,Date,Customer,Payment Terms,Status,Payment Status,Net Amount'];
+    const rows = orders.map(o => 
+      `"${o.order_number}","${o.order_date || ''}","${o.customer_name || ''}","${o.payment_method || 'Net-30'}","${o.status || 'Confirmed'}","${o.payment_status || 'Pending'}",${parseFloat(o.net_amount || o.total_amount || 0).toFixed(2)}`
+    );
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers, ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Sales_Orders_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDeleteOrder = async (id) => {
+    if (!confirm('Are you sure you want to cancel and delete this commercial sales order?')) return;
+    try {
+      const res = await fetch(`/api/sales?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        fetchSalesData();
+      } else {
+        alert(json.message);
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   const handleProductSelect = (index, productId) => {
     const prod = products.find(p => p.id === productId);
@@ -187,13 +217,21 @@ export default function SalesPage() {
             <span>Sales Report (PDF)</span>
           </button>
           <button
+            onClick={handleExportCSV}
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+            title="Download Sales Sheet (CSV)"
+          >
+            <Download size={14} />
+            <span>Download Sheet</span>
+          </button>
+          <button
             onClick={() => {
               if (products.length > 0 && !lineItems[0].product_id) {
                 setLineItems([{ product_id: products[0].id, quantity: 1, unit_price: products[0].selling_price }]);
               }
               setIsCreateOpen(true);
             }}
-            className="btn-pod-blue group"
+            className="btn-pod-blue group cursor-pointer"
           >
             <span>Create Sales Order</span>
             <span className="pod-icon">
@@ -336,14 +374,23 @@ export default function SalesPage() {
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => setSelectedInvoiceOrder(order)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-md font-bold text-xs transition-colors border border-slate-200"
-                        title="View & Print Invoice"
-                      >
-                        <FileText size={13} className="text-blue-600" />
-                        <span>Invoice</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => setSelectedInvoiceOrder(order)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-md font-bold text-xs transition-colors border border-slate-200 cursor-pointer"
+                          title="View & Print Invoice"
+                        >
+                          <FileText size={13} className="text-blue-600" />
+                          <span>Invoice</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteOrder(order.id)}
+                          className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                          title="Cancel & Delete Sales Order"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

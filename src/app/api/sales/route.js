@@ -141,3 +141,19 @@ export async function PUT(request) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) return NextResponse.json({ success: false, message: 'Order ID required' }, { status: 400 });
+
+    const order = db.findById('sales_orders', id);
+    db.delete('sales_orders', id);
+    db.logAudit('SALES_ORDER_DELETED', 'Sales', `Cancelled and deleted order ${order?.order_number || id}`);
+    return NextResponse.json({ success: true, message: 'Sales order deleted' });
+  } catch (err) {
+    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+  }
+}
+
