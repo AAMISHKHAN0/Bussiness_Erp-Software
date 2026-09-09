@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
 import InvoiceModal from '@/components/common/InvoiceModal';
+import SalesReportModal from '@/components/common/SalesReportModal';
 import { 
   ShoppingCart, Plus, Search, FileText, CheckCircle2, 
   Clock, DollarSign, Eye, Loader2, 
-  Trash2, RefreshCw
+  Trash2, RefreshCw, Printer
 } from 'lucide-react';
 
 export default function SalesPage() {
@@ -21,6 +22,7 @@ export default function SalesPage() {
   // Modals
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
+  const [isSalesReportOpen, setIsSalesReportOpen] = useState(false);
 
   // New Order Form State
   const [selectedCustomer, setSelectedCustomer] = useState('');
@@ -142,6 +144,14 @@ export default function SalesPage() {
         order={selectedInvoiceOrder}
       />
 
+      {/* Sales Report Modal for Executive Audit & PDF */}
+      <SalesReportModal
+        isOpen={isSalesReportOpen}
+        onClose={() => setIsSalesReportOpen(false)}
+        orders={orders}
+        customers={customers}
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
@@ -165,6 +175,14 @@ export default function SalesPage() {
             title="Refresh"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
+          </button>
+          <button
+            onClick={() => setIsSalesReportOpen(true)}
+            className="px-3.5 py-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition-colors"
+            title="Executive Sales Report & PDF Export"
+          >
+            <FileText size={15} className="text-blue-600" />
+            <span>Sales Report (PDF)</span>
           </button>
           <button
             onClick={() => {

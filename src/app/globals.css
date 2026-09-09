@@ -62,3 +62,61 @@
   letter-spacing: 0.05em;
   border-bottom: 1px solid #e2e8f0;
 }
+
+/* Print Optimization for PDF Export & Physical Invoicing */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10pt !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide app navigation chrome, toolbars, and buttons */
+  header,
+  aside,
+  nav,
+  .print\:hidden,
+  button,
+  .backdrop-blur-xs,
+  .fixed.inset-0.bg-slate-900\/60 {
+    display: none !important;
+  }
+
+  /* Reset layout constraints for natural print flow */
+  .fixed {
+    position: static !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .overflow-y-auto,
+  .overflow-hidden {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* Clean full-width modal printing without card borders */
+  .relative.w-full {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}

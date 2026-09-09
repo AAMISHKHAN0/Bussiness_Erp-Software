@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, Package, ShoppingCart, Truck, Users, 
   Calculator, BarChart3, ShieldAlert, Settings, Menu, X, 
   Search, Bell, Sun, Moon, ChevronDown, 
-  LogOut, UserCheck, Building2, ChevronRight
+  LogOut, UserCheck, Building2, ChevronRight,
+  PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -39,6 +40,38 @@ export default function AppShell({ children }) {
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
+  // Restore minimized sidebar state from localStorage
+  useEffect(() => {
+    try {
+      const savedState = localStorage.getItem('erp_sidebar_collapsed');
+      if (savedState !== null) {
+        setSidebarCollapsed(savedState === 'true');
+      }
+    } catch (e) {}
+  }, []);
+
+  // Keyboard shortcut Ctrl+B or Cmd+B to toggle sidebar
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('erp_sidebar_collapsed', String(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
   // If user is on /login, render without shell
   if (pathname === '/login') {
     return <>{children}</>;
@@ -69,35 +102,50 @@ export default function AppShell({ children }) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar (Collapsible) */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-slate-200 transition-all duration-200 ease-in-out lg:static shadow-sm ${
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-slate-200 transition-all duration-300 ease-in-out lg:static shadow-sm ${
           sidebarCollapsed ? 'w-20' : 'w-64'
         } ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        {/* Brand / Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 bg-white">
-          <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
+        {/* Brand / Logo Header */}
+        <div className="h-16 flex items-center justify-between px-3.5 border-b border-slate-200 bg-white">
+          <Link 
+            href="/dashboard" 
+            className={`flex items-center gap-3 overflow-hidden ${sidebarCollapsed ? 'justify-center w-full' : ''}`}
+            title="Global Enterprise ERP Suite"
+          >
             <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-black text-lg text-white shadow-sm flex-shrink-0">
               G
             </div>
             {!sidebarCollapsed && (
-              <div className="leading-tight">
-                <span className="font-extrabold text-sm tracking-tight text-slate-900 block">Global ERP</span>
-                <span className="text-[11px] font-semibold text-blue-600 tracking-normal">Enterprise Suite</span>
+              <div className="leading-tight overflow-hidden">
+                <span className="font-extrabold text-sm tracking-tight text-slate-900 block truncate">Global ERP</span>
+                <span className="text-[11px] font-semibold text-blue-600 tracking-normal block truncate">Enterprise Suite</span>
               </div>
             )}
           </Link>
+
+          {/* Minimize toggle inside sidebar */}
           <button 
             onClick={() => setMobileSidebarOpen(false)}
             className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100"
           >
             <X size={18} />
           </button>
+          {!sidebarCollapsed && (
+            <button
+              onClick={toggleSidebar}
+              className="hidden lg:flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              title="Minimize Sidebar (Ctrl+B)"
+            >
+              <PanelLeftClose size={17} />
+            </button>
+          )}
         </div>
 
         {/* Navigation Items */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        <div className="flex-1 overflow-y-auto px-2.5 py-4 space-y-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -106,16 +154,18 @@ export default function AppShell({ children }) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm transition-colors group ${
+                className={`flex items-center rounded-lg text-sm transition-colors group relative ${
+                  sidebarCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3.5 py-2.5'
+                } ${
                   isActive 
                     ? 'bg-blue-600 text-white font-semibold shadow-sm' 
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium'
                 }`}
                 title={sidebarCollapsed ? item.name : undefined}
               >
-                <Icon size={18} className={isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-600 transition-colors flex-shrink-0'} />
+                <Icon size={19} className={isActive ? 'text-white' : 'text-slate-500 group-hover:text-blue-600 transition-colors flex-shrink-0'} />
                 {!sidebarCollapsed && (
-                  <span className="flex-1 whitespace-nowrap">{item.name}</span>
+                  <span className="flex-1 whitespace-nowrap truncate">{item.name}</span>
                 )}
                 {!sidebarCollapsed && item.badge && !isActive && (
                   <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
@@ -127,30 +177,30 @@ export default function AppShell({ children }) {
           })}
         </div>
 
-        {/* Current Active Role Badge & Collapse Toggle */}
+        {/* Current Active Role Badge & Collapse Button Footer */}
         <div className="p-3 border-t border-slate-200 bg-slate-50/50">
           {!sidebarCollapsed ? (
-            <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between shadow-xs">
-              <div className="overflow-hidden">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Active Role</p>
+            <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between shadow-2xs">
+              <div className="overflow-hidden pr-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Department Portal</p>
                 <p className="text-xs font-bold text-slate-900 truncate">{user?.role || 'Super Admin'}</p>
               </div>
               <button
-                onClick={() => setSidebarCollapsed(true)}
-                className="hidden lg:block text-slate-400 hover:text-slate-700 p-1 rounded-md hover:bg-slate-100"
-                title="Collapse sidebar"
+                onClick={toggleSidebar}
+                className="hidden lg:flex p-1.5 text-slate-400 hover:text-slate-800 rounded-md hover:bg-slate-100 transition-colors flex-shrink-0"
+                title="Minimize Sidebar (Ctrl+B)"
               >
-                <Menu size={16} />
+                <PanelLeftClose size={16} />
               </button>
             </div>
           ) : (
             <div className="flex justify-center">
               <button
-                onClick={() => setSidebarCollapsed(false)}
-                className="text-slate-500 hover:text-slate-900 p-2 rounded-lg hover:bg-slate-100"
-                title="Expand sidebar"
+                onClick={toggleSidebar}
+                className="text-slate-500 hover:text-blue-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                title="Expand Sidebar (Ctrl+B)"
               >
-                <Menu size={18} />
+                <PanelLeftOpen size={19} />
               </button>
             </div>
           )}
@@ -160,14 +210,23 @@ export default function AppShell({ children }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between z-30 shadow-xs">
-          {/* Left: Mobile menu toggle + breadcrumbs */}
-          <div className="flex items-center gap-3">
+        <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between z-30 shadow-2xs">
+          {/* Left: Mobile menu toggle + Desktop sidebar toggle + breadcrumbs */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setMobileSidebarOpen(true)}
               className="lg:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             >
               <Menu size={20} />
+            </button>
+
+            {/* Desktop Minimize/Expand Toggle Button in Header */}
+            <button
+              onClick={toggleSidebar}
+              className="hidden lg:flex p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              title={sidebarCollapsed ? "Expand Sidebar (Ctrl+B)" : "Minimize Sidebar (Ctrl+B)"}
+            >
+              {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
             </button>
 
             <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-500">
@@ -187,7 +246,7 @@ export default function AppShell({ children }) {
                 <Search size={14} className="text-blue-600" />
                 <span>Search modules, accounts, items...</span>
               </span>
-              <kbd className="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-mono text-slate-600 shadow-xs">
+              <kbd className="px-2 py-0.5 rounded bg-white border border-slate-300 text-[10px] font-mono text-slate-600 shadow-2xs">
                 Ctrl+K
               </kbd>
             </button>
@@ -247,7 +306,7 @@ export default function AppShell({ children }) {
               )}
             </div>
 
-            {/* 1-Click Role Switcher & User Profile */}
+            {/* Department Role Switcher & User Profile */}
             <div className="relative">
               <button
                 onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
@@ -273,7 +332,7 @@ export default function AppShell({ children }) {
 
                   <div className="py-2">
                     <p className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                      1-Click Role Switcher
+                      Department Portal Switcher
                     </p>
                     {['Super Admin', 'Financial Controller', 'HR Director', 'Inventory Specialist', 'Senior Sales Representative'].map((role) => (
                       <button

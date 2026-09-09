@@ -183,14 +183,14 @@
       "unit": "Units",
       "purchase_price": 3450,
       "selling_price": 5890,
-      "quantity": 41,
+      "quantity": 44,
       "min_stock_level": 8,
       "location": "Warehouse Bay A-04",
       "supplier_name": "Ingram Micro Global Distribution",
       "supplier_id": "sup-3",
       "status": "In Stock",
       "is_active": true,
-      "updated_at": "2026-09-09T09:10:43.663Z"
+      "updated_at": "2026-09-09T11:42:31.972Z"
     },
     {
       "id": "p-2",
@@ -348,10 +348,10 @@
       "address": "200 South Wacker Drive, Suite 1800, Chicago, IL 60606",
       "tax_number": "US-IL-992104",
       "credit_limit": 75000,
-      "total_spent": 111745.6,
-      "current_balance": 39595.6,
+      "total_spent": 124526.90000000001,
+      "current_balance": 52376.899999999994,
       "status": "Active",
-      "updated_at": "2026-09-09T09:10:41.617Z"
+      "updated_at": "2026-09-09T11:42:30.906Z"
     },
     {
       "id": "cust-2",
@@ -478,6 +478,36 @@
     }
   ],
   "sales_orders": [
+    {
+      "id": "sal-1788954150905-63",
+      "created_at": "2026-09-09T11:42:30.905Z",
+      "updated_at": "2026-09-09T11:42:30.905Z",
+      "order_number": "SO-2026-1246",
+      "customer_id": "cust-1",
+      "customer_name": "Apex Logistics International",
+      "branch_id": "b-1",
+      "order_date": "2026-09-09",
+      "due_date": "2026-09-23",
+      "status": "Confirmed",
+      "total_amount": 11780,
+      "tax_amount": 1001.3,
+      "discount_amount": 0,
+      "net_amount": 12781.3,
+      "payment_status": "Pending",
+      "payment_method": "Net-30 Corporate Wire",
+      "notes": "Urgent datacenter expansion deployment",
+      "created_by": "Authorized Sales Agent",
+      "items": [
+        {
+          "product_id": "p-1",
+          "name": "HPE ProLiant DL380 Gen11 2U Server",
+          "sku": "HPE-DL380-G11",
+          "quantity": 2,
+          "unit_price": 5890,
+          "total": 11780
+        }
+      ]
+    },
     {
       "id": "sal-1788945041612-844",
       "created_at": "2026-09-09T09:10:41.612Z",
@@ -653,6 +683,32 @@
     }
   ],
   "purchase_orders": [
+    {
+      "id": "pur-1788954151935-13",
+      "created_at": "2026-09-09T11:42:31.935Z",
+      "updated_at": "2026-09-09T11:42:31.973Z",
+      "order_number": "PO-2026-6520",
+      "supplier_id": "sup-1",
+      "supplier_name": "Cisco Systems Commercial Channel",
+      "branch_id": "b-1",
+      "order_date": "2026-09-09",
+      "expected_delivery_date": "2026-09-19",
+      "status": "Received",
+      "total_amount": 17250,
+      "payment_status": "Paid",
+      "notes": "",
+      "created_by": "Procurement Director",
+      "items": [
+        {
+          "product_id": "p-1",
+          "name": "HPE ProLiant DL380 Gen11 2U Server",
+          "quantity": 5,
+          "unit_price": 3450,
+          "total": 17250
+        }
+      ],
+      "received_at": "2026-09-09T11:42:31.973Z"
+    },
     {
       "id": "pur-1788945043550-947",
       "created_at": "2026-09-09T09:10:43.550Z",
@@ -938,6 +994,29 @@
   ],
   "journal_entries": [
     {
+      "id": "jou-1788954153073-729",
+      "created_at": "2026-09-09T11:42:33.073Z",
+      "updated_at": "2026-09-09T11:42:33.073Z",
+      "entry_number": "JE-2026-1999",
+      "entry_date": "2026-09-09",
+      "reference_number": "REF-BALANCED-01",
+      "description": "Commercial hardware sales revenue settlement",
+      "total_amount": 12000,
+      "created_by": "Financial Controller",
+      "lines": [
+        {
+          "account_id": "acc-1",
+          "debit": 12000,
+          "credit": 0
+        },
+        {
+          "account_id": "acc-11",
+          "debit": 0,
+          "credit": 12000
+        }
+      ]
+    },
+    {
       "id": "jou-1788945046110-78",
       "created_at": "2026-09-09T09:10:46.110Z",
       "updated_at": "2026-09-09T09:10:46.110Z",
@@ -1145,10 +1224,10 @@
       "employee_id": "emp-101",
       "employee_name": "Alexander Sterling",
       "date": "2026-09-09",
-      "check_in": "14:10",
+      "check_in": "16:42",
       "check_out": "--",
       "status": "Present",
-      "updated_at": "2026-09-09T09:10:47.346Z"
+      "updated_at": "2026-09-09T11:42:56.930Z"
     },
     {
       "id": "att-2",
@@ -1259,6 +1338,76 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1788954176931",
+      "timestamp": "2026-09-09T11:42:56.931Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "ATTENDANCE_CLOCK_IN",
+      "module": "HR",
+      "ip": "127.0.0.1",
+      "details": "Alexander Sterling clocked in at 16:42"
+    },
+    {
+      "id": "log-1788954153074",
+      "timestamp": "2026-09-09T11:42:33.074Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "JOURNAL_ENTRY_POSTED",
+      "module": "Accounting",
+      "ip": "127.0.0.1",
+      "details": "Posted voucher JE-2026-1999 totaling $12000.00"
+    },
+    {
+      "id": "log-1788954151974",
+      "timestamp": "2026-09-09T11:42:31.974Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "GOODS_RECEIPT",
+      "module": "Procurement",
+      "ip": "127.0.0.1",
+      "details": "Received shipment for PO PO-2026-6520. Restocked items."
+    },
+    {
+      "id": "log-1788954151936",
+      "timestamp": "2026-09-09T11:42:31.936Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "PURCHASE_ORDER_CREATED",
+      "module": "Procurement",
+      "ip": "127.0.0.1",
+      "details": "Generated PO PO-2026-6520 to Cisco Systems Commercial Channel for $17250"
+    },
+    {
+      "id": "log-1788954150909",
+      "timestamp": "2026-09-09T11:42:30.909Z",
+      "user": "System",
+      "role": "System Admin",
+      "action": "SALES_ORDER_CREATED",
+      "module": "Sales",
+      "ip": "127.0.0.1",
+      "details": "Created Order SO-2026-1246 for Apex Logistics International totaling $12781.3"
+    },
+    {
+      "id": "log-1788954149618",
+      "timestamp": "2026-09-09T11:42:29.618Z",
+      "user": "Alexander Sterling",
+      "role": "Super Admin",
+      "action": "USER_LOGIN",
+      "module": "Auth",
+      "ip": "127.0.0.1",
+      "details": "User authenticated successfully: admin@company.com"
+    },
+    {
+      "id": "log-1788954111269",
+      "timestamp": "2026-09-09T11:41:51.269Z",
+      "user": "Alexander Sterling",
+      "role": "Super Admin",
+      "action": "USER_LOGIN",
+      "module": "Auth",
+      "ip": "127.0.0.1",
+      "details": "User authenticated successfully: admin@company.com"
+    },
     {
       "id": "log-1788945047348",
       "timestamp": "2026-09-09T09:10:47.348Z",

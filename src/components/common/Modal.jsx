@@ -24,7 +24,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
 
       {/* Dialog */}
       <div className={`relative w-full ${maxWidth} rounded-xl shadow-2xl p-6 border border-slate-200 bg-white text-slate-900 z-10 animate-in fade-in zoom-in-95 duration-150`}>
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-200">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-200 print:hidden">
           <h3 className="text-lg font-bold tracking-tight text-slate-900">{title}</h3>
           <button
             onClick={onClose}

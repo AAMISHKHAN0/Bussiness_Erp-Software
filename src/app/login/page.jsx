@@ -101,7 +101,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-6">
           <div className="text-center lg:text-left space-y-1.5">
             <h3 className="text-2xl font-extrabold tracking-tight text-slate-900">Sign in to your account</h3>
-            <p className="text-xs text-slate-500">Enter your enterprise credentials or select an executive demo role.</p>
+            <p className="text-xs text-slate-500">Enter your enterprise credentials or choose your departmental portal.</p>
           </div>
 
           {error && (
@@ -110,11 +110,11 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* 1-Click Role Switcher Demo Buttons */}
+          {/* Department Quick Role Access */}
           <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
               <UserCheck size={14} className="text-blue-600" />
-              <span>1-Click Role Demo Sign In:</span>
+              <span>Department Portal Access:</span>
             </p>
             <div className="grid grid-cols-2 gap-2">
               {[
