@@ -14,58 +14,31 @@ export default function NexisLogo({ size = 'md', showText = true, textLight = fa
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      {/* Precision Lettermark Icon (Pure SVG Letters NX - No raster images) */}
-      <div className={`relative ${current.box} flex-shrink-0 flex items-center justify-center rounded-xl shadow-md transition-transform hover:scale-105 duration-200`}>
+      {/* Precision Lettermark Icon (Pure SVG Letters NX - 100% Solid Colors, Zero Gradients) */}
+      <div className={`relative ${current.box} flex-shrink-0 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-700/80 shadow-xs transition-transform hover:scale-105 duration-200`}>
         <svg 
           width="100%" 
           height="100%" 
           viewBox="0 0 48 48" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="rounded-xl overflow-hidden"
+          className="rounded-xl overflow-hidden p-1.5"
         >
-          {/* Subtle Outer Glow & Gradient Background */}
-          <defs>
-            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0f172a" />
-              <stop offset="60%" stopColor="#1e293b" />
-              <stop offset="100%" stopColor="#0f172a" />
-            </linearGradient>
-            <linearGradient id="blueGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#60a5fa" />
-              <stop offset="50%" stopColor="#2563eb" />
-              <stop offset="100%" stopColor="#1d4ed8" />
-            </linearGradient>
-            <linearGradient id="accentCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#38bdf8" />
-              <stop offset="100%" stopColor="#3b82f6" />
-            </linearGradient>
-            <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
-              <stop offset="50%" stopColor="#64748b" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#2563eb" stopOpacity="0.8" />
-            </linearGradient>
-          </defs>
-
-          {/* Background Plate */}
-          <rect width="48" height="48" rx="12" fill="url(#bgGrad)" />
-          <rect x="0.75" y="0.75" width="46.5" height="46.5" rx="11.25" stroke="url(#borderGrad)" strokeWidth="1.5" fill="none" />
-
-          {/* Precision Monogram Letters "N" and "X" */}
-          {/* Letter "N" on Left */}
+          {/* Precision Monogram Letters "N" and "X" in Pure Solid Colors */}
+          {/* Letter "N" on Left in Solid Royal Blue */}
           <path 
-            d="M11 35V13H15.5L23.5 27.5V13H27.5V35H23L15 20.5V35H11Z" 
-            fill="url(#blueGlow)" 
+            d="M9 37V11H14.5L24 28.5V11H29V37H23.5L14 19.5V37H9Z" 
+            fill="#2563EB" 
           />
 
-          {/* Overlapping Precision Letter "X" on Right */}
+          {/* Overlapping Precision Letter "X" on Right in Pure Solid White */}
           <path 
-            d="M26 13L32 23L26 35H30.5L34 27.5L37.5 35H42L36 23L41.5 13H37.2L34 19L30.5 13H26Z" 
-            fill="#ffffff" 
+            d="M27 11L33.5 22.5L27 37H32L35.5 28.5L39 37H44L37.5 22.5L43.5 11H38.5L35.5 18L32 11H27Z" 
+            fill="#FFFFFF" 
           />
 
-          {/* Subtle Accent Geometric Node */}
-          <circle cx="34" cy="23.5" r="2" fill="url(#accentCyan)" />
+          {/* Solid Geometric Accent Dot */}
+          <circle cx="35.5" cy="23.5" r="2.25" fill="#38BDF8" />
         </svg>
       </div>
 
