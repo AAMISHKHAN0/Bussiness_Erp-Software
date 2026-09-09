@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
+import { useToast } from '@/context/ToastContext';
 import { 
   Building2, Plus, Search, Mail, Phone, MapPin, 
   Star, Truck, Loader2, RefreshCw, Download, Pencil, Trash2 
 } from 'lucide-react';
 
 export default function VendorsPage() {
+  const toast = useToast();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,8 +47,9 @@ export default function VendorsPage() {
       const res = await fetch('/api/vendors');
       const json = await res.json();
       if (json.success) setSuppliers(json.data || []);
+      else toast.error(json.message || 'Failed to fetch vendor records');
     } catch (err) {
-      console.error(err);
+      toast.error('Network error loading vendor directory');
     } finally {
       setLoading(false);
     }
@@ -68,6 +71,7 @@ export default function VendorsPage() {
       if (json.success) {
         setIsAddOpen(false);
         fetchSuppliers();
+        toast.success(`Supplier "${form.name}" registered successfully`);
         setForm({
           name: '',
           contact_person: '',
@@ -79,10 +83,10 @@ export default function VendorsPage() {
           status: 'Active'
         });
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to add vendor');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error registering vendor');
     }
   };
 
@@ -114,11 +118,12 @@ export default function VendorsPage() {
       if (json.success) {
         setIsEditOpen(false);
         fetchSuppliers();
+        toast.success(`Vendor "${editForm.name}" profile updated`);
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to update vendor');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error updating vendor');
     }
   };
 
@@ -130,17 +135,21 @@ export default function VendorsPage() {
       const res = await fetch(`/api/vendors?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
+        toast.success(`Vendor "${name}" removed from directory`);
         fetchSuppliers();
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to delete vendor');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error deleting vendor');
     }
   };
 
   const handleExportCSV = () => {
-    if (suppliers.length === 0) return alert('No vendors to export');
+    if (suppliers.length === 0) {
+      toast.error('No vendors available to export');
+      return;
+    }
     const headers = ['ID', 'Company Name', 'Category', 'Contact Person', 'Email', 'Phone', 'Address', 'Rating', 'Status', 'POs Fulfilled'];
     const rows = suppliers.map(s => [
       s.id,
@@ -163,6 +172,7 @@ export default function VendorsPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success('Vendor directory exported to CSV');
   };
 
   const filtered = suppliers.filter(s => 

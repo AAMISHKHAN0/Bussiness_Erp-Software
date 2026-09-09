@@ -115,31 +115,57 @@ class EnterpriseDatabase {
     }
   }
 
-  get(collectionName) {
-    return this.data[collectionName] || [];
+  /**
+   * Get collection records with multi-tenant isolation
+   * @param {string} collectionName
+   * @param {string} [tenantId] - Optional tenant partition ID
+   */
+  get(collectionName, tenantId) {
+    const list = this.data[collectionName] || [];
+    if (!tenantId) return list;
+
+    // Filter by tenant. Items without explicit tenant_id belong to 'tenant-default'
+    return list.filter(item => {
+      const itemTenant = item.tenant_id || 'tenant-default';
+      return itemTenant === tenantId;
+    });
   }
 
-  getSettings() {
+  getSettings(tenantId = 'tenant-default') {
     return this.data.settings || INITIAL_SEED_DATA.settings;
   }
 
-  updateSettings(updates) {
-    this.data.settings = { ...this.data.settings, ...updates };
+  updateSettings(updates, tenantId = 'tenant-default') {
+    this.data.settings = { ...this.data.settings, ...updates, tenant_id: tenantId };
     this.persist('settings');
     return this.data.settings;
   }
 
-  findById(collectionName, id) {
-    const list = this.get(collectionName);
-    return list.find((item) => String(item.id) === String(id)) || null;
+  /**
+   * Find item by ID with optional tenant isolation
+   */
+  findById(collectionName, id, tenantId) {
+    const list = this.data[collectionName] || [];
+    return list.find((item) => {
+      const matchId = String(item.id) === String(id);
+      if (!matchId) return false;
+      if (!tenantId) return true;
+      const itemTenant = item.tenant_id || 'tenant-default';
+      return itemTenant === tenantId;
+    }) || null;
   }
 
-  insert(collectionName, item) {
+  /**
+   * Insert record with automatic tenant assignment
+   */
+  insert(collectionName, item, tenantId = 'tenant-default') {
     if (!this.data[collectionName]) {
       this.data[collectionName] = [];
     }
+    const assignedTenant = tenantId || item.tenant_id || 'tenant-default';
     const newItem = {
       id: item.id || `${collectionName.slice(0, 3)}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      tenant_id: assignedTenant,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       ...item,
@@ -149,9 +175,19 @@ class EnterpriseDatabase {
     return newItem;
   }
 
-  update(collectionName, id, updates) {
-    const list = this.get(collectionName);
-    const index = list.findIndex((item) => String(item.id) === String(id));
+  /**
+   * Update record with tenant validation
+   */
+  update(collectionName, id, updates, tenantId) {
+    const list = this.data[collectionName] || [];
+    const index = list.findIndex((item) => {
+      const matchId = String(item.id) === String(id);
+      if (!matchId) return false;
+      if (!tenantId) return true;
+      const itemTenant = item.tenant_id || 'tenant-default';
+      return itemTenant === tenantId;
+    });
+
     if (index === -1) return null;
 
     this.data[collectionName][index] = {
@@ -163,33 +199,64 @@ class EnterpriseDatabase {
     return this.data[collectionName][index];
   }
 
-  delete(collectionName, id) {
-    const list = this.get(collectionName);
-    const index = list.findIndex((item) => String(item.id) === String(id));
+  /**
+   * Delete record with tenant validation
+   */
+  delete(collectionName, id, tenantId) {
+    const list = this.data[collectionName] || [];
+    const index = list.findIndex((item) => {
+      const matchId = String(item.id) === String(id);
+      if (!matchId) return false;
+      if (!tenantId) return true;
+      const itemTenant = item.tenant_id || 'tenant-default';
+      return itemTenant === tenantId;
+    });
+
     if (index === -1) return false;
     this.data[collectionName].splice(index, 1);
     this.persist(collectionName);
     return true;
   }
 
-  logAudit(action, module, details, user = 'System') {
+  /**
+   * Immutable Audit Logging with real IP and Tenant identification
+   */
+  logAudit(action, module, details, user = 'System', ip = '127.0.0.1') {
+    const userName = typeof user === 'object' 
+      ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email 
+      : user;
+    const userRole = typeof user === 'object' ? user.role : 'System Admin';
+    const tenantId = typeof user === 'object' ? user.tenant_id || 'tenant-default' : 'tenant-default';
+
     const logItem = {
-      id: `log-${Date.now()}`,
+      id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      tenant_id: tenantId,
       timestamp: new Date().toISOString(),
-      user: typeof user === 'object' ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email : user,
-      role: typeof user === 'object' ? user.role : 'System Admin',
+      user: userName,
+      role: userRole,
       action,
       module,
-      ip: '127.0.0.1',
+      ip: ip || '127.0.0.1',
       details,
     };
+
     if (!this.data.audit_logs) this.data.audit_logs = [];
     this.data.audit_logs.unshift(logItem);
     this.persist('audit_logs');
     return logItem;
   }
 
-  async resetToSeed() {
+  /**
+   * Secure database reset protected against production execution
+   */
+  async resetToSeed(callerUser) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Database reset is permanently disabled in production environments.');
+    }
+    if (callerUser && callerUser.role !== 'Super Admin') {
+      throw new Error('Access denied: Only Super Admin can reinitialize the benchmark dataset.');
+    }
+
     this.data = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
     this.persistLocal();
     if (this.sql) {

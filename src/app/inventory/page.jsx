@@ -3,16 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
+import { useToast } from '@/context/ToastContext';
 import { 
   Package, Plus, Search, AlertTriangle, 
   Download, Trash2, ArrowUpDown, 
-  RefreshCw, Loader2, MapPin, Pencil
+  RefreshCw, Loader2, MapPin, Pencil,
+  ArrowRightLeft, History, Building2
 } from 'lucide-react';
 
 export default function InventoryPage() {
+  const toast = useToast();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
+  const [stockMovements, setStockMovements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -22,10 +27,23 @@ export default function InventoryPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isLedgerModalOpen, setIsLedgerModalOpen] = useState(false);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [adjustAmount, setAdjustAmount] = useState(0);
+  const [adjustReason, setAdjustReason] = useState('');
 
-  // Form State
+  // Transfer Form State
+  const [transferForm, setTransferForm] = useState({
+    product_id: '',
+    source_warehouse_id: 'wh-1',
+    target_warehouse_id: 'wh-2',
+    quantity: 1,
+    notes: ''
+  });
+
+  // Create Form State
   const [form, setForm] = useState({
     name: '',
     sku: '',
@@ -36,9 +54,11 @@ export default function InventoryPage() {
     quantity: 10,
     min_stock_level: 5,
     location: 'Warehouse Bay A-01',
+    warehouse_id: 'wh-1',
     supplier_name: 'Ingram Micro Global Distribution'
   });
 
+  // Edit Form State
   const [editForm, setEditForm] = useState({
     id: '',
     name: '',
@@ -62,9 +82,13 @@ export default function InventoryPage() {
         setProducts(json.data.products || []);
         setCategories(json.data.categories || []);
         setSuppliers(json.data.suppliers || []);
+        setWarehouses(json.data.warehouses || []);
+        setStockMovements(json.data.stockMovements || []);
+      } else {
+        toast.error(json.message || 'Failed to load inventory data');
       }
     } catch (err) {
-      console.error(err);
+      toast.error(err.message || 'Network error loading catalog');
     } finally {
       setLoading(false);
     }
@@ -85,6 +109,7 @@ export default function InventoryPage() {
       const json = await res.json();
       if (json.success) {
         setIsAddModalOpen(false);
+        toast.success(`Registered product ${json.data.sku} to catalog`);
         fetchData();
         setForm({
           name: '',
@@ -96,13 +121,14 @@ export default function InventoryPage() {
           quantity: 10,
           min_stock_level: 5,
           location: 'Warehouse Bay A-01',
+          warehouse_id: 'wh-1',
           supplier_name: 'Ingram Micro Global Distribution'
         });
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Error registering product');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -115,20 +141,52 @@ export default function InventoryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: selectedProduct.id,
-          action: 'adjust',
           adjustment: adjustAmount,
-          reason: 'Manual Inventory Cycle Count'
+          reason: adjustReason || 'Physical inventory cycle audit'
         })
       });
       const json = await res.json();
       if (json.success) {
         setIsAdjustModalOpen(false);
+        toast.success(json.message || 'Stock count adjusted and ledger updated');
         fetchData();
       } else {
-        alert(json.message);
+        toast.error(json.message);
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
+    }
+  };
+
+  const handleTransferStock = async (e) => {
+    e.preventDefault();
+    if (!transferForm.product_id) {
+      toast.error('Please select a product to transfer');
+      return;
+    }
+    if (transferForm.source_warehouse_id === transferForm.target_warehouse_id) {
+      toast.error('Source and destination warehouse facilities must be different');
+      return;
+    }
+    try {
+      const res = await fetch('/api/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'transfer',
+          ...transferForm
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setIsTransferModalOpen(false);
+        toast.success(json.message || 'Inter-warehouse transfer executed');
+        fetchData();
+      } else {
+        toast.error(json.message || 'Transfer failed');
+      }
+    } catch (err) {
+      toast.error(err.message);
     }
   };
 
@@ -161,23 +219,33 @@ export default function InventoryPage() {
       const json = await res.json();
       if (json.success) {
         setIsEditModalOpen(false);
+        toast.success('Product specifications updated');
         fetchData();
       } else {
-        alert(json.message);
+        toast.error(json.message);
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to retire this product SKU from active catalog?')) return;
+  const handleDelete = async (id, currentQty) => {
+    if (currentQty > 0) {
+      toast.error(`Cannot delete SKU holding ${currentQty} units on hand. Adjust stock to zero first.`);
+      return;
+    }
+    if (!confirm('Are you sure you want to retire this product SKU from the active catalog?')) return;
     try {
       const res = await fetch(`/api/inventory?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
-      if (json.success) fetchData();
+      if (json.success) {
+        toast.success('Product removed from catalog');
+        fetchData();
+      } else {
+        toast.error(json.message);
+      }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -194,6 +262,7 @@ export default function InventoryPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.info('Exported catalog manifest to CSV');
   };
 
   // Filtered list
@@ -227,74 +296,95 @@ export default function InventoryPage() {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Real-time SKU catalog, location bin allocations, and safety reorder thresholds.
+            Real-time SKU catalog, location bin allocations, inter-facility transfers, and immutable movement logs.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={fetchData}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer"
             title="Refresh"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
+
+          <button
+            onClick={() => setIsLedgerModalOpen(true)}
+            className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+          >
+            <History size={14} className="text-blue-600" />
+            <span>Movement History</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (products.length > 0 && !transferForm.product_id) {
+                setTransferForm(prev => ({ ...prev, product_id: products[0].id }));
+              }
+              setIsTransferModalOpen(true);
+            }}
+            className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+          >
+            <ArrowRightLeft size={14} className="text-emerald-600" />
+            <span>Transfer Stock</span>
+          </button>
+
           <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs"
+            className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
           >
             <Download size={14} />
             <span>Export CSV</span>
           </button>
+
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="btn-pod-blue group"
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 flex items-center gap-2 transition-all cursor-pointer"
           >
             <span>Register New SKU</span>
-            <span className="pod-icon">
-              <Plus size={13} className="text-white" />
-            </span>
+            <Plus size={13} className="text-white" />
           </button>
         </div>
       </div>
 
-      {/* Metrics Banner with Double-Bezel Architecture */}
+      {/* Metrics Banner */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="double-bezel">
-          <div className="double-bezel-inner">
+        <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Active SKUs</p>
             <p className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">{products.length}</p>
-            <p className="text-[10px] text-slate-400 mt-1">Across 5 classifications</p>
+            <p className="text-[10px] text-slate-400 mt-1">Across {categories.length} classifications</p>
           </div>
         </div>
-        <div className="double-bezel">
-          <div className="double-bezel-inner">
+        <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Asset Valuation (Cost)</p>
             <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">${totalCostValuation.toLocaleString()}</p>
             <p className="text-[10px] text-slate-400 mt-1">GAAP Account #1200 Inventory</p>
           </div>
         </div>
-        <div className="double-bezel">
-          <div className="double-bezel-inner">
+        <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Projected Retail Value</p>
             <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">${totalRetailValuation.toLocaleString()}</p>
             <p className="text-[10px] text-slate-400 mt-1">~{Math.round(((totalRetailValuation - totalCostValuation) / (totalRetailValuation || 1)) * 100)}% Average Markup</p>
           </div>
         </div>
-        <div className="double-bezel">
-          <div className="double-bezel-inner">
+        <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Low Stock Warnings</p>
             <p className={`text-2xl font-extrabold mt-1 tabular-nums ${criticalCount > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
               {criticalCount} SKUs
             </p>
-            <p className="text-[10px] text-slate-400 mt-1">Below minimum safe threshold</p>
+            <p className="text-[10px] text-slate-400 mt-1">Below safety reorder threshold</p>
           </div>
         </div>
       </div>
 
       {/* Filters & Search Toolbar */}
-      <div className="double-bezel">
-        <div className="double-bezel-inner !p-2.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+        <div className="p-3 rounded-[1rem] bg-white border border-white/80 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative flex-1 w-full max-w-md">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -320,7 +410,7 @@ export default function InventoryPage() {
 
             <button
               onClick={() => setFilterCriticalOnly(!filterCriticalOnly)}
-              className={`px-3 py-2 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              className={`px-3 py-2 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                 filterCriticalOnly 
                   ? 'bg-amber-50 text-amber-700 border-amber-300' 
                   : 'bg-slate-50 text-slate-600 border-slate-200 hover:text-slate-900'
@@ -333,134 +423,131 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* Main Table with Double-Bezel Frame */}
-      <div className="double-bezel">
-        <div className="double-bezel-inner !p-0 overflow-hidden">
+      {/* Main Table */}
+      <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+        <div className="rounded-[1rem] bg-white border border-white/80 overflow-hidden">
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center gap-3">
               <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
               <p className="text-xs font-bold text-slate-500">Loading catalog items...</p>
             </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="py-16 text-center text-slate-400">
-            <Package size={36} className="mx-auto text-slate-300 mb-2" />
-            <p className="font-bold text-sm text-slate-700">No products matched the filter criteria</p>
-            <p className="text-xs mt-1 text-slate-500">Try clearing filters or search query.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
-                  <th className="py-3 px-4">Item Description</th>
-                  <th className="py-3 px-4">SKU & Barcode</th>
-                  <th className="py-3 px-4">Classification</th>
-                  <th className="py-3 px-4 text-right">Cost / Selling</th>
-                  <th className="py-3 px-4 text-center">In Stock</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredProducts.map((p) => {
-                  const isCritical = Number(p.quantity) <= Number(p.min_stock_level);
-                  return (
-                    <tr key={p.id} className="hover:bg-slate-50/70 transition-colors group">
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                          {p.name}
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
-                          <span className="flex items-center gap-1">
-                            <MapPin size={10} className="text-slate-400" /> {p.location || 'Warehouse Bay'}
+          ) : filteredProducts.length === 0 ? (
+            <div className="py-16 text-center text-slate-400">
+              <Package size={36} className="mx-auto text-slate-300 mb-2" />
+              <p className="font-bold text-sm text-slate-700">No products matched the filter criteria</p>
+              <p className="text-xs mt-1 text-slate-500">Try clearing filters or search query.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                    <th className="py-3 px-4">Item Description</th>
+                    <th className="py-3 px-4">SKU & Barcode</th>
+                    <th className="py-3 px-4">Classification</th>
+                    <th className="py-3 px-4 text-right">Cost / Selling</th>
+                    <th className="py-3 px-4 text-center">In Stock</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredProducts.map((p) => {
+                    const isLow = Number(p.quantity) <= Number(p.min_stock_level);
+                    return (
+                      <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-slate-900">{p.name}</div>
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
+                            <MapPin size={11} className="text-slate-400" />
+                            <span>{p.location || 'Warehouse Bay A'}</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono">
+                          <div className="font-bold text-blue-600">{p.sku}</div>
+                          <div className="text-[10px] text-slate-400">{p.barcode || '--'}</div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[10px]">
+                            {p.category_name}
                           </span>
-                          <span>·</span>
-                          <span>{p.supplier_name}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 font-mono">
-                        <div className="font-bold text-blue-600">{p.sku}</div>
-                        <div className="text-[10px] text-slate-400">{p.barcode || 'N/A'}</div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                          {p.category_name}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono">
-                        <div className="text-slate-500 text-[11px]">${Number(p.purchase_price).toFixed(2)}</div>
-                        <div className="font-bold text-slate-900">${Number(p.selling_price).toFixed(2)}</div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="inline-flex flex-col items-center">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold font-mono border ${
-                            isCritical ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-mono">
+                          <div className="text-slate-500 line-through text-[11px]">
+                            ${Number(p.purchase_price).toFixed(2)}
+                          </div>
+                          <div className="font-bold text-slate-900">
+                            ${Number(p.selling_price).toFixed(2)}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-mono font-bold text-xs ${
+                            isLow ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                           }`}>
-                            {p.quantity} {p.unit || 'Units'}
+                            {p.quantity} Units
                           </span>
-                          <span className="text-[9px] text-slate-400 mt-0.5">Min: {p.min_stock_level}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => handleOpenEdit(p)}
-                            className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                            title="Edit SKU Specifications"
-                          >
-                            <Pencil size={15} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedProduct(p);
-                              setAdjustAmount(0);
-                              setIsAdjustModalOpen(true);
-                            }}
-                            className="p-1.5 rounded-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                            title="Adjust Stock Quantity"
-                          >
-                            <ArrowUpDown size={15} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p.id)}
-                            className="p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                            title="Delete SKU"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => {
+                                setSelectedProduct(p);
+                                setAdjustAmount(0);
+                                setAdjustReason('');
+                                setIsAdjustModalOpen(true);
+                              }}
+                              className="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                              title="Stock Cycle Adjustment"
+                            >
+                              <ArrowUpDown size={15} />
+                            </button>
+                            <button
+                              onClick={() => handleOpenEdit(p)}
+                              className="p-1.5 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+                              title="Edit Specifications"
+                            >
+                              <Pencil size={15} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(p.id, Number(p.quantity))}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                              title="Retire Product"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Modal: Register New SKU */}
-      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Register Commercial SKU">
+      {/* MODAL: Register New Product SKU */}
+      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Register New Inventory SKU">
         <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Product Description / Title</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Product Description</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Cisco Catalyst 9300 48-Port Switch"
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                placeholder="e.g. Dell PowerEdge R750 Enterprise Server"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
                 required
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">SKU Code</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">SKU Identifier</label>
               <input
                 type="text"
                 value={form.sku}
                 onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                placeholder="CSCO-CAT-9300"
+                placeholder="e.g. SRV-DEL-001"
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono"
                 required
               />
@@ -471,7 +558,7 @@ export default function InventoryPage() {
                 type="text"
                 value={form.barcode}
                 onChange={(e) => setForm({ ...form, barcode: e.target.value })}
-                placeholder="8901234567899"
+                placeholder="890123456789"
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-mono"
               />
             </div>
@@ -486,7 +573,7 @@ export default function InventoryPage() {
               </select>
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Supplier</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Supplier Partner</label>
               <select
                 value={form.supplier_name}
                 onChange={(e) => setForm({ ...form, supplier_name: e.target.value })}
@@ -501,7 +588,7 @@ export default function InventoryPage() {
                 type="number"
                 step="0.01"
                 value={form.purchase_price}
-                onChange={(e) => setForm({ ...form, purchase_price: e.target.value })}
+                onChange={(e) => setForm({ ...form, purchase_price: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
                 required
               />
@@ -512,27 +599,27 @@ export default function InventoryPage() {
                 type="number"
                 step="0.01"
                 value={form.selling_price}
-                onChange={(e) => setForm({ ...form, selling_price: e.target.value })}
+                onChange={(e) => setForm({ ...form, selling_price: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
                 required
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Initial Stock Quantity</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Opening Stock</label>
               <input
                 type="number"
                 value={form.quantity}
-                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                onChange={(e) => setForm({ ...form, quantity: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
                 required
               />
             </div>
             <div>
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Safety Threshold Alert</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Safety Reorder Alert Level</label>
               <input
                 type="number"
                 value={form.min_stock_level}
-                onChange={(e) => setForm({ ...form, min_stock_level: e.target.value })}
+                onChange={(e) => setForm({ ...form, min_stock_level: Number(e.target.value) })}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
                 required
               />
@@ -559,37 +646,48 @@ export default function InventoryPage() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer"
             >
-              Save SKU to Catalog
+              Register SKU
             </button>
           </div>
         </form>
       </Modal>
 
-      {/* Modal: Adjust Stock */}
-      <Modal isOpen={isAdjustModalOpen} onClose={() => setIsAdjustModalOpen(false)} title={`Stock Adjustment: ${selectedProduct?.name}`}>
+      {/* MODAL: Stock Cycle Adjustment */}
+      <Modal isOpen={isAdjustModalOpen} onClose={() => setIsAdjustModalOpen(false)} title={`Stock Cycle Count: ${selectedProduct?.name || ''}`}>
         <form onSubmit={handleAdjustStock} className="space-y-4 text-xs">
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
-            <p className="text-slate-600 font-medium">SKU: <span className="font-mono font-bold text-blue-600">{selectedProduct?.sku}</span></p>
-            <p className="text-slate-600 font-medium">Current Stock on Hand: <span className="font-bold text-slate-900">{selectedProduct?.quantity} Units</span></p>
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+            <p className="text-slate-500 font-medium">Current Stock on Hand: <span className="font-mono font-bold text-slate-900">{selectedProduct?.quantity} Units</span></p>
+            <p className="text-slate-500 font-medium">SKU: <span className="font-mono font-bold text-blue-600">{selectedProduct?.sku}</span></p>
           </div>
 
           <div>
             <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">
-              Quantity Adjustment (+ to add, - to reduce)
+              Quantity Adjustment (+ to increase, - to decrease)
             </label>
             <input
               type="number"
               value={adjustAmount}
               onChange={(e) => setAdjustAmount(Number(e.target.value))}
-              placeholder="e.g. +10 or -5"
-              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600 text-sm"
+              placeholder="e.g. 5 or -2"
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono text-base font-bold focus:border-blue-600"
               required
             />
             <p className="text-[11px] text-slate-500 mt-1">
-              New Projected Balance: <strong className="text-slate-900">{Math.max(0, (selectedProduct?.quantity || 0) + adjustAmount)} Units</strong>
+              Resulting Stock Balance: <strong className="text-blue-600 font-mono">{Math.max(0, (selectedProduct?.quantity || 0) + adjustAmount)} Units</strong>
             </p>
+          </div>
+
+          <div>
+            <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Audit Reason / Discrepancy Note</label>
+            <input
+              type="text"
+              value={adjustReason}
+              onChange={(e) => setAdjustReason(e.target.value)}
+              placeholder="Physical warehouse cycle count adjustment"
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+            />
           </div>
 
           <div className="pt-4 border-t border-slate-200 flex justify-end gap-2.5">
@@ -602,25 +700,183 @@ export default function InventoryPage() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer"
             >
-              Apply Adjustment
+              Commit Adjustment
             </button>
           </div>
         </form>
       </Modal>
 
-      {/* Modal: Edit SKU Specifications */}
-      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title={`Edit SKU: ${selectedProduct?.name || ''}`}>
+      {/* MODAL: Inter-Warehouse Stock Transfer */}
+      <Modal isOpen={isTransferModalOpen} onClose={() => setIsTransferModalOpen(false)} title="Warehouse Stock Transfer">
+        <form onSubmit={handleTransferStock} className="space-y-4 text-xs">
+          <div>
+            <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Select Product SKU</label>
+            <select
+              value={transferForm.product_id}
+              onChange={(e) => setTransferForm({ ...transferForm, product_id: e.target.value })}
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              required
+            >
+              {products.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.sku}) — Available: {p.quantity} units
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Source Facility</label>
+              <select
+                value={transferForm.source_warehouse_id}
+                onChange={(e) => setTransferForm({ ...transferForm, source_warehouse_id: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              >
+                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name} ({w.code})</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Destination Facility</label>
+              <select
+                value={transferForm.target_warehouse_id}
+                onChange={(e) => setTransferForm({ ...transferForm, target_warehouse_id: e.target.value })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+              >
+                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name} ({w.code})</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Transfer Quantity (Units)</label>
+            <input
+              type="number"
+              min="1"
+              value={transferForm.quantity}
+              onChange={(e) => setTransferForm({ ...transferForm, quantity: Number(e.target.value) })}
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono focus:border-blue-600"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Logistics / Dispatch Notes</label>
+            <input
+              type="text"
+              value={transferForm.notes}
+              onChange={(e) => setTransferForm({ ...transferForm, notes: e.target.value })}
+              placeholder="e.g. Scheduled freight reallocation for Q3 inventory balancing"
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+            />
+          </div>
+
+          <div className="pt-4 border-t border-slate-200 flex justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsTransferModalOpen(false)}
+              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs cursor-pointer"
+            >
+              Execute Stock Transfer
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* MODAL: Immutable Stock Movement History Ledger */}
+      <Modal isOpen={isLedgerModalOpen} onClose={() => setIsLedgerModalOpen(false)} title="Immutable Stock Movement Ledger">
+        <div className="space-y-3 text-xs">
+          <p className="text-slate-500">
+            Audit trail of all physical and operational stock events across warehouses.
+          </p>
+
+          <div className="max-h-96 overflow-y-auto border border-slate-200 rounded-xl overflow-x-auto">
+            {stockMovements.length === 0 ? (
+              <div className="py-12 text-center text-slate-400">
+                <History size={32} className="mx-auto text-slate-300 mb-2" />
+                <p>No recorded stock movements yet.</p>
+              </div>
+            ) : (
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px]">
+                    <th className="py-2.5 px-3">Date / Time</th>
+                    <th className="py-2.5 px-3">SKU & Item</th>
+                    <th className="py-2.5 px-3">Type</th>
+                    <th className="py-2.5 px-3 text-right">Delta</th>
+                    <th className="py-2.5 px-3 text-center">Balance</th>
+                    <th className="py-2.5 px-3">Performer</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-mono">
+                  {stockMovements.map((mov) => (
+                    <tr key={mov.id} className="hover:bg-slate-50/70">
+                      <td className="py-2 px-3 text-slate-500 text-[11px]">
+                        {mov.timestamp ? new Date(mov.timestamp).toLocaleString() : '--'}
+                      </td>
+                      <td className="py-2 px-3 font-sans">
+                        <span className="font-mono font-bold text-blue-600">{mov.sku}</span>
+                        <div className="text-[10px] text-slate-400">{mov.product_name}</div>
+                      </td>
+                      <td className="py-2 px-3 font-sans">
+                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                          mov.movement_type === 'PURCHASE_RECEIPT' ? 'bg-emerald-50 text-emerald-700' :
+                          mov.movement_type === 'SALES_DISPATCH' ? 'bg-blue-50 text-blue-700' :
+                          mov.movement_type === 'ORDER_CANCEL_RESTOCK' ? 'bg-purple-50 text-purple-700' :
+                          mov.movement_type === 'WAREHOUSE_TRANSFER' ? 'bg-amber-50 text-amber-700' :
+                          'bg-slate-100 text-slate-700'
+                        }`}>
+                          {mov.movement_type?.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td className={`py-2 px-3 text-right font-bold ${
+                        Number(mov.quantity_change) > 0 ? 'text-emerald-600' : 'text-red-600'
+                      }`}>
+                        {Number(mov.quantity_change) > 0 ? `+${mov.quantity_change}` : mov.quantity_change}
+                      </td>
+                      <td className="py-2 px-3 text-center text-slate-700">
+                        {mov.balance_before} → <strong className="text-slate-900">{mov.balance_after}</strong>
+                      </td>
+                      <td className="py-2 px-3 text-slate-500 font-sans text-[11px]">
+                        {mov.performed_by || 'System'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          <div className="pt-3 border-t border-slate-200 flex justify-end">
+            <button
+              onClick={() => setIsLedgerModalOpen(false)}
+              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* MODAL: Edit Product Specifications */}
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title={`Edit Specifications: ${selectedProduct?.name || ''}`}>
         <form onSubmit={handleUpdateProduct} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Product Description / Title</label>
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Product Description</label>
               <input
                 type="text"
                 value={editForm.name}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
                 required
               />
             </div>
@@ -727,7 +983,7 @@ export default function InventoryPage() {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer"
             >
               Update SKU Record
             </button>

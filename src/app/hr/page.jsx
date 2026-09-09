@@ -3,14 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
+import { useToast } from '@/context/ToastContext';
 import { 
   Users, Plus, Clock, CheckCircle2, DollarSign, 
   Calendar, UserCheck, Loader2, Download, 
-  Search, RefreshCw 
+  Search, RefreshCw, Send 
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function HRPage() {
+  const toast = useToast();
   const { user } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [attendance, setAttendance] = useState([]);
@@ -42,9 +44,11 @@ export default function HRPage() {
         setEmployees(json.data.employees || []);
         setAttendance(json.data.attendance || []);
         setPayroll(json.data.payroll || []);
+      } else {
+        toast.error(json.message || 'Failed to fetch HR data');
       }
     } catch (err) {
-      console.error(err);
+      toast.error('Network error loading human resources records');
     } finally {
       setLoading(false);
     }
@@ -56,7 +60,10 @@ export default function HRPage() {
 
   const handleClockPunch = async (punchType) => {
     const targetEmpId = employees[0]?.id;
-    if (!targetEmpId) return;
+    if (!targetEmpId) {
+      toast.error('No employee profile found to log punch');
+      return;
+    }
 
     try {
       const res = await fetch('/api/hr', {
@@ -70,11 +77,13 @@ export default function HRPage() {
       });
       const json = await res.json();
       if (json.success) {
-        alert(json.message);
+        toast.success(json.message || `Punch ${punchType} recorded`);
         fetchHRData();
+      } else {
+        toast.error(json.message || 'Failed to record punch');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error recording punch');
     }
   };
 
@@ -90,6 +99,7 @@ export default function HRPage() {
       if (json.success) {
         setIsAddEmployeeOpen(false);
         fetchHRData();
+        toast.success(`Employee ${employeeForm.first_name} ${employeeForm.last_name} onboarded successfully`);
         setEmployeeForm({
           first_name: '',
           last_name: '',
@@ -100,10 +110,32 @@ export default function HRPage() {
           basic_salary: 11000
         });
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to onboard employee');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error onboarding employee');
+    }
+  };
+
+  const handleRunPayroll = async () => {
+    if (!confirm('Execute monthly payroll disbursement? This will compute compensation, post GAAP expense vouchers, and update employee records.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/hr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run-payroll' })
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(json.message || 'Payroll cycle processed and posted to General Ledger');
+        fetchHRData();
+      } else {
+        toast.error(json.message || 'Failed to process payroll');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Network error processing payroll');
     }
   };
 
@@ -112,6 +144,7 @@ export default function HRPage() {
     e.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
     e.designation.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
 
   const totalMonthlyPayroll = employees.reduce((sum, e) => sum + (Number(e.basic_salary) || 0), 0);
 
@@ -352,6 +385,20 @@ export default function HRPage() {
           {/* TAB 3: PAYROLL ISSUANCE */}
           {activeTab === 'payroll' && (
             <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">Automated Compensation Engine</h3>
+                  <p className="text-xs text-slate-500">Calculates statutory deductions, logs employee remittances, and posts GAAP salary disbursement vouchers.</p>
+                </div>
+                <button
+                  onClick={handleRunPayroll}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer self-start sm:self-auto"
+                >
+                  <DollarSign size={15} />
+                  <span>Execute Monthly Payroll</span>
+                </button>
+              </div>
+
               {payroll.map((p) => (
                 <div key={p.id} className="double-bezel">
                   <div className="double-bezel-inner !p-6 space-y-4">
@@ -360,6 +407,7 @@ export default function HRPage() {
                         <h3 className="font-bold text-base text-slate-900">Payroll Cycle: {p.month} {p.year}</h3>
                         <p className="text-xs text-slate-500">Disbursed on {p.payment_date} via Corporate ACH</p>
                       </div>
+
                       <div className="flex items-center gap-3">
                         <span className="font-mono font-extrabold text-blue-600 text-lg tabular-nums">
                           ${Number(p.total_net).toLocaleString(undefined, { minimumFractionDigits: 2 })}

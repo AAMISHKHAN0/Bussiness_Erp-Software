@@ -1,23 +1,31 @@
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { requirePermission } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const products = db.get('products') || [];
-    const categories = db.get('categories') || [];
-    const customers = db.get('customers') || [];
-    const suppliers = db.get('suppliers') || [];
-    const salesOrders = db.get('sales_orders') || [];
-    const purchaseOrders = db.get('purchase_orders') || [];
+    const authCheck = await requirePermission(request, 'analytics:view');
+    if (!authCheck.authorized) return authCheck.response;
+
+    const { tenant_id } = authCheck.auth;
+    const products = db.get('products', tenant_id) || [];
+    const categories = db.get('categories', tenant_id) || [];
+    const customers = db.get('customers', tenant_id) || [];
+    const suppliers = db.get('suppliers', tenant_id) || [];
+    const salesOrders = db.get('sales_orders', tenant_id) || [];
+    const purchaseOrders = db.get('purchase_orders', tenant_id) || [];
 
     // Financial calculations
-    const totalSalesVolume = salesOrders.reduce((sum, o) => sum + (Number(o.net_amount) || Number(o.total_amount) || 0), 0);
-    const totalPaidSales = salesOrders.filter(o => o.payment_status === 'Paid').reduce((sum, o) => sum + (Number(o.net_amount) || Number(o.total_amount) || 0), 0);
-    const accountsReceivable = totalSalesVolume - totalPaidSales;
+    const validSales = salesOrders.filter(o => o.status !== 'Cancelled');
+    const validPOs = purchaseOrders.filter(p => p.status !== 'Cancelled');
 
-    const totalProcurement = purchaseOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
-    const totalReceivedProcurement = purchaseOrders.filter(o => o.status === 'Received').reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
-    const accountsPayable = totalProcurement - totalReceivedProcurement;
+    const totalSalesVolume = validSales.reduce((sum, o) => sum + (Number(o.net_amount) || Number(o.total_amount) || 0), 0);
+    const totalPaidSales = validSales.filter(o => o.payment_status === 'Paid').reduce((sum, o) => sum + (Number(o.net_amount) || Number(o.total_amount) || 0), 0);
+    const accountsReceivable = Math.max(0, totalSalesVolume - totalPaidSales);
+
+    const totalProcurement = validPOs.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+    const totalReceivedProcurement = validPOs.filter(o => o.status === 'Received').reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+    const accountsPayable = Math.max(0, totalProcurement - totalReceivedProcurement);
 
     const inventoryCostValuation = products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.purchase_price)), 0);
     const inventoryRetailValuation = products.reduce((sum, p) => sum + (Number(p.quantity) * Number(p.selling_price)), 0);
@@ -56,7 +64,7 @@ export async function GET() {
 
     // Vendor Concentration
     const vendorConcentration = [...suppliers].map(s => {
-      const vendorPOs = purchaseOrders.filter(po => po.supplier_id === s.id || po.supplier_name === s.name);
+      const vendorPOs = validPOs.filter(po => po.supplier_id === s.id || po.supplier_name === s.name);
       const poVolume = vendorPOs.reduce((sum, po) => sum + (Number(po.total_amount) || 0), 0);
       return {
         id: s.id,
@@ -77,7 +85,7 @@ export async function GET() {
       { quarter: 'Q4 2025', revenue: 310000, expenses: 180000, ebitda: 130000 },
       { quarter: 'Q1 2026', revenue: 340000, expenses: 195000, ebitda: 145000 },
       { quarter: 'Q2 2026', revenue: 385000, expenses: 215000, ebitda: 170000 },
-      { quarter: 'Q3 2026 (Est)', revenue: 425000, expenses: 230000, ebitda: 195000 }
+      { quarter: 'Q3 2026 (Est)', revenue: Math.round(totalSalesVolume * 1.15), expenses: Math.round(totalProcurement * 1.1), ebitda: Math.round((totalSalesVolume - totalProcurement) * 1.1) }
     ];
 
     return NextResponse.json({
@@ -95,16 +103,13 @@ export async function GET() {
           lowStockCount,
           grossMargin,
           grossMarginPercent,
-          totalOrdersCount: salesOrders.length,
-          totalProcurementCount: purchaseOrders.length,
+          totalOrdersCount: validSales.length,
+          totalProcurementCount: validPOs.length,
           totalSKUsCount: products.length
         },
-        salesOrders,
-        purchaseOrders,
-        products,
+        categoryDistribution,
         clientConcentration,
         vendorConcentration,
-        categoryDistribution,
         historicalPerformance
       }
     });

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
+import { useToast } from '@/context/ToastContext';
 import { 
   Calculator, BookOpen, Repeat, FileBarChart, Plus, 
   Search, CheckCircle2, AlertCircle, Scale, 
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react';
 
 export default function AccountingPage() {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('coa'); // 'coa' | 'gl' | 'balanceSheet' | 'pnl' | 'trialBalance'
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,9 +46,13 @@ export default function AccountingPage() {
     try {
       const res = await fetch('/api/accounting');
       const json = await res.json();
-      if (json.success) setData(json.data);
+      if (json.success) {
+        setData(json.data);
+      } else {
+        toast.error(json.message || 'Failed to fetch ledger accounts');
+      }
     } catch (err) {
-      console.error(err);
+      toast.error('Network error loading general ledger');
     } finally {
       setLoading(false);
     }
@@ -68,12 +74,13 @@ export default function AccountingPage() {
       if (json.success) {
         setIsAccountModalOpen(false);
         fetchAccounting();
+        toast.success(`Account #${accountForm.code} (${accountForm.name}) created in Chart of Accounts`);
         setAccountForm({ code: '', name: '', type: 'Asset', category: 'Current Assets', balance: 0 });
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to create account');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error creating account');
     }
   };
 
@@ -89,13 +96,15 @@ export default function AccountingPage() {
       if (json.success) {
         setIsJournalModalOpen(false);
         fetchAccounting();
+        toast.success('Balanced GAAP journal voucher posted to General Ledger');
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Journal entry rejected');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error posting journal');
     }
   };
+
 
   const addJournalLine = () => {
     setJournalForm({

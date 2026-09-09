@@ -5,13 +5,16 @@ import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
 import InvoiceModal from '@/components/common/InvoiceModal';
 import SalesReportModal from '@/components/common/SalesReportModal';
+import { useToast } from '@/context/ToastContext';
 import { 
   ShoppingCart, Plus, Search, FileText, CheckCircle2, 
   Clock, DollarSign, Eye, Loader2, 
-  Trash2, RefreshCw, Printer, Download
+  Trash2, RefreshCw, Printer, Download,
+  CreditCard, Ban
 } from 'lucide-react';
 
 export default function SalesPage() {
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -23,6 +26,9 @@ export default function SalesPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
   const [isSalesReportOpen, setIsSalesReportOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedPaymentOrder, setSelectedPaymentOrder] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState(0);
 
   // New Order Form State
   const [selectedCustomer, setSelectedCustomer] = useState('');
@@ -44,9 +50,11 @@ export default function SalesPage() {
         if (json.data.customers.length > 0 && !selectedCustomer) {
           setSelectedCustomer(json.data.customers[0].id);
         }
+      } else {
+        toast.error(json.message || 'Failed to load sales data');
       }
     } catch (err) {
-      console.error(err);
+      toast.error(err.message || 'Network error loading sales records');
     } finally {
       setLoading(false);
     }
@@ -69,20 +77,24 @@ export default function SalesPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.info('Exported sales manifest to CSV');
   };
 
-  const handleDeleteOrder = async (id) => {
-    if (!confirm('Are you sure you want to cancel and delete this commercial sales order?')) return;
+  const handleCancelOrder = async (id, orderNumber) => {
+    const reason = prompt(`Enter reason to VOID and cancel order ${orderNumber} (Inventory will be restocked and accounting reversed):`);
+    if (!reason) return;
+
     try {
-      const res = await fetch(`/api/sales?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/sales?id=${id}&reason=${encodeURIComponent(reason)}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
+        toast.success(json.message || `Order ${orderNumber} cancelled and reversed`);
         fetchSalesData();
       } else {
-        alert(json.message);
+        toast.error(json.message);
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -129,13 +141,40 @@ export default function SalesPage() {
       const json = await res.json();
       if (json.success) {
         setIsCreateOpen(false);
+        toast.success(`Sales Order ${json.data.order.order_number} generated & posted to ledger`);
         fetchSalesData();
         setLineItems([{ product_id: products[0]?.id || '', quantity: 1, unit_price: products[0]?.selling_price || 0 }]);
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to issue order');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
+    }
+  };
+
+  const handleRecordPayment = async (e) => {
+    e.preventDefault();
+    if (!selectedPaymentOrder) return;
+    try {
+      const res = await fetch('/api/sales', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedPaymentOrder.id,
+          action: 'payment',
+          payment_amount: paymentAmount
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setIsPaymentModalOpen(false);
+        toast.success(`Payment settled for ${selectedPaymentOrder.order_number}`);
+        fetchSalesData();
+      } else {
+        toast.error(json.message);
+      }
+    } catch (err) {
+      toast.error(err.message);
     }
   };
 
@@ -147,9 +186,14 @@ export default function SalesPage() {
         body: JSON.stringify({ id, status: newStatus })
       });
       const json = await res.json();
-      if (json.success) fetchSalesData();
+      if (json.success) {
+        toast.success(`Order status set to ${newStatus}`);
+        fetchSalesData();
+      } else {
+        toast.error(json.message);
+      }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -161,8 +205,9 @@ export default function SalesPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const totalSalesVolume = orders.reduce((sum, o) => sum + (Number(o.net_amount) || 0), 0);
-  const totalPaid = orders.filter(o => o.payment_status === 'Paid').reduce((sum, o) => sum + (Number(o.net_amount) || 0), 0);
+  const validOrders = orders.filter(o => o.status !== 'Cancelled');
+  const totalSalesVolume = validOrders.reduce((sum, o) => sum + (Number(o.net_amount) || Number(o.total_amount) || 0), 0);
+  const totalPaid = validOrders.filter(o => o.payment_status === 'Paid').reduce((sum, o) => sum + (Number(o.net_amount) || Number(o.total_amount) || 0), 0);
   const pendingReceivables = totalSalesVolume - totalPaid;
 
   return (
@@ -194,21 +239,21 @@ export default function SalesPage() {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Order lifecycle management, customer billing status, and commercial invoices.
+            Order lifecycle management, customer receivables status, and commercial double-entry invoices.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={fetchSalesData}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
+            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer"
             title="Refresh"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
           <button
             onClick={() => setIsSalesReportOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs flex items-center gap-2 transition-colors active:scale-98"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold shadow-2xs flex items-center gap-2 transition-colors active:scale-98 cursor-pointer"
             title="Executive Sales Report & PDF Export"
           >
             <span className="w-5 h-5 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
@@ -231,44 +276,42 @@ export default function SalesPage() {
               }
               setIsCreateOpen(true);
             }}
-            className="btn-pod-blue group cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 flex items-center gap-2 transition-all cursor-pointer"
           >
             <span>Create Sales Order</span>
-            <span className="pod-icon">
-              <Plus size={13} className="text-white" />
-            </span>
+            <Plus size={13} className="text-white" />
           </button>
         </div>
       </div>
 
-      {/* Metrics Banner with Double-Bezel Architecture */}
+      {/* Metrics Banner */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="double-bezel">
-          <div className="double-bezel-inner">
+        <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Gross Sales Volume</p>
             <p className="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">${totalSalesVolume.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            <p className="text-[10px] text-slate-400 mt-1">{orders.length} total orders recorded</p>
+            <p className="text-[10px] text-slate-400 mt-1">{validOrders.length} active orders booked</p>
           </div>
         </div>
-        <div className="double-bezel">
-          <div className="double-bezel-inner">
+        <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Settled (Paid)</p>
             <p className="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums">${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             <p className="text-[10px] text-slate-400 mt-1">Direct wire & ACH deposits</p>
           </div>
         </div>
-        <div className="double-bezel">
-          <div className="double-bezel-inner">
+        <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Receivables Due</p>
             <p className="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums">${pendingReceivables.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             <p className="text-[10px] text-slate-400 mt-1">GAAP Account #1100 AR</p>
           </div>
         </div>
-        <div className="double-bezel">
-          <div className="double-bezel-inner">
+        <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+          <div className="p-4 rounded-[1rem] bg-white border border-white/80">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Average Order Size</p>
             <p className="text-2xl font-extrabold text-blue-600 mt-1 tabular-nums">
-              ${orders.length > 0 ? Math.round(totalSalesVolume / orders.length).toLocaleString() : 0}
+              ${validOrders.length > 0 ? Math.round(totalSalesVolume / validOrders.length).toLocaleString() : 0}
             </p>
             <p className="text-[10px] text-slate-400 mt-1">Commercial client average</p>
           </div>
@@ -276,8 +319,8 @@ export default function SalesPage() {
       </div>
 
       {/* Search & Status Filters */}
-      <div className="double-bezel">
-        <div className="double-bezel-inner !p-2.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+        <div className="p-3 rounded-[1rem] bg-white border border-white/80 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative flex-1 w-full max-w-md">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -290,11 +333,11 @@ export default function SalesPage() {
           </div>
 
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
-            {['All', 'Confirmed', 'Shipped', 'Delivered', 'Draft'].map((st) => (
+            {['All', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap cursor-pointer ${
                   statusFilter === st 
                     ? 'bg-blue-600 text-white shadow-xs' 
                     : 'bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200'
@@ -307,97 +350,122 @@ export default function SalesPage() {
         </div>
       </div>
 
-      {/* Orders Table with Double-Bezel Frame */}
-      <div className="double-bezel">
-        <div className="double-bezel-inner !p-0 overflow-hidden">
+      {/* Orders Table */}
+      <div className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs">
+        <div className="rounded-[1rem] bg-white border border-white/80 overflow-hidden">
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center gap-3">
               <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
               <p className="text-xs font-bold text-slate-500">Loading sales orders...</p>
             </div>
-        ) : filteredOrders.length === 0 ? (
-          <div className="py-16 text-center text-slate-400">
-            <ShoppingCart size={36} className="mx-auto text-slate-300 mb-2" />
-            <p className="font-bold text-sm text-slate-700">No sales orders found</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
-                  <th className="py-3 px-4">Order Number</th>
-                  <th className="py-3 px-4">Client Entity</th>
-                  <th className="py-3 px-4">Order Date</th>
-                  <th className="py-3 px-4 text-right">Net Value</th>
-                  <th className="py-3 px-4 text-center">Fulfillment Status</th>
-                  <th className="py-3 px-4 text-center">Payment</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-blue-600">
-                      {order.order_number}
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-800">
-                      {order.customer_name}
-                      <span className="block text-[10px] text-slate-400 font-normal">Terms: {order.payment_method}</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-500 font-medium">{order.order_date}</td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
-                      ${parseFloat(order.net_amount || order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <select
-                        value={order.status}
-                        onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
-                        className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border outline-none cursor-pointer ${
-                          order.status === 'Delivered' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
-                          order.status === 'Shipped' ? 'bg-blue-50 text-blue-800 border-blue-300' :
-                          order.status === 'Confirmed' ? 'bg-blue-50 text-blue-800 border-blue-300' :
-                          'bg-amber-50 text-amber-800 border-amber-300'
-                        }`}
-                      >
-                        <option value="Draft">Draft</option>
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                      </select>
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                        order.payment_status === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-                      }`}>
-                        {order.payment_status === 'Paid' ? <CheckCircle2 size={11} /> : <Clock size={11} />}
-                        {order.payment_status || 'Pending'}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => setSelectedInvoiceOrder(order)}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-md font-bold text-xs transition-colors border border-slate-200 cursor-pointer"
-                          title="View & Print Invoice"
-                        >
-                          <FileText size={13} className="text-blue-600" />
-                          <span>Invoice</span>
-                        </button>
-                        <button
-                          onClick={() => handleDeleteOrder(order.id)}
-                          className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
-                          title="Cancel & Delete Sales Order"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
+          ) : filteredOrders.length === 0 ? (
+            <div className="py-16 text-center text-slate-400">
+              <ShoppingCart size={36} className="mx-auto text-slate-300 mb-2" />
+              <p className="font-bold text-sm text-slate-700">No sales orders found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                    <th className="py-3 px-4">Order Number</th>
+                    <th className="py-3 px-4">Client Entity</th>
+                    <th className="py-3 px-4">Order Date</th>
+                    <th className="py-3 px-4 text-right">Net Value</th>
+                    <th className="py-3 px-4 text-center">Fulfillment Status</th>
+                    <th className="py-3 px-4 text-center">Payment</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredOrders.map((order) => {
+                    const isCancelled = order.status === 'Cancelled';
+                    return (
+                      <tr key={order.id} className={`hover:bg-slate-50/70 transition-colors ${isCancelled ? 'opacity-60 bg-slate-50/40' : ''}`}>
+                        <td className="py-3.5 px-4 font-mono font-bold text-blue-600">
+                          {order.order_number}
+                          {isCancelled && <span className="block text-[10px] text-purple-600 font-sans">VOIDED / CANCELLED</span>}
+                        </td>
+                        <td className="py-3.5 px-4 font-semibold text-slate-800">
+                          {order.customer_name}
+                          <span className="block text-[10px] text-slate-400 font-normal">Terms: {order.payment_method}</span>
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-500 font-medium">{order.order_date}</td>
+                        <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
+                          ${parseFloat(order.net_amount || order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          {isCancelled ? (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-purple-50 text-purple-700 border border-purple-200">
+                              Cancelled
+                            </span>
+                          ) : (
+                            <select
+                              value={order.status}
+                              onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                              className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border outline-none cursor-pointer ${
+                                order.status === 'Delivered' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+                                order.status === 'Shipped' ? 'bg-blue-50 text-blue-800 border-blue-300' :
+                                order.status === 'Confirmed' ? 'bg-blue-50 text-blue-800 border-blue-300' :
+                                'bg-amber-50 text-amber-800 border-amber-300'
+                              }`}
+                            >
+                              <option value="Confirmed">Confirmed</option>
+                              <option value="Shipped">Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                            </select>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                            order.payment_status === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}>
+                            {order.payment_status === 'Paid' ? <CheckCircle2 size={11} /> : <Clock size={11} />}
+                            {order.payment_status || 'Pending'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {!isCancelled && order.payment_status !== 'Paid' && (
+                              <button
+                                onClick={() => {
+                                  setSelectedPaymentOrder(order);
+                                  setPaymentAmount(Number(order.net_amount) || Number(order.total_amount) || 0);
+                                  setIsPaymentModalOpen(true);
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-md font-bold text-xs transition-colors border border-emerald-200 cursor-pointer"
+                                title="Record Cash Receipt"
+                              >
+                                <CreditCard size={12} />
+                                <span>Pay</span>
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setSelectedInvoiceOrder(order)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-md font-bold text-xs transition-colors border border-slate-200 cursor-pointer"
+                              title="View & Print Invoice"
+                            >
+                              <FileText size={13} className="text-blue-600" />
+                              <span>Invoice</span>
+                            </button>
+                            {!isCancelled && (
+                              <button
+                                onClick={() => handleCancelOrder(order.id, order.order_number)}
+                                className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                                title="Safe VOID & Restock"
+                              >
+                                <Ban size={15} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
@@ -441,7 +509,7 @@ export default function SalesPage() {
               <button
                 type="button"
                 onClick={addLineItem}
-                className="text-blue-600 hover:text-blue-800 font-bold text-xs flex items-center gap-1"
+                className="text-blue-600 hover:text-blue-800 font-bold text-xs flex items-center gap-1 cursor-pointer"
               >
                 <Plus size={14} /> Add Line Item
               </button>
@@ -458,7 +526,7 @@ export default function SalesPage() {
                   >
                     <option value="" disabled>Select a catalog item...</option>
                     {products.map(p => (
-                      <option key={p.id} value={p.id}>{p.name} ({p.sku}) - ${p.selling_price}</option>
+                      <option key={p.id} value={p.id}>{p.name} ({p.sku}) - ${p.selling_price} ({p.quantity} avail)</option>
                     ))}
                   </select>
                 </div>
@@ -482,7 +550,7 @@ export default function SalesPage() {
                   type="button"
                   onClick={() => removeLineItem(idx)}
                   disabled={lineItems.length === 1}
-                  className="p-1 text-slate-400 hover:text-red-600 disabled:opacity-30"
+                  className="p-1 text-slate-400 hover:text-red-600 disabled:opacity-30 cursor-pointer"
                 >
                   <Trash2 size={15} />
                 </button>
@@ -516,15 +584,56 @@ export default function SalesPage() {
             <button
               type="button"
               onClick={() => setIsCreateOpen(false)}
-              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer"
             >
               Issue Sales Order
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Record Customer Cash Receipt */}
+      <Modal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} title={`Record Payment: ${selectedPaymentOrder?.order_number || ''}`}>
+        <form onSubmit={handleRecordPayment} className="space-y-4 text-xs">
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+            <p className="text-slate-500 font-medium">Customer: <strong className="text-slate-900">{selectedPaymentOrder?.customer_name}</strong></p>
+            <p className="text-slate-500 font-medium">Order Net Value: <strong className="text-slate-900 font-mono">${Number(selectedPaymentOrder?.net_amount || selectedPaymentOrder?.total_amount || 0).toFixed(2)}</strong></p>
+          </div>
+
+          <div>
+            <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Receipt Amount ($)</label>
+            <input
+              type="number"
+              step="0.01"
+              value={paymentAmount}
+              onChange={(e) => setPaymentAmount(Number(e.target.value))}
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none font-mono text-base font-bold focus:border-blue-600"
+              required
+            />
+            <p className="text-[11px] text-slate-500 mt-1">
+              Posts GAAP Cash Receipt voucher: Debits Operating Checking #1010, Credits AR #1100.
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-slate-200 flex justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsPaymentModalOpen(false)}
+              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs cursor-pointer"
+            >
+              Confirm Cash Receipt
             </button>
           </div>
         </form>

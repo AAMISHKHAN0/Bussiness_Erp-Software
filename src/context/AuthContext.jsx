@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ROLE_PERMISSIONS, hasPermission as checkPermission } from '@/lib/permissions';
 
 const AuthContext = createContext(null);
 
@@ -8,30 +9,35 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Check saved session on mount
   useEffect(() => {
-    // Check saved session or initialize default
-    const saved = localStorage.getItem('apex_erp_user');
-    if (saved) {
+    const initAuth = async () => {
       try {
-        setUser(JSON.parse(saved));
-      } catch {
-        setUser(null);
+        const res = await fetch('/api/auth');
+        const json = await res.json();
+        if (json.success && json.user) {
+          setUser(json.user);
+          localStorage.setItem('apex_erp_user', JSON.stringify(json.user));
+        } else {
+          // Check local cache
+          const saved = localStorage.getItem('apex_erp_user');
+          if (saved) {
+            setUser(JSON.parse(saved));
+          } else {
+            setUser(null);
+          }
+        }
+      } catch (e) {
+        const saved = localStorage.getItem('apex_erp_user');
+        if (saved) {
+          try { setUser(JSON.parse(saved)); } catch {}
+        }
+      } finally {
+        setLoading(false);
       }
-    } else {
-      // Default to Super Admin for seamless initial access
-      const defaultUser = {
-        id: "u-1",
-        email: "admin@company.com",
-        first_name: "Alexander",
-        last_name: "Sterling",
-        role: "Super Admin",
-        department: "Executive Board",
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=96&auto=format&fit=crop&q=80"
-      };
-      setUser(defaultUser);
-      localStorage.setItem('apex_erp_user', JSON.stringify(defaultUser));
-    }
-    setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email, password) => {
@@ -44,9 +50,13 @@ export function AuthProvider({ children }) {
     if (json.success && json.user) {
       setUser(json.user);
       localStorage.setItem('apex_erp_user', JSON.stringify(json.user));
+      if (json.token) {
+        localStorage.setItem('nexis_token', json.token);
+        document.cookie = `nexis_token=${json.token}; path=/; max-age=604800; SameSite=Lax`;
+      }
       return json;
     }
-    throw new Error(json.message || 'Login failed');
+    throw new Error(json.message || 'Authentication failed');
   };
 
   const switchRole = async (roleName) => {
@@ -59,18 +69,37 @@ export function AuthProvider({ children }) {
     if (json.success && json.user) {
       setUser(json.user);
       localStorage.setItem('apex_erp_user', JSON.stringify(json.user));
+      if (json.token) {
+        localStorage.setItem('nexis_token', json.token);
+        document.cookie = `nexis_token=${json.token}; path=/; max-age=604800; SameSite=Lax`;
+      }
       return json;
     }
     throw new Error(json.message || 'Role switch failed');
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' })
+      });
+    } catch (e) {}
     setUser(null);
     localStorage.removeItem('apex_erp_user');
+    localStorage.removeItem('nexis_token');
+    document.cookie = 'nexis_token=; path=/; max-age=0; SameSite=Lax';
+  };
+
+  const hasPermission = (requiredPermission) => {
+    if (!user) return false;
+    const permissions = ROLE_PERMISSIONS[user.role] || [];
+    return checkPermission(permissions, requiredPermission);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, switchRole, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, switchRole, logout, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

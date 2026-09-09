@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import AppShell from '@/components/layout/AppShell';
+import { useToast } from '@/context/ToastContext';
 import { 
   Settings, Building2, Globe, Cpu, Database, 
   RotateCcw, Save, ShieldCheck, CheckCircle2, Loader2, RefreshCw 
 } from 'lucide-react';
 
 export default function AdminSettingsPage() {
+  const toast = useToast();
   const [settings, setSettings] = useState({
     company_name: '',
     legal_name: '',
@@ -32,9 +34,11 @@ export default function AdminSettingsPage() {
       if (json.success) {
         setSettings(json.data.settings || {});
         setHealth(json.data.systemHealth || {});
+      } else {
+        toast.error(json.message || 'Failed to fetch enterprise settings');
       }
     } catch (err) {
-      console.error(err);
+      toast.error('Network error loading administrative configurations');
     } finally {
       setLoading(false);
     }
@@ -56,17 +60,20 @@ export default function AdminSettingsPage() {
       const json = await res.json();
       if (json.success) {
         setSavedSuccess(true);
+        toast.success('Enterprise configuration parameters saved');
         setTimeout(() => setSavedSuccess(false), 3000);
+      } else {
+        toast.error(json.message || 'Failed to save configuration');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error saving settings');
     } finally {
       setSaving(false);
     }
   };
 
   const handleResetData = async () => {
-    if (!confirm('Warning: This will reload the clean standardized corporate dataset. Proceed?')) return;
+    if (!confirm('Warning: This will reload the clean standardized corporate dataset. Super Admin privileges required. Proceed?')) return;
     try {
       const res = await fetch('/api/admin', {
         method: 'PUT',
@@ -75,13 +82,16 @@ export default function AdminSettingsPage() {
       });
       const json = await res.json();
       if (json.success) {
-        alert(json.message);
+        toast.success(json.message || 'Standard enterprise dataset restored');
         fetchAdminData();
+      } else {
+        toast.error(json.message || 'Failed to restore default dataset');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error resetting dataset');
     }
   };
+
 
   return (
     <AppShell>

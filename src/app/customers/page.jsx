@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
+import { useToast } from '@/context/ToastContext';
 import { 
   Users, Plus, Search, Mail, Phone, MapPin, 
   CreditCard, DollarSign, Loader2, RefreshCw, Download, Pencil, Trash2 
 } from 'lucide-react';
 
 export default function CustomersPage() {
+  const toast = useToast();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,9 +46,13 @@ export default function CustomersPage() {
     try {
       const res = await fetch('/api/customers');
       const json = await res.json();
-      if (json.success) setCustomers(json.data || []);
+      if (json.success) {
+        setCustomers(json.data || []);
+      } else {
+        toast.error(json.message || 'Failed to fetch customer records');
+      }
     } catch (err) {
-      console.error(err);
+      toast.error('Network error loading customer accounts');
     } finally {
       setLoading(false);
     }
@@ -68,6 +74,7 @@ export default function CustomersPage() {
       if (json.success) {
         setIsAddOpen(false);
         fetchCustomers();
+        toast.success(`Customer "${form.name}" registered successfully`);
         setForm({
           name: '',
           company_name: '',
@@ -79,10 +86,10 @@ export default function CustomersPage() {
           status: 'Active'
         });
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to add customer');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error registering customer');
     }
   };
 
@@ -114,11 +121,12 @@ export default function CustomersPage() {
       if (json.success) {
         setIsEditOpen(false);
         fetchCustomers();
+        toast.success(`Account "${editForm.name}" updated`);
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to update customer');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error updating customer');
     }
   };
 
@@ -130,17 +138,21 @@ export default function CustomersPage() {
       const res = await fetch(`/api/customers?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
+        toast.success(`Customer "${name}" removed from accounts`);
         fetchCustomers();
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to delete customer');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error deleting customer');
     }
   };
 
   const handleExportCSV = () => {
-    if (customers.length === 0) return alert('No customers to export');
+    if (customers.length === 0) {
+      toast.error('No customers available to export');
+      return;
+    }
     const headers = ['ID', 'Trade Name', 'Company Name', 'Contact Person', 'Email', 'Phone', 'Address', 'Credit Limit', 'Total Spent', 'Current AR Balance', 'Status'];
     const rows = customers.map(c => [
       c.id,
@@ -152,18 +164,19 @@ export default function CustomersPage() {
       `"${c.address || ''}"`,
       c.credit_limit || 0,
       c.total_spent || 0,
-      c.current_balance || 0,
+      c.balance || 0,
       c.status || 'Active'
     ]);
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `corporate_customers_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `Customers_Directory_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success('Customer directory exported to CSV');
   };
 
   const filtered = customers.filter(c => 

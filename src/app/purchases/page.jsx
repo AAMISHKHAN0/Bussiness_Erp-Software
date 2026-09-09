@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import AppShell from '@/components/layout/AppShell';
 import Modal from '@/components/common/Modal';
+import { useToast } from '@/context/ToastContext';
 import { 
   Truck, Plus, Search, CheckCircle2, Clock, 
-  PackageCheck, Loader2, Trash2, RefreshCw, Download 
+  PackageCheck, Loader2, Trash2, RefreshCw, Download,
+  Check, XCircle, AlertTriangle, ShieldCheck
 } from 'lucide-react';
 
 export default function PurchasesPage() {
+  const toast = useToast();
   const [orders, setOrders] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -33,9 +36,11 @@ export default function PurchasesPage() {
         if (json.data.suppliers.length > 0 && !selectedSupplier) {
           setSelectedSupplier(json.data.suppliers[0].id);
         }
+      } else {
+        toast.error(json.message || 'Failed to load purchase orders');
       }
     } catch (err) {
-      console.error(err);
+      toast.error('Network error loading procurement data');
     } finally {
       setLoading(false);
     }
@@ -46,6 +51,10 @@ export default function PurchasesPage() {
   }, []);
 
   const handleExportCSV = () => {
+    if (orders.length === 0) {
+      toast.error('No procurement orders available to export');
+      return;
+    }
     const headers = ['PO Number,Supplier,Order Date,Expected Delivery,Total Amount,Status'];
     const rows = orders.map(o => 
       `"${o.order_number}","${o.supplier_name}","${o.order_date}","${o.expected_delivery_date || ''}",${parseFloat(o.total_amount || 0).toFixed(2)},"${o.status}"`
@@ -58,25 +67,46 @@ export default function PurchasesPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    toast.success('Procurement manifest exported to CSV');
   };
 
-  const handleDeletePO = async (id) => {
-    if (!confirm('Are you sure you want to cancel and remove this purchase order?')) return;
+  const handleCancelPO = async (id, orderNumber) => {
+    if (!confirm(`Are you sure you want to cancel Purchase Order ${orderNumber}? Any associated accounting accruals will be reversed.`)) return;
     try {
       const res = await fetch(`/api/purchases?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
+        toast.success(`Purchase Order ${orderNumber} cancelled and accrued liabilities reversed`);
         fetchData();
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to cancel purchase order');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error cancelling purchase order');
     }
   };
 
-  const handleReceiveGoods = async (orderId) => {
-    if (!confirm('Confirm goods receipt note (GRN)? This will immediately restock warehouse inventory.')) return;
+  const handleApprovePO = async (orderId, orderNumber) => {
+    try {
+      const res = await fetch('/api/purchases', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: orderId, action: 'approve' })
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(`Purchase Order ${orderNumber} authorized and converted to active order`);
+        fetchData();
+      } else {
+        toast.error(json.message || 'Failed to approve purchase order');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Network error approving purchase order');
+    }
+  };
+
+  const handleReceiveGoods = async (orderId, orderNumber) => {
+    if (!confirm(`Confirm goods receipt note (GRN) for ${orderNumber}? This will immediately record warehouse intake and restock inventory.`)) return;
     try {
       const res = await fetch('/api/purchases', {
         method: 'PUT',
@@ -84,9 +114,14 @@ export default function PurchasesPage() {
         body: JSON.stringify({ id: orderId, action: 'receive' })
       });
       const json = await res.json();
-      if (json.success) fetchData();
+      if (json.success) {
+        toast.success(`GRN recorded! Stock movements ledger and inventory valuations updated`);
+        fetchData();
+      } else {
+        toast.error(json.message || 'Goods receipt failed');
+      }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error receiving goods');
     }
   };
 
@@ -104,13 +139,18 @@ export default function PurchasesPage() {
       });
       const json = await res.json();
       if (json.success) {
+        if (json.approval_required) {
+          toast.info(`Purchase Order submitted! Amount exceeds $10,000 threshold and is queued for executive approval.`);
+        } else {
+          toast.success(`Purchase Order generated successfully`);
+        }
         setIsCreateOpen(false);
         fetchData();
       } else {
-        alert(json.message);
+        toast.error(json.message || 'Failed to create purchase order');
       }
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message || 'Network error creating purchase order');
     }
   };
 
@@ -122,6 +162,7 @@ export default function PurchasesPage() {
     if (lineItems.length === 1) return;
     setLineItems(lineItems.filter((_, i) => i !== idx));
   };
+
 
   const filtered = orders.filter(o => 
     o.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -259,34 +300,57 @@ export default function PurchasesPage() {
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                         po.status === 'Received' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
                         po.status === 'Ordered' ? 'bg-blue-50 text-blue-800 border-blue-300' :
-                        'bg-amber-50 text-amber-800 border-amber-300'
+                        po.status === 'Pending Approval' ? 'bg-amber-50 text-amber-800 border-amber-300 animate-pulse' :
+                        po.status === 'Cancelled' ? 'bg-slate-100 text-slate-500 border-slate-300 line-through' :
+                        'bg-slate-50 text-slate-700 border-slate-300'
                       }`}>
-                        {po.status === 'Received' ? <CheckCircle2 size={11} /> : <Clock size={11} />}
+                        {po.status === 'Received' ? <CheckCircle2 size={11} /> :
+                         po.status === 'Pending Approval' ? <ShieldCheck size={11} /> :
+                         po.status === 'Cancelled' ? <XCircle size={11} /> :
+                         <Clock size={11} />}
                         {po.status}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        {po.status !== 'Received' ? (
+                        {po.status === 'Pending Approval' && (
                           <button
-                            onClick={() => handleReceiveGoods(po.id)}
+                            onClick={() => handleApprovePO(po.id, po.order_number)}
+                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-bold text-xs transition-colors shadow-2xs flex items-center gap-1 cursor-pointer"
+                            title="Approve high-value purchase order"
+                          >
+                            <Check size={13} />
+                            <span>Authorize</span>
+                          </button>
+                        )}
+                        {po.status === 'Ordered' && (
+                          <button
+                            onClick={() => handleReceiveGoods(po.id, po.order_number)}
                             className="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-md font-bold text-xs transition-colors border border-emerald-300 flex items-center gap-1.5 cursor-pointer"
                           >
                             <PackageCheck size={14} />
                             <span>Receive Shipment</span>
                           </button>
-                        ) : (
+                        )}
+                        {po.status === 'Received' && (
                           <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
                             <CheckCircle2 size={13} /> Restocked
                           </span>
                         )}
-                        <button
-                          onClick={() => handleDeletePO(po.id)}
-                          className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
-                          title="Cancel & Delete Purchase Order"
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                        {po.status === 'Cancelled' && (
+                          <span className="text-[11px] font-semibold text-slate-400">
+                            Voided
+                          </span>
+                        )}
+                        {po.status !== 'Received' && po.status !== 'Cancelled' && (
+                          <button
+                            onClick={() => handleCancelPO(po.id, po.order_number)}
+                            className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                            title="Cancel Purchase Order and Reverse Accruals"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

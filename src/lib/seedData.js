@@ -23,6 +23,12 @@ export const INITIAL_SEED_DATA = {
     { id: "b-3", name: "West Coast Technical Operations", code: "SJC-OPS", address: "100 Innovation Blvd, San Jose, CA", is_main: false }
   ],
 
+  warehouses: [
+    { id: "wh-1", name: "HQ East Coast Staging Hub", code: "WH-NYC-01", branch_id: "b-1", address: "450 Lexington Ave, New York, NY", capacity_units: 50000, is_active: true },
+    { id: "wh-2", name: "Midwest Logistics Distribution Center", code: "WH-CHI-01", branch_id: "b-2", address: "3500 Logistics Way, Chicago, IL", capacity_units: 75000, is_active: true },
+    { id: "wh-3", name: "West Coast Micro-Depot", code: "WH-SJC-01", branch_id: "b-3", address: "100 Innovation Blvd, San Jose, CA", capacity_units: 35000, is_active: true }
+  ],
+
   roles: [
     { id: "r-1", name: "Super Admin", description: "Unrestricted operational, accounting, and system authority" },
     { id: "r-2", name: "Executive Admin", description: "Executive departmental oversight and reporting" },
@@ -724,5 +730,149 @@ export const INITIAL_SEED_DATA = {
     { id: "log-3", timestamp: "2026-09-09T08:15:33Z", user: "Marcus Vance", role: "Inventory Specialist", action: "PURCHASE_ORDER_ISSUED", module: "Procurement", ip: "192.168.2.45", details: "Generated PO-2026-0412 for Schneider Electric & Fastenal supplies." },
     { id: "log-4", timestamp: "2026-09-08T16:20:00Z", user: "Derrick Cole", role: "Senior Sales Representative", action: "SALES_ORDER_CONFIRMED", module: "Sales", ip: "192.168.3.10", details: "Order SO-2026-0892 confirmed for Apex Logistics International." },
     { id: "log-5", timestamp: "2026-09-08T11:00:00Z", user: "Sophia Martinez", role: "HR Director", action: "ATTENDANCE_VERIFICATION", module: "HR", ip: "192.168.1.22", details: "Staff clock-in records synchronized across corporate facilities." }
+  ],
+
+  stock_movements: [
+    {
+      id: "mov-1",
+      product_id: "p-3",
+      sku: "DELL-PE-R760",
+      product_name: "Dell PowerEdge R760 Dual-Xeon Server",
+      movement_type: "PURCHASE_RECEIPT",
+      quantity_change: 10,
+      balance_before: 8,
+      balance_after: 18,
+      warehouse_id: "wh-1",
+      warehouse_name: "HQ East Coast Staging Hub",
+      reference_id: "PO-2026-0410",
+      notes: "Goods received from Dell Technologies",
+      performed_by: "Marcus Vance",
+      timestamp: "2026-09-04T14:30:00Z"
+    },
+    {
+      id: "mov-2",
+      product_id: "p-1",
+      sku: "HPE-DL380-G11",
+      product_name: "HPE ProLiant DL380 Gen11 2U Server",
+      movement_type: "SALES_DISPATCH",
+      quantity_change: -5,
+      balance_before: 40,
+      balance_after: 35,
+      warehouse_id: "wh-1",
+      warehouse_name: "HQ East Coast Staging Hub",
+      reference_id: "SO-2026-0891",
+      notes: "Fulfilled for Morgan & Sterling Capital",
+      performed_by: "Derrick Cole",
+      timestamp: "2026-09-07T11:15:00Z"
+    },
+    {
+      id: "mov-3",
+      product_id: "p-2",
+      sku: "CSCO-CAT-9300",
+      product_name: "Cisco Catalyst 9300 48-Port PoE+ Switch",
+      movement_type: "SALES_DISPATCH",
+      quantity_change: -1,
+      balance_before: 29,
+      balance_after: 28,
+      warehouse_id: "wh-2",
+      warehouse_name: "Midwest Logistics Distribution Center",
+      reference_id: "SO-2026-0891",
+      notes: "Fulfilled for Morgan & Sterling Capital",
+      performed_by: "Derrick Cole",
+      timestamp: "2026-09-07T11:20:00Z"
+    }
+  ],
+
+  quotations: [
+    {
+      id: "quote-301",
+      quotation_number: "QT-2026-0155",
+      customer_id: "cust-2",
+      customer_name: "Vanguard Health Systems Inc.",
+      created_by: "Derrick Cole",
+      issue_date: "2026-09-08",
+      expiry_date: "2026-09-22",
+      status: "Draft",
+      total_amount: 22800.00,
+      tax_amount: 1938.00,
+      discount_amount: 300.00,
+      net_amount: 24438.00,
+      payment_terms: "Net-30 Invoice",
+      items: [
+        { product_id: "p-1", name: "HPE ProLiant DL380 Gen11 2U Server", sku: "HPE-DL380-G11", quantity: 3, unit_price: 5890.00, total: 17670.00 },
+        { product_id: "p-5", name: "Eaton 9PX 10kVA Double-Conversion UPS", sku: "ETN-UPS-10K", quantity: 1, unit_price: 4800.00, total: 4800.00 }
+      ]
+    }
+  ],
+
+  invoices: [
+    {
+      id: "inv-401",
+      invoice_number: "INV-2026-0891",
+      order_id: "so-101",
+      order_number: "SO-2026-0891",
+      customer_id: "cust-4",
+      customer_name: "Morgan & Sterling Capital",
+      invoice_date: "2026-09-07",
+      due_date: "2026-09-21",
+      total_amount: 34250.00,
+      tax_amount: 2911.25,
+      net_amount: 36661.25,
+      paid_amount: 36661.25,
+      balance_due: 0.00,
+      status: "Paid",
+      payment_method: "Wire Transfer (ACH)"
+    },
+    {
+      id: "inv-402",
+      invoice_number: "INV-2026-0892",
+      order_id: "so-102",
+      order_number: "SO-2026-0892",
+      customer_id: "cust-1",
+      customer_name: "Apex Logistics International",
+      invoice_date: "2026-09-08",
+      due_date: "2026-09-22",
+      total_amount: 19800.00,
+      tax_amount: 1683.00,
+      net_amount: 21483.00,
+      paid_amount: 0.00,
+      balance_due: 21483.00,
+      status: "Unpaid",
+      payment_method: "Net-30 Invoice"
+    }
+  ],
+
+  payments: [
+    {
+      id: "pay-501",
+      payment_number: "RCPT-2026-0044",
+      invoice_id: "inv-401",
+      invoice_number: "INV-2026-0891",
+      customer_id: "cust-4",
+      customer_name: "Morgan & Sterling Capital",
+      payment_date: "2026-09-07",
+      amount: 36661.25,
+      payment_method: "Wire Transfer (ACH)",
+      transaction_reference: "ACH-WIRE-NY-8910",
+      received_by: "Victoria Chen",
+      notes: "Settled in full against Chase checking account"
+    }
+  ],
+
+  approval_requests: [
+    {
+      id: "appr-01",
+      module: "Procurement",
+      entity_type: "PURCHASE_ORDER",
+      entity_id: "po-202",
+      entity_reference: "PO-2026-0411",
+      requested_by: "Marcus Vance",
+      amount: 28000.00,
+      threshold_triggered: "PO value > $10,000",
+      status: "Approved",
+      reviewed_by: "Alexander Sterling",
+      reviewed_at: "2026-09-07T12:00:00Z",
+      comments: "Approved for Midwest logistics switch rollout."
+    }
   ]
 };

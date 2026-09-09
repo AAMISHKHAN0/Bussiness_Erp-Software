@@ -39,12 +39,20 @@ export default function DashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const getStatIcon = (title) => {
-    switch (title) {
-      case 'Total Revenue': return <DollarSign className="w-4 h-4 text-blue-600" />;
-      case 'Operating Treasury': return <TrendingUp className="w-4 h-4 text-emerald-600" />;
-      case 'Stock Units': return <Package className="w-4 h-4 text-blue-600" />;
-      default: return <Users className="w-4 h-4 text-slate-700" />;
+  const getStatIcon = (id, title) => {
+    switch (id) {
+      case 'revenue': return <DollarSign className="w-4 h-4 text-blue-600" />;
+      case 'gross_profit': return <TrendingUp className="w-4 h-4 text-emerald-600" />;
+      case 'treasury': return <ShieldCheck className="w-4 h-4 text-indigo-600" />;
+      case 'inventory_val': return <Package className="w-4 h-4 text-amber-600" />;
+      case 'ar': return <ArrowUpRight className="w-4 h-4 text-violet-600" />;
+      case 'ap': return <TrendingDown className="w-4 h-4 text-rose-600" />;
+      default: {
+        if (title?.includes('Revenue')) return <DollarSign className="w-4 h-4 text-blue-600" />;
+        if (title?.includes('Treasury')) return <ShieldCheck className="w-4 h-4 text-indigo-600" />;
+        if (title?.includes('Stock')) return <Package className="w-4 h-4 text-amber-600" />;
+        return <Users className="w-4 h-4 text-slate-700" />;
+      }
     }
   };
 
@@ -109,41 +117,82 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* =========================================================================
-              DOUBLE-BEZEL KPI BENTO TILES
+              DOUBLE-BEZEL KPI BENTO TILES (6-Metric Ledger)
               ========================================================================= */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
             {data?.stats?.map((card, i) => (
               <div
-                key={i}
+                key={card.id || i}
                 className="p-1 rounded-[1.25rem] bg-slate-200/60 border border-slate-200/80 shadow-2xs hover:bg-slate-200/90 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group"
               >
                 {/* Inner Precision Core */}
-                <div className="p-4 sm:p-5 rounded-[1rem] bg-white border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] flex flex-col justify-between h-full space-y-3">
+                <div className="p-3.5 sm:p-4 rounded-[1rem] bg-white border border-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] flex flex-col justify-between h-full space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{card.title}</p>
-                    <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors">
-                      {getStatIcon(card.title)}
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 truncate pr-1">{card.title}</p>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors flex-shrink-0">
+                      {getStatIcon(card.id, card.title)}
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-mono truncate">
                       {card.isCurrency && '$'}
                       {Number(card.value).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </h3>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs pt-2.5 border-t border-slate-100">
-                    <span className="flex items-center gap-1 text-emerald-600 font-bold text-[11px]">
-                      <TrendingUp size={13} />
+                  <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
+                    <span className={`flex items-center gap-1 font-bold text-[10px] ${
+                      card.trend === 'down' ? 'text-rose-600' : 'text-emerald-600'
+                    }`}>
+                      {card.trend === 'down' ? <TrendingDown size={11} /> : <TrendingUp size={11} />}
                       {card.change}
                     </span>
-                    <span className="text-slate-400 text-[11px] font-medium">{card.subtitle}</span>
+                    <span className="text-slate-400 text-[10px] font-medium truncate ml-1">{card.subtitle}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Executive Action Banner (Pending PO Approvals & Overdue Collections) */}
+          {(data?.actionItems?.pendingApprovals?.length > 0 || data?.actionItems?.overdueInvoices?.length > 0) && (
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 flex-shrink-0">
+                  <AlertTriangle size={18} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide">
+                    Executive Authorization & Action Required
+                  </h4>
+                  <p className="text-xs text-amber-700 mt-0.5">
+                    {data.actionItems.pendingApprovals?.length > 0 && `${data.actionItems.pendingApprovals.length} purchase order(s) awaiting executive sign-off. `}
+                    {data.actionItems.overdueInvoices?.length > 0 && `${data.actionItems.overdueInvoices.length} customer invoice(s) past due terms.`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                {data.actionItems.pendingApprovals?.length > 0 && (
+                  <Link
+                    href="/purchases"
+                    className="px-3 py-1.5 rounded-lg bg-white hover:bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold transition-colors shadow-2xs"
+                  >
+                    Review POs ({data.actionItems.pendingApprovals.length})
+                  </Link>
+                )}
+                {data.actionItems.overdueInvoices?.length > 0 && (
+                  <Link
+                    href="/accounting"
+                    className="px-3 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold transition-colors shadow-2xs"
+                  >
+                    Audit Ledger
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+
 
           {/* =========================================================================
               ANALYTICS & OPERATIONAL SPLIT SECTION (Double-Bezel Architecture)
