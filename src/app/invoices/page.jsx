@@ -11,6 +11,7 @@ import {
   Building2, Calendar, User, ArrowUpRight
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
+import { printInvoice } from '@/lib/printEngine';
 
 export default function InvoicesPage() {
   const toast = useToast();
@@ -400,9 +401,17 @@ export default function InvoicesPage() {
                         <button
                           onClick={() => { setSelectedInvoice(inv); setIsViewModalOpen(true); }}
                           className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-                          title="View / Print Invoice"
+                          title="View Invoice Details"
                         >
                           <Eye size={13} />
+                        </button>
+
+                        <button
+                          onClick={() => printInvoice(inv, data?.settings)}
+                          className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors"
+                          title="Instant Print / PDF"
+                        >
+                          <Printer size={13} />
                         </button>
 
                         {inv.status === 'Draft' && (
@@ -464,6 +473,7 @@ export default function InvoicesPage() {
                 required
               >
                 <option value="" disabled>Select billing customer...</option>
+                <option value="cust-walkin">Walk-in Retail Customer (Default Counter)</option>
                 {customers.map(c => (
                   <option key={c.id} value={c.id}>{c.name || c.company_name}</option>
                 ))}
@@ -803,9 +813,21 @@ export default function InvoicesPage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-200 text-[10px] text-slate-500 space-y-1">
-                <p><span className="font-bold">Terms:</span> {selectedInvoice.terms || 'Net 30 days'}</p>
-                <p><span className="font-bold">Notes:</span> {selectedInvoice.notes || 'Official electronic commercial invoice.'}</p>
+              <div className="pt-3 border-t border-slate-200 text-[10px] text-slate-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div className="space-y-0.5">
+                  <p><span className="font-bold">Terms:</span> {selectedInvoice.terms || 'Net 30 days'}</p>
+                  <p><span className="font-bold">Notes:</span> {selectedInvoice.notes || 'Official electronic commercial invoice.'}</p>
+                </div>
+                <div className="text-right">
+                  <a
+                    href="https://digitalerena.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-blue-600 hover:underline inline-block"
+                  >
+                    Powered by digitalerena.com
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -817,7 +839,7 @@ export default function InvoicesPage() {
                 Close
               </button>
               <button
-                onClick={() => window.print()}
+                onClick={() => printInvoice(selectedInvoice, data?.settings)}
                 className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow-xs"
               >
                 <Printer size={14} />

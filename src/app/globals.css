@@ -191,14 +191,18 @@
     print-color-adjust: exact !important;
   }
 
-  /* Hide app navigation chrome, toolbars, and buttons */
+  /* Hide app navigation chrome, toolbars, buttons, and toasts */
   header,
   aside,
   nav,
   .print\:hidden,
   button,
   .backdrop-blur-xs,
-  .fixed.inset-0.bg-slate-900\/60 {
+  .fixed.inset-0.bg-slate-900\/60,
+  #toast-container,
+  [role="alert"],
+  [aria-live="polite"],
+  [aria-live="assertive"] {
     display: none !important;
   }
 

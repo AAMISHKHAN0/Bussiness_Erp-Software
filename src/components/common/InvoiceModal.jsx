@@ -5,12 +5,31 @@ import Modal from './Modal';
 import { Printer, CheckCircle2, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
 import NexisLogo from './NexisLogo';
+import { printInvoice } from '@/lib/printEngine';
 
 export default function InvoiceModal({ isOpen, onClose, order }) {
   if (!order) return null;
 
   const handlePrint = () => {
-    window.print();
+    const inv = {
+      invoice_number: order.order_number ? `INV-${order.order_number}` : 'INV-COMM',
+      customer_name: order.customer_name,
+      customer_email: order.customer_email || 'Corporate Client',
+      customer_phone: order.customer_phone || '',
+      invoice_date: order.order_date || new Date().toISOString().slice(0, 10),
+      due_date: order.due_date || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+      items: order.items || [],
+      subtotal: Number(order.total_amount) || 0,
+      discount_amount: Number(order.discount_amount) || 0,
+      tax_amount: Number(order.tax_amount) || 0,
+      total_amount: Number(order.net_amount || order.total_amount) || 0,
+      amount_paid: order.payment_status === 'Paid' ? Number(order.net_amount || order.total_amount) : 0,
+      balance_due: order.payment_status === 'Paid' ? 0 : Number(order.net_amount || order.total_amount),
+      status: order.payment_status === 'Paid' ? 'Paid' : 'Issued',
+      terms: 'Net-30. Wire instructions to Habib Bank Limited (HBL).',
+      notes: `Sales Order #${order.order_number} commercial settlement.`
+    };
+    printInvoice(inv);
   };
 
   const isPaid = order.payment_status === 'Paid';
@@ -132,6 +151,18 @@ export default function InvoiceModal({ isOpen, onClose, order }) {
                 <span className="text-blue-600">{formatCurrency(order.net_amount || order.total_amount || 0)}</span>
               </div>
             </div>
+          </div>
+
+          <div className="pt-3 mt-4 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-400">
+            <span>Verified Computer Generated Commercial Invoice</span>
+            <a
+              href="https://digitalerena.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-blue-600 hover:underline"
+            >
+              Powered by digitalerena.com
+            </a>
           </div>
         </div>
       </div>

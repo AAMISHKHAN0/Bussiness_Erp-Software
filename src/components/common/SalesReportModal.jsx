@@ -202,6 +202,18 @@ export default function SalesReportModal({ isOpen, onClose, orders = [], custome
               <p className="text-[10px]">Confidential &mdash; Internal & Client Audit Purposes Only</p>
             </div>
           </div>
+
+          <div className="pt-4 mt-6 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-400">
+            <span>NEXIS Enterprise Cloud Accounting &middot; GAAP Certified</span>
+            <a
+              href="https://digitalerena.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-blue-600 hover:underline"
+            >
+              Powered by digitalerena.com
+            </a>
+          </div>
         </div>
       </div>
     </Modal>

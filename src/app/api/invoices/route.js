@@ -25,10 +25,50 @@ export async function GET(request) {
       return NextResponse.json({ success: true, data: { invoice, payments: invoicePayments } });
     }
 
+    // Auto-synchronize any POS sales missing from invoices ledger
+    const posSales = db.get('pos_sales', tenant_id);
+    let synced = false;
+    for (const pos of posSales) {
+      const exists = invoices.some(i => i.sale_id === pos.id || (pos.receipt_number && i.receipt_number === pos.receipt_number));
+      if (!exists) {
+        const invNum = `INV-${pos.receipt_number ? pos.receipt_number.replace('REC-', 'POS-') : pos.id}`;
+        db.insert('invoices', {
+          invoice_number: invNum,
+          receipt_number: pos.receipt_number,
+          order_number: pos.receipt_number,
+          sale_id: pos.id,
+          customer_id: pos.customer_id || 'cust-walkin',
+          customer_name: pos.customer_name || 'Walk-in Retail Client',
+          customer_phone: pos.customer_phone || '',
+          invoice_date: pos.sale_date ? pos.sale_date.slice(0, 10) : new Date().toISOString().slice(0, 10),
+          due_date: pos.sale_date ? pos.sale_date.slice(0, 10) : new Date().toISOString().slice(0, 10),
+          items: pos.items || [],
+          subtotal: Number(pos.subtotal) || Number(pos.total_amount) || 0,
+          discount_amount: Number(pos.discount_amount) || 0,
+          tax_amount: Number(pos.tax_amount) || 0,
+          total_amount: Number(pos.total_amount) || 0,
+          amount_paid: Number(pos.total_amount) || 0,
+          balance_due: 0,
+          status: pos.status === 'Refunded' ? 'Void' : 'Paid',
+          payment_status: pos.status === 'Refunded' ? 'Refunded' : 'Paid',
+          payment_method: pos.payment_method || 'Cash',
+          terms: 'Settled at POS Terminal',
+          notes: `POS Retail Sale Receipt #${pos.receipt_number}`,
+          created_by: pos.cashier_name || 'Cashier',
+          source: 'POS'
+        }, tenant_id);
+        synced = true;
+      }
+    }
+    if (synced) {
+      db.persist('invoices');
+    }
+
+    const allInvoices = db.get('invoices', tenant_id);
     const todayStr = new Date().toISOString().slice(0, 10);
 
     // Compute live status (auto-flag overdue if not paid and due_date < today)
-    const processedInvoices = invoices.map(inv => {
+    const processedInvoices = allInvoices.map(inv => {
       let status = inv.status || 'Issued';
       const balanceDue = Number(inv.balance_due) ?? (Number(inv.total_amount) - (Number(inv.amount_paid) || 0));
       if (status !== 'Paid' && status !== 'Void' && status !== 'Draft') {
@@ -55,7 +95,7 @@ export async function GET(request) {
     return NextResponse.json({
       success: true,
       data: {
-        invoices: processedInvoices.reverse(),
+        invoices: [...processedInvoices].reverse(),
         customers,
         products,
         payments,
@@ -64,7 +104,7 @@ export async function GET(request) {
           totalOutstanding,
           overdueCount,
           paidCount,
-          totalCount: invoices.length
+          totalCount: processedInvoices.length
         },
         settings
       }
@@ -95,12 +135,27 @@ export async function POST(request) {
         tax_amount = 0,
         notes = '',
         terms = 'Payment due within 30 days from date of issuance.',
-        status = 'Issued'
+        status = 'Issued',
+        payment_method = 'Bank Transfer'
       } = body;
 
-      const customer = db.findById('customers', customer_id, tenant_id);
+      let customer = db.findById('customers', customer_id, tenant_id);
       if (!customer) {
-        return NextResponse.json({ success: false, message: 'Customer record is required.' }, { status: 400 });
+        if (customer_id === 'cust-walkin' || !customer_id) {
+          customer = {
+            id: 'cust-walkin',
+            name: body.customer_name || 'Walk-in Retail Customer',
+            email: '',
+            phone: ''
+          };
+        } else {
+          customer = {
+            id: customer_id,
+            name: body.customer_name || 'Commercial Client',
+            email: '',
+            phone: ''
+          };
+        }
       }
 
       if (!Array.isArray(items) || items.length === 0) {
@@ -129,6 +184,7 @@ export async function POST(request) {
 
       const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
       const calculatedDueDate = due_date || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+      const isPaid = status === 'Paid';
 
       const newInvoice = db.insert('invoices', {
         invoice_number: invoiceNumber,
@@ -143,19 +199,26 @@ export async function POST(request) {
         discount_amount: Number(discount_amount),
         tax_amount: calculatedTax,
         total_amount: grandTotal,
-        amount_paid: 0,
-        balance_due: grandTotal,
+        amount_paid: isPaid ? grandTotal : 0,
+        balance_due: isPaid ? 0 : grandTotal,
         status: status || 'Issued',
-        payment_status: 'Unpaid',
+        payment_status: isPaid ? 'Paid' : 'Unpaid',
+        payment_method,
         terms,
         notes,
         created_by: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email
       }, tenant_id);
 
-      // If issued, adjust customer accounts receivable balance
-      if (newInvoice.status === 'Issued') {
+      db.persist('invoices');
+
+      // If issued on credit, adjust customer accounts receivable balance
+      if (newInvoice.status === 'Issued' && customer.id !== 'cust-walkin') {
         db.update('customers', customer.id, {
           current_balance: Math.round(((Number(customer.current_balance) || 0) + grandTotal) * 100) / 100
+        }, tenant_id);
+      } else if (newInvoice.status === 'Paid' && customer.id !== 'cust-walkin') {
+        db.update('customers', customer.id, {
+          total_spent: Math.round(((Number(customer.total_spent) || 0) + grandTotal) * 100) / 100
         }, tenant_id);
       }
 

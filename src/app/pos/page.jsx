@@ -12,6 +12,7 @@ import {
   Sparkles, History, Download
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
+import { printReceipt } from '@/lib/printEngine';
 
 export default function POSPage() {
   const toast = useToast();
@@ -781,9 +782,10 @@ export default function POSPage() {
                 )}
               </div>
 
-              <div className="text-center pt-3 border-t border-dashed border-slate-300 text-[9px] text-slate-400">
+              <div className="text-center pt-3 border-t border-dashed border-slate-300 text-[9px] text-slate-400 space-y-0.5">
                 <p>Thank you for your business!</p>
                 <p>Retain receipt for standard 7-day returns.</p>
+                <p className="font-bold text-slate-600 uppercase tracking-wider pt-1">Powered by digitalerena.com</p>
               </div>
             </div>
 
@@ -795,7 +797,7 @@ export default function POSPage() {
                 Close
               </button>
               <button
-                onClick={() => window.print()}
+                onClick={() => printReceipt(activeReceipt)}
                 className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-1.5 shadow-xs"
               >
                 <Printer size={14} />
@@ -866,16 +868,25 @@ export default function POSPage() {
                     {formatCurrency(sale.total_amount)}
                   </td>
                   <td className="py-2.5 px-3 text-right">
-                    {sale.status !== 'Refunded' ? (
+                    <div className="flex items-center justify-end gap-1.5">
                       <button
-                        onClick={() => handleRefund(sale)}
-                        className="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-[10px] border border-rose-200"
+                        onClick={() => printReceipt(sale)}
+                        className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                        title="Reprint Thermal Receipt"
                       >
-                        Refund
+                        <Printer size={12} />
                       </button>
-                    ) : (
-                      <span className="text-[10px] text-slate-400 font-mono">Refunded</span>
-                    )}
+                      {sale.status !== 'Refunded' ? (
+                        <button
+                          onClick={() => handleRefund(sale)}
+                          className="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-[10px] border border-rose-200"
+                        >
+                          Refund
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 font-mono">Refunded</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

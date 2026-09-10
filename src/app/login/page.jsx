@@ -153,7 +153,9 @@ export default function LoginPage() {
           <div className="flex items-center gap-4 text-[11px] font-mono text-slate-500">
             <span>TLS 1.3 Encryption</span>
             <span>·</span>
-            <span>99.99% Cloud SLA</span>
+            <a href="https://digitalerena.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition-colors">
+              Powered by digitalerena.com
+            </a>
           </div>
         </div>
       </div>
@@ -333,7 +335,10 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-[11px] text-slate-400">
-            NEXIS ERP Systems &middot; Enterprise Operating Cloud &middot; All rights reserved.
+            NEXIS ERP Systems &middot; Enterprise Operating Cloud &middot; Powered by{' '}
+            <a href="https://digitalerena.com" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-700 hover:underline">
+              digitalerena.com
+            </a>
           </p>
         </div>
       </div>

@@ -171,9 +171,40 @@ export async function POST(request) {
         notes
       }, tenant_id);
 
-      // 5. Record formal payment
+      // 5. Automatically Create & Synchronize Official Commercial Invoice
+      const invoiceNumber = `INV-${receiptNumber.replace('REC-', 'POS-')}`;
+      const newInvoice = db.insert('invoices', {
+        invoice_number: invoiceNumber,
+        receipt_number: receiptNumber,
+        order_number: receiptNumber,
+        sale_id: saleRecord.id,
+        customer_id: customer.id,
+        customer_name: customer.name || customer.company_name,
+        customer_email: customer.email || '',
+        customer_phone: customer.phone || '',
+        invoice_date: new Date().toISOString().slice(0, 10),
+        due_date: new Date().toISOString().slice(0, 10),
+        items: processedItems,
+        subtotal: Number(subtotal),
+        discount_amount: Number(discount_amount),
+        tax_amount: Number(tax_amount),
+        total_amount: Number(total_amount),
+        amount_paid: Number(total_amount),
+        balance_due: 0,
+        status: 'Paid',
+        payment_status: 'Paid',
+        payment_method,
+        terms: 'Settled immediately at POS Counter',
+        notes: notes || `POS Retail Sale - Receipt #${receiptNumber}`,
+        created_by: saleRecord.cashier_name,
+        source: 'POS'
+      }, tenant_id);
+
+      // 6. Record formal payment linked to both sale and invoice
       db.insert('payments', {
         payment_number: `PAY-${receiptNumber}`,
+        invoice_id: newInvoice.id,
+        invoice_number: invoiceNumber,
         sale_id: saleRecord.id,
         customer_id: customer.id,
         customer_name: customer.name,
@@ -183,6 +214,8 @@ export async function POST(request) {
         reference: receiptNumber,
         status: 'Cleared'
       }, tenant_id);
+
+      db.persist('invoices');
 
       // 6. Update Customer History
       if (customer.id !== 'cust-walkin') {
@@ -343,6 +376,24 @@ export async function POST(request) {
         refund_reason: reason,
         refunded_by: user.email
       }, tenant_id);
+
+      // Also update linked commercial invoice to Void
+      const allInvoices = db.get('invoices', tenant_id);
+      const linkedInv = allInvoices.find(i => i.sale_id === sale.id || i.receipt_number === sale.receipt_number);
+      if (linkedInv) {
+        db.update('invoices', linkedInv.id, {
+          status: 'Void',
+          notes: `${linkedInv.notes || ''} [Refunded & Voided on ${new Date().toISOString().slice(0, 10)}: ${reason}]`
+        }, tenant_id);
+        db.persist('invoices');
+      }
+
+      // GAAP Accounting Reversal
+      try {
+        AccountingEngine.reverseTransaction(sale.receipt_number, reason, user, tenant_id);
+      } catch (revErr) {
+        console.warn('[POS API] Refund reversal notice:', revErr.message);
+      }
 
       db.logAudit('POS_SALE_REFUNDED', 'POS', `Processed return & refund for ${sale.receipt_number} (PKR ${sale.total_amount})`, user, clientIp);
 

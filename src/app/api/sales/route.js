@@ -195,11 +195,13 @@ export async function POST(request) {
       customer_name: customer.name || customer.company_name,
       invoice_date: newOrder.order_date,
       due_date: newOrder.due_date,
+      items: processedItems,
       subtotal: taxableAmount,
       tax_amount: taxAmount,
       total_amount: netAmount,
+      amount_paid: newOrder.payment_status === 'Paid' ? netAmount : 0,
       balance_due: newOrder.payment_status === 'Paid' ? 0 : netAmount,
-      status: newOrder.payment_status === 'Paid' ? 'Paid' : 'Sent',
+      status: newOrder.payment_status === 'Paid' ? 'Paid' : 'Issued',
       created_by: newOrder.created_by
     }, tenant_id);
 

@@ -183,21 +183,34 @@ export default function AppShell({ children }) {
         {/* Current Active Role Badge & Collapse Button Footer */}
         <div className="p-3 border-t border-slate-200 bg-slate-50/50">
           {!sidebarCollapsed ? (
-            <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between shadow-2xs">
-              <div className="overflow-hidden pr-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Department Portal</p>
-                <p className="text-xs font-bold text-slate-900 truncate">{user?.role || 'Super Admin'}</p>
+            <div className="space-y-2">
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center justify-between shadow-2xs">
+                <div className="overflow-hidden pr-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Department Portal</p>
+                  <p className="text-xs font-bold text-slate-900 truncate">{user?.role || 'Super Admin'}</p>
+                </div>
+                <button
+                  onClick={toggleSidebar}
+                  className="hidden lg:flex p-1.5 text-slate-400 hover:text-slate-800 rounded-md hover:bg-slate-100 transition-colors flex-shrink-0"
+                  title="Minimize Sidebar (Ctrl+B)"
+                >
+                  <PanelLeftClose size={16} />
+                </button>
               </div>
-              <button
-                onClick={toggleSidebar}
-                className="hidden lg:flex p-1.5 text-slate-400 hover:text-slate-800 rounded-md hover:bg-slate-100 transition-colors flex-shrink-0"
-                title="Minimize Sidebar (Ctrl+B)"
-              >
-                <PanelLeftClose size={16} />
-              </button>
+              <div className="text-center pt-0.5">
+                <a
+                  href="https://digitalerena.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10.5px] font-semibold text-slate-400 hover:text-blue-600 transition-colors inline-flex items-center gap-1 group"
+                >
+                  <span>Powered by</span>
+                  <span className="font-bold text-blue-600 group-hover:underline">digitalerena.com</span>
+                </a>
+              </div>
             </div>
           ) : (
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-1.5">
               <button
                 onClick={toggleSidebar}
                 className="text-slate-500 hover:text-blue-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
@@ -205,6 +218,15 @@ export default function AppShell({ children }) {
               >
                 <PanelLeftOpen size={19} />
               </button>
+              <a
+                href="https://digitalerena.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[9px] font-bold text-blue-600 hover:underline"
+                title="Powered by digitalerena.com"
+              >
+                DE
+              </a>
             </div>
           )}
         </div>
@@ -372,6 +394,24 @@ export default function AppShell({ children }) {
         <main className="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
           <div className="max-w-7xl mx-auto space-y-6">
             {children}
+
+            {/* Global Enterprise Footer */}
+            <footer className="pt-6 pb-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2 print:hidden">
+              <div className="flex items-center gap-2">
+                <span>NEXIS Business ERP &middot; Enterprise Operating Cloud</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span>Powered by</span>
+                <a
+                  href="https://digitalerena.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  digitalerena.com
+                </a>
+              </div>
+            </footer>
           </div>
         </main>
       </div>

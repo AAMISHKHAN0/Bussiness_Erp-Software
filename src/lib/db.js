@@ -40,7 +40,20 @@ class EnterpriseDatabase {
           this.data = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
           this.persistLocal();
         } else {
-          this.data = { ...this.data, ...parsed };
+          this.data = { ...INITIAL_SEED_DATA, ...parsed };
+          
+          // Ensure critical arrays are hydrated and never lost
+          const required = ['invoices', 'pos_sales', 'pos_registers', 'pos_sessions', 'pos_held_sales', 'expenses', 'customers', 'products', 'accounts', 'journal_entries', 'payments'];
+          let needsPersist = false;
+          for (const key of required) {
+            if (!this.data[key] || !Array.isArray(this.data[key]) || (this.data[key].length === 0 && INITIAL_SEED_DATA[key]?.length > 0)) {
+              this.data[key] = JSON.parse(JSON.stringify(INITIAL_SEED_DATA[key] || []));
+              needsPersist = true;
+            }
+          }
+          if (needsPersist) {
+            this.persistLocal();
+          }
         }
       } else {
         this.persistLocal();

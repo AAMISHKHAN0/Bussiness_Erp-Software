@@ -489,6 +489,106 @@ export class AccountingEngine {
       tenantId
     });
   }
+
+  /**
+   * Automated POS Sale Double-Entry Posting
+   * Debits Cash Register (#1010) or Merchant Clearing (#1020),
+   * Credits POS Revenue (#4010), Credits Sales Tax Payable (#2100),
+   * Debits Cost of Goods Sold (#5010), Credits Merchandise Inventory (#1200).
+   */
+  static postPOSSale(sale, user, tenantId = 'tenant-default') {
+    const totalAmount = Number(sale.total_amount) || 0;
+    if (totalAmount <= 0) return null;
+
+    const taxAmount = Number(sale.tax_amount) || 0;
+    const grossSales = Math.round((totalAmount - taxAmount) * 100) / 100;
+
+    let cogsAmount = 0;
+    if (Array.isArray(sale.items)) {
+      for (const item of sale.items) {
+        const product = db.findById('products', item.product_id, tenantId);
+        const unitCost = product ? (Number(product.purchase_price) || 0) : ((Number(item.unit_price) || 0) * 0.6);
+        cogsAmount += (Number(item.quantity) || 1) * unitCost;
+      }
+    }
+    cogsAmount = Math.round(cogsAmount * 100) / 100;
+
+    const paymentMethod = (sale.payment_method || 'Cash').toLowerCase();
+    const isCash = paymentMethod.includes('cash');
+
+    const accCash = this.getAccount('1010', tenantId) || { id: 'acc-1010', code: '1010', name: 'Cash on Hand & Petty Cash Register' };
+    const accBank = this.getAccount('1020', tenantId) || { id: 'acc-1020', code: '1020', name: 'Operating Checking & Merchant Account' };
+    const accRevenue = this.getAccount('4010', tenantId) || { id: 'acc-4010', code: '4010', name: 'POS Retail & Commercial Revenue' };
+    const accTax = this.getAccount('2100', tenantId) || { id: 'acc-2100', code: '2100', name: 'Sales Tax / GST Statutory Payable' };
+    const accCOGS = this.getAccount('5010', tenantId) || { id: 'acc-5010', code: '5010', name: 'Cost of Goods Sold (COGS)' };
+    const accInventory = this.getAccount('1200', tenantId) || { id: 'acc-1200', code: '1200', name: 'Finished Goods Merchandise Inventory' };
+
+    const settlementAcc = isCash ? accCash : accBank;
+    const lines = [];
+
+    // 1. Settlement Debit
+    lines.push({
+      account_id: settlementAcc.id,
+      account_code: settlementAcc.code,
+      account_name: settlementAcc.name,
+      debit: totalAmount,
+      credit: 0
+    });
+
+    // 2. Revenue Recognition Credit
+    if (taxAmount > 0) {
+      lines.push({
+        account_id: accRevenue.id,
+        account_code: accRevenue.code,
+        account_name: accRevenue.name,
+        debit: 0,
+        credit: grossSales
+      });
+      lines.push({
+        account_id: accTax.id,
+        account_code: accTax.code,
+        account_name: accTax.name,
+        debit: 0,
+        credit: taxAmount
+      });
+    } else {
+      lines.push({
+        account_id: accRevenue.id,
+        account_code: accRevenue.code,
+        account_name: accRevenue.name,
+        debit: 0,
+        credit: totalAmount
+      });
+    }
+
+    // 3. COGS and Inventory Reduction
+    if (cogsAmount > 0) {
+      lines.push({
+        account_id: accCOGS.id,
+        account_code: accCOGS.code,
+        account_name: accCOGS.name,
+        debit: cogsAmount,
+        credit: 0
+      });
+      lines.push({
+        account_id: accInventory.id,
+        account_code: accInventory.code,
+        account_name: accInventory.name,
+        debit: 0,
+        credit: cogsAmount
+      });
+    }
+
+    return this.postVoucher({
+      entryDate: sale.sale_date ? sale.sale_date.slice(0, 10) : new Date().toISOString().slice(0, 10),
+      referenceNumber: sale.receipt_number || sale.id,
+      referenceType: 'POS_SALE',
+      description: `POS Retail Counter Sale #${sale.receipt_number} (${sale.customer_name || 'Walk-in Client'})`,
+      lines,
+      user,
+      tenantId
+    });
+  }
 }
 
 export default AccountingEngine;
