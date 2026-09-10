@@ -8,7 +8,7 @@ import {
   Calculator, BarChart3, ShieldAlert, Settings, Menu, X, 
   Search, Bell, Sun, Moon, ChevronDown, 
   LogOut, UserCheck, Building2, ChevronRight,
-  PanelLeftClose, PanelLeftOpen
+  PanelLeftClose, PanelLeftOpen, CreditCard, FileText
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -18,13 +18,16 @@ import NexisLogo from '@/components/common/NexisLogo';
 
 const NAV_ITEMS = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'POS Counter', href: '/pos', icon: CreditCard, badge: 'POS' },
+  { name: 'Invoices', href: '/invoices', icon: FileText, badge: 'Billing' },
   { name: 'Inventory & Items', href: '/inventory', icon: Package, badge: 'Stock' },
   { name: 'Sales Orders', href: '/sales', icon: ShoppingCart },
   { name: 'Procurement', href: '/purchases', icon: Truck },
   { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Vendors', href: '/vendors', icon: Building2 },
   { name: 'Accounting', href: '/accounting', icon: Calculator, badge: 'GAAP' },
-  { name: 'HR & Payroll', href: '/hr', icon: UserCheck },
+  { name: 'User Management', href: '/users', icon: UserCheck, badge: 'Seats' },
+  { name: 'HR & Payroll', href: '/hr', icon: Users },
   { name: 'Reports & Analytics', href: '/analytics', icon: BarChart3, badge: 'Reports' },
   { name: 'Audit Logs', href: '/audit-logs', icon: ShieldAlert },
   { name: 'System Settings', href: '/admin', icon: Settings },

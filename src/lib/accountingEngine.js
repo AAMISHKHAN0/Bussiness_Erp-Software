@@ -285,6 +285,184 @@ export class AccountingEngine {
   }
 
   /**
+   * Automated Point of Sale (POS) Cash/Card Sale Double-Entry Posting
+   * Dr Cash/Bank (#1010), Cr Revenue (#4010), Cr Tax (#2100),
+   * Dr COGS (#5010), Cr Inventory (#1200)
+   */
+  static postPOSSale(sale, user, tenantId = 'tenant-default') {
+    const totalAmount = Math.round((Number(sale.total_amount) || 0) * 100) / 100;
+    const taxAmount = Math.round((Number(sale.tax_amount) || 0) * 100) / 100;
+    const subtotal = Math.round((Number(sale.subtotal) || (totalAmount - taxAmount)) * 100) / 100;
+
+    let totalCOGS = 0;
+    if (Array.isArray(sale.items)) {
+      for (const item of sale.items) {
+        const product = db.findById('products', item.product_id, tenantId);
+        const cost = product ? (Number(product.purchase_price) || 0) : (Number(item.unit_price) * 0.6);
+        totalCOGS += (Number(item.quantity) || 1) * cost;
+      }
+    }
+    totalCOGS = Math.round(totalCOGS * 100) / 100;
+
+    const accCash = this.getAccount('1010', tenantId) || { id: 'acc-1010', code: '1010', name: 'Operating Checking Account (Habib Bank)' };
+    const accRevenue = this.getAccount('4010', tenantId) || { id: 'acc-4010', code: '4010', name: 'Commercial Hardware Sales Revenue' };
+    const accTax = this.getAccount('2100', tenantId) || { id: 'acc-2100', code: '2100', name: 'Accrued Statutory Tax & Payroll Liabilities' };
+    const accCOGS = this.getAccount('5010', tenantId) || { id: 'acc-5010', code: '5010', name: 'Cost of Goods Sold (COGS)' };
+    const accInventory = this.getAccount('1200', tenantId) || { id: 'acc-1200', code: '1200', name: 'Finished Goods Merchandise Inventory' };
+
+    const lines = [
+      {
+        account_id: accCash.id,
+        account_code: accCash.code,
+        account_name: accCash.name,
+        debit: totalAmount,
+        credit: 0
+      }
+    ];
+
+    if (taxAmount > 0) {
+      lines.push({
+        account_id: accRevenue.id,
+        account_code: accRevenue.code,
+        account_name: accRevenue.name,
+        debit: 0,
+        credit: subtotal
+      });
+      lines.push({
+        account_id: accTax.id,
+        account_code: accTax.code,
+        account_name: accTax.name,
+        debit: 0,
+        credit: taxAmount
+      });
+    } else {
+      lines.push({
+        account_id: accRevenue.id,
+        account_code: accRevenue.code,
+        account_name: accRevenue.name,
+        debit: 0,
+        credit: totalAmount
+      });
+    }
+
+    if (totalCOGS > 0) {
+      lines.push({
+        account_id: accCOGS.id,
+        account_code: accCOGS.code,
+        account_name: accCOGS.name,
+        debit: totalCOGS,
+        credit: 0
+      });
+      lines.push({
+        account_id: accInventory.id,
+        account_code: accInventory.code,
+        account_name: accInventory.name,
+        debit: 0,
+        credit: totalCOGS
+      });
+    }
+
+    return this.postVoucher({
+      entryDate: (sale.sale_date ? sale.sale_date.slice(0, 10) : null) || new Date().toISOString().slice(0, 10),
+      referenceNumber: sale.receipt_number || sale.id,
+      referenceType: 'POS_SALE',
+      description: `POS Retail Sale #${sale.receipt_number} (${sale.customer_name || 'Walk-in Client'})`,
+      lines,
+      user,
+      tenantId
+    });
+  }
+
+  /**
+   * Automated Corporate Expense Double-Entry Posting
+   * Dr Expense Account (#6xxx), Cr Cash/Bank (#1010) or Accounts Payable (#2010)
+   */
+  static postExpense(expense, user, tenantId = 'tenant-default') {
+    const amount = Math.round((Number(expense.amount) || 0) * 100) / 100;
+    if (amount <= 0) return null;
+
+    let accExpense = null;
+    if (expense.account_id) accExpense = db.findById('accounts', expense.account_id, tenantId);
+    if (!accExpense && expense.account_code) accExpense = this.getAccount(expense.account_code, tenantId);
+    if (!accExpense) accExpense = this.getAccount('6020', tenantId) || { id: 'acc-6020', code: '6020', name: 'Office Facilities, Rent & Utilities' };
+
+    let accPayment = null;
+    if (expense.payment_account_id) accPayment = db.findById('accounts', expense.payment_account_id, tenantId);
+    if (!accPayment && expense.payment_account_code) accPayment = this.getAccount(expense.payment_account_code, tenantId);
+    if (!accPayment) {
+      accPayment = (expense.status === 'Pending' || expense.payment_method === 'On Credit')
+        ? (this.getAccount('2010', tenantId) || { id: 'acc-2010', code: '2010', name: 'Accounts Payable' })
+        : (this.getAccount('1010', tenantId) || { id: 'acc-1010', code: '1010', name: 'Operating Checking Account (Habib Bank)' });
+    }
+
+    const lines = [
+      {
+        account_id: accExpense.id,
+        account_code: accExpense.code,
+        account_name: accExpense.name,
+        debit: amount,
+        credit: 0
+      },
+      {
+        account_id: accPayment.id,
+        account_code: accPayment.code,
+        account_name: accPayment.name,
+        debit: 0,
+        credit: amount
+      }
+    ];
+
+    return this.postVoucher({
+      entryDate: expense.date || new Date().toISOString().slice(0, 10),
+      referenceNumber: expense.expense_number || expense.id,
+      referenceType: 'EXPENSE',
+      description: `Expense: ${expense.description || expense.category} (${expense.payee_vendor || 'Vendor'})`,
+      lines,
+      user,
+      tenantId
+    });
+  }
+
+  /**
+   * Automated Invoice Payment Receipt Double-Entry Posting
+   * Dr Cash/Bank (#1010), Cr Accounts Receivable (#1100)
+   */
+  static postInvoicePayment(payment, user, tenantId = 'tenant-default') {
+    const amount = Math.round((Number(payment.amount) || 0) * 100) / 100;
+    if (amount <= 0) return null;
+
+    const accCash = this.getAccount('1010', tenantId) || { id: 'acc-1010', code: '1010', name: 'Operating Checking Account (Habib Bank)' };
+    const accReceivable = this.getAccount('1100', tenantId) || { id: 'acc-1100', code: '1100', name: 'Accounts Receivable' };
+
+    const lines = [
+      {
+        account_id: accCash.id,
+        account_code: accCash.code,
+        account_name: accCash.name,
+        debit: amount,
+        credit: 0
+      },
+      {
+        account_id: accReceivable.id,
+        account_code: accReceivable.code,
+        account_name: accReceivable.name,
+        debit: 0,
+        credit: amount
+      }
+    ];
+
+    return this.postVoucher({
+      entryDate: payment.payment_date || new Date().toISOString().slice(0, 10),
+      referenceNumber: payment.payment_number || payment.id,
+      referenceType: 'PAYMENT_RECEIVED',
+      description: `Customer payment received for Invoice #${payment.invoice_number || payment.order_number || ''} (${payment.customer_name || 'Client'})`,
+      lines,
+      user,
+      tenantId
+    });
+  }
+
+  /**
    * Safe Reversal of Transaction
    * Creates an exact mirror reversing journal entry (swapping Debits and Credits)
    * so previous accounting records are never destructively erased.

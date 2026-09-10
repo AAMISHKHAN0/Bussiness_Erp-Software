@@ -8,7 +8,8 @@
     "address": "Level 14, Executive Tower, Clifton Block 4, Karachi, Pakistan",
     "currency": "PKR",
     "currency_symbol": "Rs. ",
-    "default_tax_rate": 18
+    "default_tax_rate": 18,
+    "max_users": 4
   },
   "branches": [
     {
@@ -70,26 +71,46 @@
     },
     {
       "id": "r-2",
+      "name": "Administrator",
+      "description": "Full administrative governance, user security, and enterprise config"
+    },
+    {
+      "id": "r-3",
+      "name": "Manager",
+      "description": "Store, inventory, sales, and operational oversight"
+    },
+    {
+      "id": "r-4",
+      "name": "Accountant",
+      "description": "General ledger, journal vouchers, reconciliation & statements"
+    },
+    {
+      "id": "r-5",
+      "name": "Cashier",
+      "description": "Fast Point of Sale billing, register sessions, and receipts"
+    },
+    {
+      "id": "r-6",
       "name": "Executive Admin",
       "description": "Executive departmental oversight and reporting"
     },
     {
-      "id": "r-3",
+      "id": "r-7",
       "name": "Financial Controller",
-      "description": "General ledger, journal vouchers, reconciliation & statements"
+      "description": "Executive financial controller and audit reporting"
     },
     {
-      "id": "r-4",
+      "id": "r-8",
       "name": "Inventory Specialist",
       "description": "Stock transfers, warehouse adjustments, and catalog management"
     },
     {
-      "id": "r-5",
+      "id": "r-9",
       "name": "HR Director",
       "description": "Staff directory, digital attendance, and payroll issuance"
     },
     {
-      "id": "r-6",
+      "id": "r-10",
       "name": "Senior Sales Representative",
       "description": "Customer accounts, quotations, and sales order fulfillment"
     }
@@ -101,8 +122,8 @@
       "password_hash": "$2a$10$7rA1mDvh8t1Yq9gP8D0GceJ6b8V6c0sXJ3.FmB3Y8p2vA3J6v3kO6",
       "first_name": "Alexander",
       "last_name": "Sterling",
-      "role": "Super Admin",
-      "role_id": "r-1",
+      "role": "Administrator",
+      "role_id": "r-2",
       "branch_id": "b-1",
       "department": "Executive Leadership",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=96&auto=format&fit=crop&q=80",
@@ -115,8 +136,8 @@
       "password_hash": "$2a$10$7rA1mDvh8t1Yq9gP8D0GceJ6b8V6c0sXJ3.FmB3Y8p2vA3J6v3kO6",
       "first_name": "Victoria",
       "last_name": "Chen",
-      "role": "Financial Controller",
-      "role_id": "r-3",
+      "role": "Accountant",
+      "role_id": "r-4",
       "branch_id": "b-1",
       "department": "Finance & Corporate Accounting",
       "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=96&auto=format&fit=crop&q=80",
@@ -125,45 +146,31 @@
     },
     {
       "id": "u-3",
-      "email": "inventory@company.com",
+      "email": "cashier@company.com",
       "password_hash": "$2a$10$7rA1mDvh8t1Yq9gP8D0GceJ6b8V6c0sXJ3.FmB3Y8p2vA3J6v3kO6",
-      "first_name": "Marcus",
-      "last_name": "Vance",
-      "role": "Inventory Specialist",
-      "role_id": "r-4",
-      "branch_id": "b-2",
-      "department": "Supply Chain & Operations",
+      "first_name": "Tariq",
+      "last_name": "Mahmood",
+      "role": "Cashier",
+      "role_id": "r-5",
+      "branch_id": "b-1",
+      "department": "Retail & Counter POS",
       "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=96&auto=format&fit=crop&q=80",
       "phone": "+92 (302) 829-0103",
       "is_active": true
     },
     {
       "id": "u-4",
-      "email": "hr@company.com",
+      "email": "manager@company.com",
       "password_hash": "$2a$10$7rA1mDvh8t1Yq9gP8D0GceJ6b8V6c0sXJ3.FmB3Y8p2vA3J6v3kO6",
-      "first_name": "Sophia",
-      "last_name": "Martinez",
-      "role": "HR Director",
-      "role_id": "r-5",
-      "branch_id": "b-1",
-      "department": "Human Resources",
-      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=96&auto=format&fit=crop&q=80",
-      "phone": "+92 (303) 829-0104",
-      "is_active": true
-    },
-    {
-      "id": "u-5",
-      "email": "sales@company.com",
-      "password_hash": "$2a$10$7rA1mDvh8t1Yq9gP8D0GceJ6b8V6c0sXJ3.FmB3Y8p2vA3J6v3kO6",
-      "first_name": "Derrick",
-      "last_name": "Cole",
-      "role": "Senior Sales Representative",
-      "role_id": "r-6",
-      "branch_id": "b-3",
-      "department": "Commercial Enterprise Sales",
+      "first_name": "Marcus",
+      "last_name": "Vance",
+      "role": "Manager",
+      "role_id": "r-3",
+      "branch_id": "b-2",
+      "department": "Supply Chain & Operations",
       "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=96&auto=format&fit=crop&q=80",
-      "phone": "+92 (304) 829-0105",
-      "is_active": true
+      "phone": "+92 (303) 829-0104",
+      "is_active": false
     }
   ],
   "categories": [
@@ -363,6 +370,20 @@
     }
   ],
   "customers": [
+    {
+      "id": "cust-walkin",
+      "name": "Walk-in Retail Customer",
+      "company_name": "Walk-in Retail Client",
+      "contact_person": "Walk-in Counter",
+      "email": "pos@nexiserp.com",
+      "phone": "+92 (21) 111-000-000",
+      "address": "Direct Counter POS",
+      "tax_number": "Unregistered",
+      "credit_limit": 0,
+      "total_spent": 345000,
+      "current_balance": 0,
+      "status": "Active"
+    },
     {
       "id": "cust-1",
       "name": "Habib Bank Limited (HBL)",
@@ -1349,6 +1370,172 @@
       "reviewed_by": "Alexander Sterling",
       "reviewed_at": "2026-09-07T12:00:00Z",
       "comments": "Approved for Punjab logistics switch deployment."
+    }
+  ],
+  "pos_registers": [
+    {
+      "id": "reg-1",
+      "name": "Main Checkout Terminal 01",
+      "code": "REG-KHI-01",
+      "branch_id": "b-1",
+      "warehouse_id": "wh-1",
+      "status": "Open",
+      "current_session_id": "sess-1",
+      "ip_address": "192.168.1.150"
+    },
+    {
+      "id": "reg-2",
+      "name": "Express Terminal 02",
+      "code": "POS-KHI-02",
+      "branch_id": "b-1",
+      "warehouse_id": "wh-1",
+      "status": "Closed",
+      "current_session_id": null,
+      "ip_address": "192.168.1.151"
+    }
+  ],
+  "pos_sessions": [
+    {
+      "id": "sess-1",
+      "register_id": "reg-1",
+      "register_name": "Main Checkout Terminal 01",
+      "cashier_id": "u-3",
+      "cashier_name": "Tariq Mahmood",
+      "opened_at": "2026-09-10T08:00:00Z",
+      "closed_at": null,
+      "opening_cash": 25000,
+      "total_sales": 345000,
+      "cash_sales": 212400,
+      "card_sales": 132600,
+      "transactions_count": 2,
+      "status": "Open"
+    }
+  ],
+  "pos_sales": [
+    {
+      "id": "pos-101",
+      "receipt_number": "POS-2026-0001",
+      "session_id": "sess-1",
+      "register_id": "reg-1",
+      "cashier_id": "u-3",
+      "cashier_name": "Tariq Mahmood",
+      "customer_id": "cust-walkin",
+      "customer_name": "Walk-in Retail Client",
+      "sale_date": "2026-09-10T08:15:00Z",
+      "subtotal": 180000,
+      "discount_amount": 0,
+      "tax_amount": 32400,
+      "total_amount": 212400,
+      "tendered_amount": 215000,
+      "change_due": 2600,
+      "payment_method": "Cash",
+      "payment_status": "Paid",
+      "status": "Completed",
+      "items": [
+        {
+          "product_id": "prod-2",
+          "name": "Cisco Catalyst 9300-48P Managed Switch",
+          "sku": "NET-CAT-9300",
+          "quantity": 1,
+          "unit_price": 180000,
+          "purchase_cost": 110000,
+          "total": 180000
+        }
+      ]
+    },
+    {
+      "id": "pos-102",
+      "receipt_number": "POS-2026-0002",
+      "session_id": "sess-1",
+      "register_id": "reg-1",
+      "cashier_id": "u-3",
+      "cashier_name": "Tariq Mahmood",
+      "customer_id": "cust-1",
+      "customer_name": "Habib Bank Limited (HBL)",
+      "sale_date": "2026-09-10T08:45:00Z",
+      "subtotal": 115000,
+      "discount_amount": 2400,
+      "tax_amount": 20000,
+      "total_amount": 132600,
+      "tendered_amount": 132600,
+      "change_due": 0,
+      "payment_method": "Card",
+      "payment_status": "Paid",
+      "status": "Completed",
+      "items": [
+        {
+          "product_id": "prod-4",
+          "name": "Fortinet FortiGate 100F Security Appliance",
+          "sku": "SEC-FG-100F",
+          "quantity": 1,
+          "unit_price": 115000,
+          "purchase_cost": 72000,
+          "total": 115000
+        }
+      ]
+    }
+  ],
+  "pos_held_sales": [],
+  "expenses": [
+    {
+      "id": "exp-01",
+      "expense_number": "EXP-2026-0001",
+      "date": "2026-09-08",
+      "category": "Utilities & Facilities",
+      "account_id": "acc-6020",
+      "account_code": "6020",
+      "account_name": "Office Facilities, Rent & Utilities",
+      "payment_account_id": "acc-1010",
+      "payment_account_code": "1010",
+      "payment_account_name": "Operating Checking Account (Habib Bank)",
+      "payee_vendor": "K-Electric Corporate Billing",
+      "payment_method": "Bank Transfer",
+      "amount": 450000,
+      "tax_amount": 0,
+      "reference_number": "KE-BILL-920184",
+      "description": "Karachi Distribution Hub Primary Substation Electric Power Billing",
+      "status": "Settled",
+      "created_by": "Victoria Chen"
+    },
+    {
+      "id": "exp-02",
+      "expense_number": "EXP-2026-0002",
+      "date": "2026-09-09",
+      "category": "IT & Infrastructure",
+      "account_id": "acc-6030",
+      "account_code": "6030",
+      "account_name": "Data Center Hosting & Network Bandwidth",
+      "payment_account_id": "acc-1010",
+      "payment_account_code": "1010",
+      "payment_account_name": "Operating Checking Account (Habib Bank)",
+      "payee_vendor": "PTCL Enterprise Cloud",
+      "payment_method": "Bank Transfer",
+      "amount": 320000,
+      "tax_amount": 0,
+      "reference_number": "PTCL-INV-4412",
+      "description": "Dedicated Tier-3 Data Center Fiber Cross-Connect & Transit",
+      "status": "Settled",
+      "created_by": "Victoria Chen"
+    },
+    {
+      "id": "exp-03",
+      "expense_number": "EXP-2026-0003",
+      "date": "2026-09-09",
+      "category": "Audit & Compliance",
+      "account_id": "acc-6040",
+      "account_code": "6040",
+      "account_name": "Legal, Corporate Audit & Compliance Fees",
+      "payment_account_id": "acc-1010",
+      "payment_account_code": "1010",
+      "payment_account_name": "Operating Checking Account (Habib Bank)",
+      "payee_vendor": "A.F. Ferguson & Co. (PwC)",
+      "payment_method": "Bank Transfer",
+      "amount": 180000,
+      "tax_amount": 0,
+      "reference_number": "AFF-RET-2026",
+      "description": "Quarterly statutory GAAP external financial review retainer",
+      "status": "Settled",
+      "created_by": "Victoria Chen"
     }
   ]
 }

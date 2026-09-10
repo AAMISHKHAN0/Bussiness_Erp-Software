@@ -8,8 +8,38 @@ export async function GET(request) {
     if (!authCheck.authorized) return authCheck.response;
 
     const { tenant_id } = authCheck.auth;
+    const { searchParams } = new URL(request.url);
+    const customerId = searchParams.get('id');
+
     const customers = db.get('customers', tenant_id);
-    return NextResponse.json({ success: true, data: customers });
+    const invoices = db.get('invoices', tenant_id);
+    const posSales = db.get('pos_sales', tenant_id);
+
+    if (customerId) {
+      const customer = customers.find(c => c.id === customerId);
+      if (!customer) return NextResponse.json({ success: false, message: 'Customer not found' }, { status: 404 });
+      const customerInvoices = invoices.filter(i => i.customer_id === customerId);
+      const customerPOS = posSales.filter(p => p.customer_id === customerId);
+      return NextResponse.json({
+        success: true,
+        data: {
+          ...customer,
+          invoices: customerInvoices,
+          pos_sales: customerPOS
+        }
+      });
+    }
+
+    const enrichedCustomers = customers.map(c => {
+      const custInvoices = invoices.filter(i => i.customer_id === c.id);
+      return {
+        ...c,
+        invoices_count: custInvoices.length,
+        invoices: custInvoices.slice(-5)
+      };
+    });
+
+    return NextResponse.json({ success: true, data: enrichedCustomers });
   } catch (err) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }

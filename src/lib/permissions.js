@@ -5,14 +5,27 @@
 
 export const ROLE_PERMISSIONS = {
   'Super Admin': ['*'],
+  'Administrator': ['*'],
+  'Manager': [
+    'dashboard:view', 'pos:*', 'sales:*', 'invoices:*', 'inventory:*',
+    'customers:*', 'vendors:*', 'accounting:view', 'analytics:view', 'audit:view', 'users:view'
+  ],
+  'Accountant': [
+    'dashboard:view', 'accounting:*', 'invoices:*', 'sales:view', 'pos:view',
+    'customers:view', 'vendors:view', 'analytics:view'
+  ],
+  'Cashier': [
+    'dashboard:view', 'pos:view', 'pos:sale', 'pos:discount', 'pos:close_register',
+    'customers:view', 'inventory:view'
+  ],
   'Executive Admin': [
-    'dashboard:view', 'inventory:view', 'sales:view', 'procurement:view',
-    'customers:view', 'vendors:view', 'accounting:view', 'hr:view',
-    'analytics:view', 'audit:view', 'settings:view'
+    'dashboard:view', 'inventory:view', 'sales:view', 'pos:view', 'invoices:view',
+    'procurement:view', 'customers:view', 'vendors:view', 'accounting:view', 'hr:view',
+    'analytics:view', 'audit:view', 'settings:view', 'users:view'
   ],
   'Financial Controller': [
-    'dashboard:view', 'accounting:*', 'sales:view', 'procurement:view',
-    'customers:view', 'vendors:view', 'analytics:view', 'audit:view'
+    'dashboard:view', 'accounting:*', 'invoices:*', 'sales:view', 'pos:view',
+    'procurement:view', 'customers:view', 'vendors:view', 'analytics:view', 'audit:view'
   ],
   'Inventory Specialist': [
     'dashboard:view', 'inventory:*', 'procurement:view', 'procurement:receive',
@@ -22,8 +35,8 @@ export const ROLE_PERMISSIONS = {
     'dashboard:view', 'hr:*', 'analytics:view'
   ],
   'Senior Sales Representative': [
-    'dashboard:view', 'sales:*', 'customers:*', 'inventory:view',
-    'analytics:view'
+    'dashboard:view', 'sales:*', 'pos:view', 'pos:sale', 'invoices:view', 'customers:*',
+    'inventory:view', 'analytics:view'
   ]
 };
 
@@ -47,3 +60,6 @@ export function hasPermission(userPermissions, requiredPermission) {
     return false;
   });
 }
+
+export const ROLES = ROLE_PERMISSIONS;
+

@@ -36,7 +36,7 @@ class EnterpriseDatabase {
       if (fs.existsSync(this.dbFilePath)) {
         const fileContent = fs.readFileSync(this.dbFilePath, 'utf-8');
         const parsed = JSON.parse(fileContent);
-        if (!parsed.settings || parsed.settings.currency !== 'PKR') {
+        if (!parsed.settings || parsed.settings.currency !== 'PKR' || !parsed.pos_registers || !parsed.expenses || !parsed.settings.max_users) {
           this.data = JSON.parse(JSON.stringify(INITIAL_SEED_DATA));
           this.persistLocal();
         } else {
