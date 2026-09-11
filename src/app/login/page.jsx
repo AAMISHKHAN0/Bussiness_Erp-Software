@@ -12,7 +12,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, switchRole } = useAuth();
+  const { user, loading: authLoading, login, switchRole } = useAuth();
   
   const [email, setEmail] = useState('admin@company.com');
   const [password, setPassword] = useState('password123');
@@ -21,6 +21,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
+
+  // If already authenticated, redirect to destination
+  React.useEffect(() => {
+    if (!authLoading && user) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get('redirect') || '/dashboard';
+      window.location.href = redirectUrl;
+    }
+  }, [user, authLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,15 +41,16 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      await login(email, password);
-      router.push('/dashboard');
+      await login(email.trim(), password);
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get('redirect') || '/dashboard';
+      window.location.href = redirectUrl;
     } catch (err) {
       // Enterprise security: Never expose backend internal query/database errors
       const sanitized = err.message && !err.message.toLowerCase().includes('database') && !err.message.toLowerCase().includes('sql')
         ? err.message
         : 'Invalid work email or password. Please check your credentials.';
       setError(sanitized);
-    } finally {
       setLoading(false);
     }
   };
@@ -50,10 +60,11 @@ export default function LoginPage() {
     setError('');
     try {
       await switchRole(roleName);
-      router.push('/dashboard');
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get('redirect') || '/dashboard';
+      window.location.href = redirectUrl;
     } catch (err) {
       setError('Unable to authenticate role switch session.');
-    } finally {
       setLoading(false);
     }
   };
@@ -323,6 +334,28 @@ export default function LoginPage() {
                 >
                   <p className="text-[10px] font-bold text-slate-800">Accountant</p>
                   <p className="text-[9px] font-mono text-slate-500 truncate">accountant@company.com</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('cashier@company.com');
+                    setPassword('password123');
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-left transition-colors cursor-pointer"
+                >
+                  <p className="text-[10px] font-bold text-slate-800">Cashier (POS)</p>
+                  <p className="text-[9px] font-mono text-slate-500 truncate">cashier@company.com</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('manager@company.com');
+                    setPassword('password123');
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-left transition-colors cursor-pointer"
+                >
+                  <p className="text-[10px] font-bold text-slate-800">Manager</p>
+                  <p className="text-[9px] font-mono text-slate-500 truncate">manager@company.com</p>
                 </button>
               </div>
             </div>

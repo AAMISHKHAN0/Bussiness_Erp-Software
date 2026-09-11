@@ -228,13 +228,13 @@ export default function AccountingPage() {
   return (
     <AppShell>
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
               Financial Accounting Suite
             </h1>
-            <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
               GAAP General Ledger
             </span>
           </div>
@@ -243,18 +243,19 @@ export default function AccountingPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Action Toolbar: Unified h-9 buttons, clean spacing, and zero awkward line-wrapping */}
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
           <button
             onClick={fetchAccounting}
-            className="p-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs"
-            title="Refresh"
+            className="p-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs h-9 w-9 flex items-center justify-center shrink-0"
+            title="Refresh Ledger"
           >
-            <RefreshCw size={15} className={loading ? 'animate-spin text-blue-600' : ''} />
+            <RefreshCw size={14} className={loading ? 'animate-spin text-blue-600' : ''} />
           </button>
           
           <button
             onClick={() => setIsExpenseModalOpen(true)}
-            className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-xs font-semibold text-rose-700 flex items-center gap-1.5 transition-colors shadow-2xs"
+            className="px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-xs font-semibold text-rose-700 flex items-center gap-1.5 transition-colors shadow-2xs h-9 whitespace-nowrap shrink-0"
           >
             <Plus size={13} />
             <span>Record Expense</span>
@@ -262,20 +263,18 @@ export default function AccountingPage() {
 
           <button
             onClick={() => setIsJournalModalOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-2 transition-colors shadow-2xs"
+            className="px-3 py-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1.5 transition-colors shadow-2xs h-9 whitespace-nowrap shrink-0"
           >
             <Repeat size={13} className="text-blue-600" />
-            <span>Post Journal Voucher</span>
+            <span>Journal Voucher</span>
           </button>
           
           <button
             onClick={() => setIsAccountModalOpen(true)}
-            className="btn-pod-blue group"
+            className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs h-9 whitespace-nowrap shrink-0"
           >
-            <span>New Ledger Account</span>
-            <span className="pod-icon">
-              <Plus size={13} className="text-white" />
-            </span>
+            <Plus size={14} />
+            <span>New Account</span>
           </button>
         </div>
       </div>
@@ -538,12 +537,10 @@ export default function AccountingPage() {
                 </div>
                 <button
                   onClick={() => setIsExpenseModalOpen(true)}
-                  className="btn-pod-blue group"
+                  className="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs h-9"
                 >
+                  <Plus size={13} />
                   <span>Record Corporate Expense</span>
-                  <span className="pod-icon">
-                    <Plus size={13} className="text-white" />
-                  </span>
                 </button>
               </div>
 
@@ -680,7 +677,7 @@ export default function AccountingPage() {
           {activeTab === 'coa' && (
             <div className="space-y-4">
               <div className="double-bezel">
-                <div className="double-bezel-inner !p-2.5 flex items-center justify-between gap-3">
+                <div className="double-bezel-inner !p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="relative flex-1 max-w-md">
                     <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
@@ -691,6 +688,13 @@ export default function AccountingPage() {
                       className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-blue-600 focus:bg-white transition-colors"
                     />
                   </div>
+                  <button
+                    onClick={() => setIsAccountModalOpen(true)}
+                    className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs shrink-0 self-end sm:self-auto h-9"
+                  >
+                    <Plus size={13} />
+                    <span>Create Ledger Account</span>
+                  </button>
                 </div>
               </div>
 
@@ -740,14 +744,23 @@ export default function AccountingPage() {
             <div className="space-y-4">
               <div className="double-bezel">
                 <div className="double-bezel-inner space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
                     <div>
                       <h3 className="text-sm font-bold text-slate-900">Journal Transaction Vouchers</h3>
                       <p className="text-xs text-slate-500">Chronological verified GAAP double-entry postings</p>
                     </div>
-                    <span className="text-xs font-mono text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
-                      {journalEntries.length} Vouchers Posted
-                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xs font-mono text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+                        {journalEntries.length} Vouchers Posted
+                      </span>
+                      <button
+                        onClick={() => setIsJournalModalOpen(true)}
+                        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs h-8"
+                      >
+                        <Plus size={13} />
+                        <span>Post Voucher</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-4">

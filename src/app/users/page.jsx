@@ -7,7 +7,7 @@ import { useToast } from '@/context/ToastContext';
 import { 
   Users, UserPlus, Shield, ShieldCheck, CheckCircle2, 
   XCircle, AlertTriangle, RefreshCw, Key, Building2, 
-  Lock, Edit3, Power, UserCheck
+  Lock, Edit3, Power, UserCheck, Trash2
 } from 'lucide-react';
 
 export default function UsersPage() {
@@ -27,7 +27,8 @@ export default function UsersPage() {
     email: '',
     password: '',
     role: 'Cashier',
-    branch_id: 'b-1'
+    branch_id: 'b-1',
+    is_active: true
   });
 
   const fetchUsers = async () => {
@@ -69,12 +70,32 @@ export default function UsersPage() {
         setIsAddModalOpen(false);
         fetchUsers();
         toast.success(json.message || 'User created successfully');
-        setForm({ first_name: '', last_name: '', email: '', password: '', role: 'Cashier', branch_id: 'b-1' });
+        setForm({ first_name: '', last_name: '', email: '', password: '', role: 'Cashier', branch_id: 'b-1', is_active: true });
       } else {
         toast.error(json.message || 'Failed to create user');
       }
     } catch (err) {
       toast.error(err.message || 'Error creating user');
+    }
+  };
+
+  const handleDeleteUser = async (u) => {
+    if (!confirm(`Are you sure you want to delete user ${u.full_name || u.email}? This will release their allocated seat.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/users?id=${u.id}`, {
+        method: 'DELETE'
+      });
+      const json = await res.json();
+      if (json.success) {
+        toast.success(json.message || 'User deleted');
+        fetchUsers();
+      } else {
+        toast.error(json.message || 'Failed to delete user');
+      }
+    } catch (err) {
+      toast.error('Network error deleting user');
     }
   };
 
@@ -120,13 +141,14 @@ export default function UsersPage() {
           first_name: selectedUser.first_name,
           last_name: selectedUser.last_name,
           role: selectedUser.role,
-          branch_id: selectedUser.branch_id
+          branch_id: selectedUser.branch_id,
+          password: selectedUser.new_password ? selectedUser.new_password.trim() : undefined
         })
       });
       const json = await res.json();
       if (json.success) {
         setIsEditModalOpen(false);
-        toast.success('User updated successfully');
+        toast.success('User profile updated successfully');
         fetchUsers();
       } else {
         toast.error(json.message);
@@ -166,15 +188,14 @@ export default function UsersPage() {
           </button>
           
           <button
-            onClick={() => setIsAddModalOpen(true)}
-            disabled={seatInfo.isLimitReached}
-            className="btn-pod-blue group disabled:opacity-50 disabled:cursor-not-allowed"
-            title={seatInfo.isLimitReached ? 'Active seat limit reached' : 'Add member'}
+            onClick={() => {
+              setForm(prev => ({ ...prev, is_active: !seatInfo.isLimitReached }));
+              setIsAddModalOpen(true);
+            }}
+            className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
           >
-            <span>Add Organization Member</span>
-            <span className="pod-icon">
-              <UserPlus size={13} className="text-white" />
-            </span>
+            <UserPlus size={14} />
+            <span>Add Member</span>
           </button>
         </div>
       </div>
@@ -283,11 +304,11 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1.5">
                       <button
-                        onClick={() => { setSelectedUser(u); setIsEditModalOpen(true); }}
+                        onClick={() => { setSelectedUser({ ...u, new_password: '' }); setIsEditModalOpen(true); }}
                         className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
-                        title="Edit User"
+                        title="Edit User Profile"
                       >
                         <Edit3 size={13} />
                       </button>
@@ -301,6 +322,13 @@ export default function UsersPage() {
                       >
                         {u.is_active ? 'Disable' : 'Activate'}
                       </button>
+                      <button
+                        onClick={() => handleDeleteUser(u)}
+                        className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
+                        title="Delete User"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -313,10 +341,18 @@ export default function UsersPage() {
       {/* Modal: Add User */}
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add Organization Member">
         <form onSubmit={handleCreateUser} className="space-y-4 text-xs">
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-slate-700">
-            <p className="font-bold text-blue-900">Seat Enforcement Active</p>
-            <p className="text-[11px] text-blue-700 mt-0.5">
-              Available seats: {seatInfo.availableSeats} of {seatInfo.maxUsers}. Creating this user will consume 1 seat.
+          <div className={`p-3 rounded-lg text-xs ${
+            seatInfo.isLimitReached 
+              ? 'bg-amber-50 border border-amber-200 text-amber-800' 
+              : 'bg-blue-50 border border-blue-200 text-blue-900'
+          }`}>
+            <p className="font-bold">
+              {seatInfo.isLimitReached ? 'Active Seat Quota Full (4/4 Active)' : 'Active Seat Allocation'}
+            </p>
+            <p className="text-[11px] mt-0.5">
+              {seatInfo.isLimitReached 
+                ? 'All 4 active seats are currently in use. You can create this staff member as Inactive (Draft), or deactivate an existing user first.' 
+                : `Available seats: ${seatInfo.availableSeats} of ${seatInfo.maxUsers}. Creating an active user will consume 1 seat.`}
             </p>
           </div>
 
@@ -394,6 +430,20 @@ export default function UsersPage() {
                 <option value="b-2">Karachi Regional Distribution Center</option>
               </select>
             </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">Account Activation Status</label>
+              <select
+                value={form.is_active ? 'active' : 'inactive'}
+                onChange={(e) => setForm({ ...form, is_active: e.target.value === 'active' })}
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-bold"
+              >
+                <option value="active" disabled={seatInfo.isLimitReached}>
+                  Active Member {seatInfo.isLimitReached ? '(Seat quota full)' : '(Consumes 1 Active Seat)'}
+                </option>
+                <option value="inactive">Inactive / Draft (Does not consume seat)</option>
+              </select>
+            </div>
           </div>
 
           <div className="pt-4 border-t border-slate-200 flex justify-end gap-2.5">
@@ -448,11 +498,24 @@ export default function UsersPage() {
                   onChange={(e) => setSelectedUser({ ...selectedUser, role: e.target.value })}
                   className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600 font-bold"
                 >
-                  <option value="Administrator">Administrator</option>
-                  <option value="Manager">Manager</option>
-                  <option value="Accountant">Accountant</option>
-                  <option value="Cashier">Cashier</option>
+                  <option value="Administrator">Administrator (Full Enterprise Access)</option>
+                  <option value="Manager">Manager (Operations & Oversight)</option>
+                  <option value="Accountant">Accountant (General Ledger & Finance)</option>
+                  <option value="Cashier">Cashier (POS Counter & Billing)</option>
                 </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-slate-700 font-bold uppercase text-[10px] mb-1">
+                  Reset Password (Optional)
+                </label>
+                <input
+                  type="password"
+                  value={selectedUser.new_password || ''}
+                  onChange={(e) => setSelectedUser({ ...selectedUser, new_password: e.target.value })}
+                  placeholder="Enter new password (leave blank to keep current)"
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 outline-none focus:border-blue-600"
+                />
               </div>
             </div>
 

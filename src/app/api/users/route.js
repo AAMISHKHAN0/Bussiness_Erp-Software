@@ -65,7 +65,7 @@ export async function POST(request) {
     if (!authCheck.authorized) return authCheck.response;
 
     const { user: requestingUser, tenant_id } = authCheck.auth;
-    const { email, password, first_name, last_name, role = 'Cashier', branch_id = 'b-1' } = body;
+    const { email, password, first_name, last_name, role = 'Cashier', branch_id = 'b-1', is_active = true } = body;
 
     if (!email || !password) {
       return NextResponse.json({ success: false, message: 'Email and password are required.' }, { status: 400 });
@@ -77,8 +77,9 @@ export async function POST(request) {
     // ENFORCE ACTIVE USER SEAT RESTRICTION SERVER-SIDE
     const existingUsers = db.get('users', tenant_id);
     const activeCount = existingUsers.filter(u => u.is_active !== false && u.status !== 'Disabled').length;
+    const wantsActive = is_active !== false;
 
-    if (activeCount >= maxUsers) {
+    if (wantsActive && activeCount >= maxUsers) {
       return NextResponse.json({
         success: false,
         error_code: 'SEAT_LIMIT_REACHED',
@@ -87,7 +88,7 @@ export async function POST(request) {
     }
 
     // Check duplicate email
-    const duplicate = existingUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const duplicate = existingUsers.find(u => u.email.toLowerCase().trim() === email.toLowerCase().trim());
     if (duplicate) {
       return NextResponse.json({ success: false, message: `A user with email ${email} already exists.` }, { status: 400 });
     }
@@ -98,31 +99,32 @@ export async function POST(request) {
     const newUser = db.insert('users', {
       email: email.toLowerCase().trim(),
       password: hashedPassword,
+      password_hash: hashedPassword,
       first_name: first_name?.trim() || '',
       last_name: last_name?.trim() || '',
       role: ROLES[role] ? role : 'Cashier',
       branch_id: branch_id || 'b-1',
-      is_active: true,
-      status: 'Active',
+      is_active: wantsActive,
+      status: wantsActive ? 'Active' : 'Disabled',
       created_at: new Date().toISOString()
     }, tenant_id);
 
     db.logAudit(
       'USER_CREATED',
       'User Management',
-      `Created user account ${newUser.email} with role [${newUser.role}]. Active seats used: ${activeCount + 1} of ${maxUsers}.`,
+      `Created user account ${newUser.email} with role [${newUser.role}]. Active seats used: ${wantsActive ? activeCount + 1 : activeCount} of ${maxUsers}.`,
       requestingUser,
       clientIp
     );
 
     return NextResponse.json({
       success: true,
-      message: `User ${newUser.email} created successfully. Active seats: ${activeCount + 1}/${maxUsers}`,
+      message: `User ${newUser.email} created successfully.${wantsActive ? ` Active seats: ${activeCount + 1}/${maxUsers}` : ' (Created as Inactive)'}`,
       data: {
         id: newUser.id,
         email: newUser.email,
         role: newUser.role,
-        is_active: true
+        is_active: wantsActive
       }
     });
   } catch (err) {
@@ -200,6 +202,12 @@ export async function PUT(request) {
       if (last_name !== undefined) updates.last_name = last_name.trim();
       if (role && ROLES[role]) updates.role = role;
       if (branch_id) updates.branch_id = branch_id;
+      if (body.password && String(body.password).trim()) {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(String(body.password).trim(), salt);
+        updates.password = hashedPassword;
+        updates.password_hash = hashedPassword;
+      }
 
       db.update('users', targetUser.id, updates, tenant_id);
 
@@ -208,6 +216,48 @@ export async function PUT(request) {
     }
 
     return NextResponse.json({ success: false, message: 'Unknown action.' }, { status: 400 });
+  } catch (err) {
+    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const authCheck = await requirePermission(request, 'users:disable');
+    if (!authCheck.authorized) return authCheck.response;
+
+    const { user: requestingUser, tenant_id } = authCheck.auth;
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('id');
+
+    if (!userId) {
+      return NextResponse.json({ success: false, message: 'User ID is required.' }, { status: 400 });
+    }
+
+    if (userId === requestingUser.id) {
+      return NextResponse.json({ success: false, message: 'Security restriction: You cannot delete your own active account.' }, { status: 400 });
+    }
+
+    const targetUser = db.findById('users', userId, tenant_id);
+    if (!targetUser) {
+      return NextResponse.json({ success: false, message: 'User not found.' }, { status: 404 });
+    }
+
+    db.delete('users', targetUser.id, tenant_id);
+    db.persist('users');
+
+    db.logAudit(
+      'USER_DELETED',
+      'User Management',
+      `Permanently deleted user account ${targetUser.email} (${targetUser.role})`,
+      requestingUser,
+      getClientIp(request)
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: `User ${targetUser.email} has been permanently deleted.`
+    });
   } catch (err) {
     return NextResponse.json({ success: false, message: err.message }, { status: 500 });
   }

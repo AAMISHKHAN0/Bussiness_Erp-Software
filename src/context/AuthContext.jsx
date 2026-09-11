@@ -17,10 +17,11 @@ export function AuthProvider({ children }) {
         const json = await res.json();
         if (json.success && json.user) {
           setUser(json.user);
+          localStorage.setItem('nexis_user', JSON.stringify(json.user));
           localStorage.setItem('apex_erp_user', JSON.stringify(json.user));
         } else {
           // Check local cache
-          const saved = localStorage.getItem('apex_erp_user');
+          const saved = localStorage.getItem('nexis_user') || localStorage.getItem('apex_erp_user');
           if (saved) {
             setUser(JSON.parse(saved));
           } else {
@@ -28,7 +29,7 @@ export function AuthProvider({ children }) {
           }
         }
       } catch (e) {
-        const saved = localStorage.getItem('apex_erp_user');
+        const saved = localStorage.getItem('nexis_user') || localStorage.getItem('apex_erp_user');
         if (saved) {
           try { setUser(JSON.parse(saved)); } catch {}
         }
@@ -44,15 +45,18 @@ export function AuthProvider({ children }) {
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email: email.trim(), password })
     });
     const json = await res.json();
     if (json.success && json.user) {
       setUser(json.user);
+      localStorage.setItem('nexis_user', JSON.stringify(json.user));
       localStorage.setItem('apex_erp_user', JSON.stringify(json.user));
       if (json.token) {
         localStorage.setItem('nexis_token', json.token);
+        localStorage.setItem('erp_token', json.token);
         document.cookie = `nexis_token=${json.token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `erp_token=${json.token}; path=/; max-age=604800; SameSite=Lax`;
       }
       return json;
     }
@@ -68,10 +72,13 @@ export function AuthProvider({ children }) {
     const json = await res.json();
     if (json.success && json.user) {
       setUser(json.user);
+      localStorage.setItem('nexis_user', JSON.stringify(json.user));
       localStorage.setItem('apex_erp_user', JSON.stringify(json.user));
       if (json.token) {
         localStorage.setItem('nexis_token', json.token);
+        localStorage.setItem('erp_token', json.token);
         document.cookie = `nexis_token=${json.token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `erp_token=${json.token}; path=/; max-age=604800; SameSite=Lax`;
       }
       return json;
     }
@@ -87,9 +94,12 @@ export function AuthProvider({ children }) {
       });
     } catch (e) {}
     setUser(null);
+    localStorage.removeItem('nexis_user');
     localStorage.removeItem('apex_erp_user');
     localStorage.removeItem('nexis_token');
+    localStorage.removeItem('erp_token');
     document.cookie = 'nexis_token=; path=/; max-age=0; SameSite=Lax';
+    document.cookie = 'erp_token=; path=/; max-age=0; SameSite=Lax';
   };
 
   const hasPermission = (requiredPermission) => {
